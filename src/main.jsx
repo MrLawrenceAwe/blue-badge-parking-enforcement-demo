@@ -172,6 +172,8 @@ const demoUsers = [
   { email: 'admin@westminster.gov.uk', password: 'demo123', role: 'admin', name: 'Council Admin', badgeIds: [] }
 ];
 
+const demoAccountOrder = ['holder', 'officer', 'admin', 'carer'];
+
 const statusLabel = {
   valid: 'Valid',
   expired: 'Expired',
@@ -205,6 +207,15 @@ function accessibleBadgesFor(user, badges) {
 function allowedRolesFor(user) {
   if (user.role === 'admin') return ['holder', 'carer', 'officer', 'admin'];
   return [user.role];
+}
+
+function labelForRole(role) {
+  return {
+    holder: 'Holder',
+    carer: 'Carer',
+    officer: 'Officer',
+    admin: 'Admin'
+  }[role] ?? role;
 }
 
 function calculateRisk(badge, sessions, scans, query = {}) {
@@ -299,6 +310,14 @@ function App() {
     setAuthUser(user);
     setRole(user.role);
     setSelectedBadgeId(accessibleBadgesFor(user, badges)[0]?.id ?? badges[0].id);
+    setLastScanResult(null);
+    setLoginError('');
+  }
+
+  function switchDemoUser(nextUser) {
+    setAuthUser(nextUser);
+    setRole(nextUser.role);
+    setSelectedBadgeId(accessibleBadgesFor(nextUser, badges)[0]?.id ?? badges[0].id);
     setLastScanResult(null);
     setLoginError('');
   }
@@ -419,9 +438,13 @@ function App() {
   return (
     <main>
       <header className="app-header">
-        <div>
-          <p className="eyebrow">Secure Digital Blue Badge</p>
+        <div className="title-block">
+          <div className="title-row">
+            <p className="eyebrow">Secure Digital Blue Badge</p>
+            <span className="demo-pill">Council demo prototype</span>
+          </div>
           <h1>Parking Enforcement System</h1>
+          <p className="hero-note">Interactive concept for sharing the holder, officer, and council admin journeys with stakeholders.</p>
         </div>
         <div className="role-switcher" aria-label="Choose role">
           {[
@@ -442,9 +465,28 @@ function App() {
       </header>
 
       <section className="auth-strip" aria-label="Demo sign in">
-        <div>
+        <div className="auth-strip-copy">
           <strong>Signed in as {authUser.name}</strong>
           <span>{authUser.email} - {authUser.role}</span>
+          <p className="demo-note">Use the quick demo accounts below to switch between the main user journeys.</p>
+        </div>
+        <div className="demo-account-list" aria-label="Quick demo accounts">
+          {demoAccountOrder.map((demoRole) => {
+            const demoUser = demoUsers.find((user) => user.role === demoRole);
+            const isActive = authUser.email === demoUser.email;
+            return (
+              <button
+                key={demoUser.email}
+                type="button"
+                className={`demo-account-button${isActive ? ' active' : ''}`}
+                onClick={() => switchDemoUser(demoUser)}
+                aria-pressed={isActive}
+              >
+                <span>{labelForRole(demoUser.role)}</span>
+                <small>{demoUser.email}</small>
+              </button>
+            );
+          })}
         </div>
         <form
           onSubmit={(event) => {
