@@ -58,7 +58,7 @@ export function AdminOverviewTab({
             <article key={scan.id} className="scan-card">
               <strong>{scan.badgeId}</strong>
               <span>{scan.vehicle} - {scan.location}</span>
-              <small>{scan.officer} at {formatTime(scan.time)} - {scan.outcome}</small>
+              <small>{scan.officer} - {formatTime(scan.time)} - {scan.outcome}</small>
             </article>
           ))}
         </div>

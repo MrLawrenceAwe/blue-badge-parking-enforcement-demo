@@ -66,7 +66,6 @@ export function HolderView({
         <div className={`account-status ${risk.severity}`}>
           <ShieldCheck aria-hidden="true" />
           <strong>{accountMessage}</strong>
-          <span>Officers can verify this badge using the signed QR code.</span>
         </div>
         <StolenReportForm reportStolen={reportStolen} />
         {badge.status === 'stolen' && (

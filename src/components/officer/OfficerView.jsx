@@ -41,7 +41,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
       <div className="officer-decision-stack">
         <section className={`verification-result ${risk.severity}${isValid ? ' compact-result' : ''}`} aria-live="polite">
           <div>
-            <p>Verification result</p>
+            <p>Result</p>
             <h2>{isValid ? 'Valid' : risk.verdict === 'suspicious' ? 'Suspicious' : risk.verdict === 'stolen / deactivated' ? 'Stolen / deactivated' : 'Invalid'}</h2>
           </div>
           <div className="result-detail">

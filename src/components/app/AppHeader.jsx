@@ -16,7 +16,7 @@ export function AppHeader({ role, currentDemoRoles, demoUsers, setRole, selectDe
           <span className="demo-pill">Prototype</span>
         </div>
         <h1>Parking Enforcement System</h1>
-        <p className="hero-note">Verify badges, manage sessions, and review enforcement cases.</p>
+        <p className="hero-note">Verify badges, sessions, and enforcement cases.</p>
       </div>
       <div className="role-switcher" aria-label="Choose role">
         {roleOptions.map(([value, Icon, label]) => {
