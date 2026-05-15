@@ -611,6 +611,20 @@ dd {
   gap: 10px;
 }
 
+.case-scope {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f4f8fb;
+}
+
+.case-scope span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .case-fields {
   display: grid;
   gap: 10px;
