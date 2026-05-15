@@ -9,7 +9,26 @@ const RISK_LEVEL = {
   high: 'auto-suspend / high priority alert'
 };
 
-export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}) {
+export const defaultRiskRules = {
+  highRiskThreshold: 81,
+  reviewThreshold: 61,
+  monitorThreshold: 31,
+  closeScanMinutes: 45,
+  closeScanDistanceKm: 2,
+  longStayMinutes: 210,
+  weights: {
+    stolenOrSuspended: 85,
+    unregisteredVehicle: 45,
+    impossibleTravel: 35,
+    multipleFailedScans: 25,
+    newDeviceUnusualLocation: 30,
+    longStay: 25,
+    expired: 70,
+    default: 20
+  }
+};
+
+export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rules = defaultRiskRules) {
   const events = [];
   if (!badge) {
     return riskResult({
@@ -17,7 +36,8 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}) {
       level: RISK_LEVEL.high,
       events: ['Unknown badge or invalid verification token'],
       severity: 'risk-high',
-      verdict: 'invalid'
+      verdict: 'invalid',
+      explanation: ['No matching badge record or trusted QR token was found.']
     });
   }
 
@@ -34,14 +54,14 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}) {
   if (failedScans >= 2) events.push('Multiple failed scans');
 
   const closeLocationScan = badgeScans.some((scan) => {
-    const closeInTime = scanContext.time ? minutesBetween(scan.time, scanContext.time) < 45 : true;
+    const closeInTime = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.closeScanMinutes : true;
     const scanGps = scan.gps ?? mockGpsForLocation(scan.location);
-    return closeInTime && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= 2;
+    return closeInTime && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.closeScanDistanceKm;
   });
   if (closeLocationScan) events.push('Badge scanned in two locations close together');
 
   const activeSessions = sessions.filter((session) => session.badgeId === badge.id);
-  if (activeSessions.some((session) => session.durationMins > 210)) {
+  if (activeSessions.some((session) => session.durationMins > rules.longStayMinutes)) {
     events.push('Long or repeated suspicious parking sessions');
   }
 
@@ -53,35 +73,38 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}) {
     events.push('New device plus unusual location');
   }
 
-  let score = Math.min(100, events.reduce((total, event) => total + scoreForRiskEvent(event), 0));
+  let score = Math.min(100, events.reduce((total, event) => total + scoreForRiskEvent(event, rules), 0));
+  const explanation = explainRisk(events, rules);
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
     score = Math.max(score, 85);
-    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-critical', verdict: 'stolen / deactivated' });
+    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-critical', verdict: 'stolen / deactivated', explanation });
   }
 
   if (badge.status === 'expired') {
     score = Math.max(score, 70);
     return riskResult({
       score,
-      level: score >= 81 ? RISK_LEVEL.high : RISK_LEVEL.review,
+      level: score >= rules.highRiskThreshold ? RISK_LEVEL.high : RISK_LEVEL.review,
       events,
       severity: 'risk-high',
-      verdict: 'invalid'
+      verdict: 'invalid',
+      explanation
     });
   }
 
-  if (score >= 81) {
-    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-high', verdict: 'invalid' });
+  if (score >= rules.highRiskThreshold) {
+    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-high', verdict: 'invalid', explanation });
   }
 
-  if (score >= 31 || badge.status === 'under review') {
+  if (score >= rules.monitorThreshold || badge.status === 'under review') {
     return riskResult({
       score,
-      level: score >= 61 ? RISK_LEVEL.review : RISK_LEVEL.monitor,
+      level: score >= rules.reviewThreshold ? RISK_LEVEL.review : RISK_LEVEL.monitor,
       events,
       severity: 'risk-watch',
-      verdict: 'suspicious'
+      verdict: 'suspicious',
+      explanation
     });
   }
 
@@ -90,7 +113,8 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}) {
     level: RISK_LEVEL.normal,
     events: events.length ? events : ['No active risk events'],
     severity: 'risk-low',
-    verdict: 'valid'
+    verdict: 'valid',
+    explanation: ['No configured risk rules were triggered.']
   });
 }
 
@@ -111,15 +135,20 @@ export function scanOutcomeForRisk(risk) {
   return 'invalid';
 }
 
-function scoreForRiskEvent(event) {
-  if (event.includes('stolen') || event.includes('suspended')) return 85;
-  if (event.includes('unregistered')) return 45;
-  if (event.includes('two locations')) return 35;
-  if (event.includes('failed')) return 25;
-  if (event.includes('New device')) return 30;
-  if (event.includes('Long')) return 25;
-  if (event.includes('expired')) return 70;
-  return 20;
+function scoreForRiskEvent(event, rules) {
+  if (event.includes('stolen') || event.includes('suspended')) return rules.weights.stolenOrSuspended;
+  if (event.includes('unregistered')) return rules.weights.unregisteredVehicle;
+  if (event.includes('two locations')) return rules.weights.impossibleTravel;
+  if (event.includes('failed')) return rules.weights.multipleFailedScans;
+  if (event.includes('New device')) return rules.weights.newDeviceUnusualLocation;
+  if (event.includes('Long')) return rules.weights.longStay;
+  if (event.includes('expired')) return rules.weights.expired;
+  return rules.weights.default;
+}
+
+function explainRisk(events, rules) {
+  if (!events.length) return ['No configured risk rules were triggered.'];
+  return events.map((event) => `${event}: +${scoreForRiskEvent(event, rules)} points`);
 }
 
 function riskResult(result) {

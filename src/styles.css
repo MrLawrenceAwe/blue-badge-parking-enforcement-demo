@@ -473,6 +473,17 @@ dd {
   gap: 10px;
 }
 
+.replacement-form {
+  border: 1px solid #9bbbd1;
+  border-left: 6px solid var(--blue);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  background: #f7fbff;
+  display: grid;
+  gap: 10px;
+}
+
 .checkbox-label {
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -498,10 +509,21 @@ dd {
   font-weight: 700;
 }
 
+.risk-explanation,
+.timeline-list {
+  display: grid;
+  gap: 8px;
+}
+
+.risk-explanation small {
+  display: block;
+}
+
 .session-card,
 .scan-card,
 .case-card,
-.record-button {
+.record-button,
+.timeline-item {
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 12px;
@@ -568,10 +590,20 @@ dd {
 
 .record-button small,
 .scan-card small,
-.case-card small {
+.case-card small,
+.timeline-item small {
   display: block;
   color: var(--muted);
   margin-top: 4px;
+}
+
+.timeline-item {
+  display: grid;
+  gap: 4px;
+}
+
+.timeline-item span {
+  color: var(--muted);
 }
 
 .list {

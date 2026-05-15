@@ -8,7 +8,22 @@ import { StatusPill } from '../common/StatusPill';
 import { StolenReportForm } from '../common/StolenReportForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
-export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession, extendSession, endSession, reportStolen, risk, sessionMessage }) {
+export function HolderView({
+  badge,
+  badges,
+  setSelectedBadgeId,
+  sessions,
+  startSession,
+  extendSession,
+  endSession,
+  reportStolen,
+  requestReplacementBadge,
+  replacementForm,
+  replacementRequests,
+  notifications,
+  risk,
+  sessionMessage
+}) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   const verificationToken = verificationTokenForBadge(badge.id);
   const accountMessage = risk.verdict === 'valid'
@@ -52,6 +67,23 @@ export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startS
           <span>Officers can verify this badge using the signed QR code.</span>
         </div>
         <StolenReportForm reportStolen={reportStolen} />
+        {badge.status === 'stolen' && (
+          <form
+            className="replacement-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              requestReplacementBadge(new FormData(event.currentTarget));
+            }}
+          >
+            <h3>Replacement request</h3>
+            <label>Crime, loss, or council reference<input name="reference" value={replacementForm.values.reference} onChange={(event) => replacementForm.setValues((current) => ({ ...current, reference: event.target.value }))} required /></label>
+            <label>Temporary permit<select name="temporaryPermit" value={replacementForm.values.temporaryPermit} onChange={(event) => replacementForm.setValues((current) => ({ ...current, temporaryPermit: event.target.value }))}><option>Requested</option><option>Not required</option><option>Pending</option></select></label>
+            <button className="secondary-button" type="submit">Request replacement</button>
+            {replacementRequests.map((request) => (
+              <small key={request.id}>{request.id}: {request.status} - {request.reference} - temporary permit {request.temporaryPermit.toLowerCase()}</small>
+            ))}
+          </form>
+        )}
       </section>
 
       <section className="panel">
@@ -62,6 +94,13 @@ export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startS
         <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
         {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
         {activeSession && <SessionCard session={activeSession} />}
+        <div className="timeline-list">
+          <h3>Notifications</h3>
+          {notifications.map((notification) => (
+            <small key={notification.id}>{notification.channel} at {new Date(notification.time).toLocaleString('en-GB')}: {notification.message}</small>
+          ))}
+          {!notifications.length && <small>No notifications for this badge in the demo.</small>}
+        </div>
       </section>
     </div>
   );
