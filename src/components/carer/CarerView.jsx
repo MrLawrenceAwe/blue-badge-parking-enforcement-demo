@@ -25,7 +25,7 @@ export function CarerView({
     <div className="page-grid">
       <section className="panel">
         <div className="panel-heading">
-          <h2>Delegated Access</h2>
+          <h2>Delegated access</h2>
           <UsersRound aria-hidden="true" />
         </div>
         <div className="list">
@@ -39,22 +39,22 @@ export function CarerView({
       </section>
       <section className="panel">
         <div className="panel-heading">
-          <h2>Care Notes</h2>
+          <h2>Care notes</h2>
           <FileText aria-hidden="true" />
         </div>
-        <p className="plain-text">Carers can help manage delegated badge access, check the current badge state, and confirm the locked parking session details without changing arrival time after start.</p>
+        <p className="plain-text">Manage delegated access and confirm session details.</p>
         {sessions.filter((session) => session.badgeId === selectedBadge.id).map((session) => <SessionCard key={session.id} session={session} />)}
         <div className="timeline-list">
           <h3>Notifications</h3>
           {notifications.map((notification) => (
             <small key={notification.id}>{notification.channel} at {new Date(notification.time).toLocaleString('en-GB')}: {notification.message}</small>
           ))}
-          {!notifications.length && <small>No notifications for this badge in the demo.</small>}
+          {!notifications.length && <small>No notifications for this badge.</small>}
         </div>
       </section>
       <section className="panel">
         <div className="panel-heading">
-          <h2>Delegated Session</h2>
+          <h2>Delegated session</h2>
           <Clock3 aria-hidden="true" />
         </div>
         <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />

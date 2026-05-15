@@ -5,6 +5,14 @@ import { SessionCard } from '../common/SessionCard';
 import { StatusPill } from '../common/StatusPill';
 
 const caseStatuses = ['Open', 'Officer review', 'High priority', 'Evidence requested', 'Resolved'];
+const adminTabs = ['Overview', 'Cases', 'Rules', 'Audit'];
+
+function formatRiskLabel(label) {
+  return label
+    .split(' / ')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' / ');
+}
 
 export function AdminView({
   badges,
@@ -27,6 +35,7 @@ export function AdminView({
   stolenOrSuspendedBadges
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Overview');
 
   return (
     <div className="admin-layout">
@@ -41,9 +50,26 @@ export function AdminView({
         </div>
       </details>
 
+      <div className="tab-list" role="tablist" aria-label="Admin sections">
+        {adminTabs.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
+            className={activeTab === tab ? 'active' : ''}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
       <section className="dashboard-grid">
+        {activeTab === 'Overview' && (
+          <>
         <div className="panel risk-panel">
-          <div className="panel-heading"><h2>Fraud Risk Scores</h2><Gauge aria-hidden="true" /></div>
+          <div className="panel-heading"><h2>Fraud risk scores</h2><Gauge aria-hidden="true" /></div>
           <div className="table-wrap">
             <table>
               <thead><tr><th>Badge</th><th>Vehicle</th><th>Status</th><th>Risk</th></tr></thead>
@@ -65,7 +91,7 @@ export function AdminView({
                     <td data-label="Badge">{badge.id}<br /><small>{badge.holder}</small></td>
                     <td data-label="Vehicle">{badge.vehicle}</td>
                     <td data-label="Status"><StatusPill status={badge.status} /></td>
-                    <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskByBadge[badge.id].level}</small></td>
+                    <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{formatRiskLabel(riskByBadge[badge.id].level)}</small></td>
                   </tr>
                 ))}
               </tbody>
@@ -73,8 +99,56 @@ export function AdminView({
           </div>
         </div>
 
-        <div className="panel case-management-panel">
-          <div className="panel-heading"><h2>Case Management</h2><FileText aria-hidden="true" /></div>
+        <div className="panel active-sessions-panel">
+          <div className="panel-heading"><h2>Active sessions</h2><Clock3 aria-hidden="true" /></div>
+          <div className="list compact">{sessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
+        </div>
+
+        <div className="panel recent-scans-panel">
+          <div className="panel-heading"><h2>Recent scans</h2><QrCode aria-hidden="true" /></div>
+          <div className="list compact">
+            {scans.map((scan) => (
+              <article key={scan.id} className="scan-card">
+                <strong>{scan.badgeId}</strong>
+                <span>{scan.vehicle} - {scan.location}</span>
+                <small>{scan.officer} at {formatTime(scan.time)} - {scan.outcome}</small>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="panel suspicious-cases-panel">
+          <div className="panel-heading"><h2>Suspicious cases</h2><ShieldAlert aria-hidden="true" /></div>
+          <div className="list compact">
+            {suspiciousCases.map((caseRecord) => (
+              <article key={caseRecord.id} className="case-card">
+                <strong>{caseRecord.id}</strong>
+                <span>{caseRecord.badgeId} - {caseRecord.status}</span>
+                <small>{caseRecord.assignedTo}</small>
+              </article>
+            ))}
+            {!suspiciousCases.length && <p className="plain-text">No suspicious cases match the current filters.</p>}
+          </div>
+        </div>
+
+        <div className="panel badge-status-panel">
+          <div className="panel-heading"><h2>Stolen or suspended badges</h2><Siren aria-hidden="true" /></div>
+          <div className="list compact">
+            {stolenOrSuspendedBadges.map((badge) => (
+              <button key={badge.id} type="button" className="record-button" onClick={() => actions.selectBadge(badge.id)}>
+                <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
+                <StatusPill status={badge.status} />
+              </button>
+            ))}
+            {!stolenOrSuspendedBadges.length && <p className="plain-text">No stolen or suspended badges match the filters.</p>}
+          </div>
+        </div>
+          </>
+        )}
+
+        {activeTab === 'Cases' && (
+        <div className="panel case-management-panel full-span">
+          <div className="panel-heading"><h2>Case management</h2><FileText aria-hidden="true" /></div>
           <label>Selected badge<select value={selectedBadge.id} onChange={(event) => actions.selectBadge(event.target.value)}>{allBadges.map((badge) => <option key={badge.id} value={badge.id}>{badge.id} - {badge.holder}</option>)}</select></label>
           <div className="case-scope">
             <strong>Cases for {selectedBadge.holder}</strong>
@@ -95,7 +169,7 @@ export function AdminView({
           {adminMessage && <p className="form-message" role="status">{adminMessage}</p>}
           <div className="list compact">
             {!cases.length && (
-              <p className="plain-text">No open or historic case records are attached to this selected badge in the demo dataset.</p>
+              <p className="plain-text">No case records for this badge.</p>
             )}
             {cases.map((caseRecord) => (
               <article key={caseRecord.id} className="case-card">
@@ -134,65 +208,25 @@ export function AdminView({
             ))}
           </div>
         </div>
+        )}
 
-        <div className="panel risk-rules-panel">
-          <div className="panel-heading"><h2>Council Risk Rules</h2><Gauge aria-hidden="true" /></div>
+        {activeTab === 'Rules' && (
+        <div className="panel risk-rules-panel full-span">
+          <div className="panel-heading"><h2>Council risk rules</h2><Gauge aria-hidden="true" /></div>
           <div className="case-fields">
             <label>High risk threshold<input type="number" min="1" max="100" value={riskRules.highRiskThreshold} onChange={(event) => actions.updateRiskRule('highRiskThreshold', event.target.value)} /></label>
             <label>Review threshold<input type="number" min="1" max="100" value={riskRules.reviewThreshold} onChange={(event) => actions.updateRiskRule('reviewThreshold', event.target.value)} /></label>
             <label>Monitor threshold<input type="number" min="1" max="100" value={riskRules.monitorThreshold} onChange={(event) => actions.updateRiskRule('monitorThreshold', event.target.value)} /></label>
             <label>Close scan minutes<input type="number" min="5" max="240" value={riskRules.closeScanMinutes} onChange={(event) => actions.updateRiskRule('closeScanMinutes', event.target.value)} /></label>
           </div>
-          <p className="plain-text">Risk scores recalculate immediately using the configured thresholds and the explanation shown to officers.</p>
+          <p className="plain-text">Risk scores update immediately.</p>
         </div>
+        )}
 
-        <div className="panel active-sessions-panel">
-          <div className="panel-heading"><h2>Active Sessions</h2><Clock3 aria-hidden="true" /></div>
-          <div className="list compact">{sessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
-        </div>
-
-        <div className="panel recent-scans-panel">
-          <div className="panel-heading"><h2>Recent Scans</h2><QrCode aria-hidden="true" /></div>
-          <div className="list compact">
-            {scans.map((scan) => (
-              <article key={scan.id} className="scan-card">
-                <strong>{scan.badgeId}</strong>
-                <span>{scan.vehicle} - {scan.location}</span>
-                <small>{scan.officer} at {formatTime(scan.time)} - {scan.outcome}</small>
-              </article>
-            ))}
-          </div>
-        </div>
-
-        <div className="panel suspicious-cases-panel">
-          <div className="panel-heading"><h2>Suspicious Cases</h2><ShieldAlert aria-hidden="true" /></div>
-          <div className="list compact">
-            {suspiciousCases.map((caseRecord) => (
-              <article key={caseRecord.id} className="case-card">
-                <strong>{caseRecord.id}</strong>
-                <span>{caseRecord.badgeId} - {caseRecord.status}</span>
-                <small>{caseRecord.assignedTo}</small>
-              </article>
-            ))}
-            {!suspiciousCases.length && <p className="plain-text">No suspicious cases match the current filters.</p>}
-          </div>
-        </div>
-
-        <div className="panel badge-status-panel">
-          <div className="panel-heading"><h2>Stolen or Suspended Badges</h2><Siren aria-hidden="true" /></div>
-          <div className="list compact">
-            {stolenOrSuspendedBadges.map((badge) => (
-              <button key={badge.id} type="button" className="record-button" onClick={() => actions.selectBadge(badge.id)}>
-                <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
-                <StatusPill status={badge.status} />
-              </button>
-            ))}
-            {!stolenOrSuspendedBadges.length && <p className="plain-text">No stolen or suspended badges in the current mock dataset.</p>}
-          </div>
-        </div>
-
+        {activeTab === 'Audit' && (
+          <>
         <div className="panel">
-          <div className="panel-heading"><h2>Audit Timeline</h2><FileText aria-hidden="true" /></div>
+          <div className="panel-heading"><h2>Audit timeline</h2><FileText aria-hidden="true" /></div>
           <div className="timeline-list">
             {auditEvents.map((event) => (
               <article key={event.id} className="timeline-item">
@@ -205,7 +239,7 @@ export function AdminView({
         </div>
 
         <div className="panel">
-          <div className="panel-heading"><h2>Holder Notifications</h2><ShieldCheck aria-hidden="true" /></div>
+          <div className="panel-heading"><h2>Holder notifications</h2><ShieldCheck aria-hidden="true" /></div>
           <div className="timeline-list">
             {notifications.map((notification) => (
               <article key={notification.id} className="timeline-item">
@@ -219,7 +253,7 @@ export function AdminView({
         </div>
 
         <div className="panel">
-          <div className="panel-heading"><h2>Replacement Requests</h2><Siren aria-hidden="true" /></div>
+          <div className="panel-heading"><h2>Replacement requests</h2><Siren aria-hidden="true" /></div>
           <div className="timeline-list">
             {replacementRequests.map((request) => (
               <article key={request.id} className="timeline-item">
@@ -231,6 +265,8 @@ export function AdminView({
             {!replacementRequests.length && <p className="plain-text">No replacement requests.</p>}
           </div>
         </div>
+          </>
+        )}
       </section>
     </div>
   );

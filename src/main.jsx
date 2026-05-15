@@ -621,11 +621,11 @@ function App() {
       <header className="app-header">
         <div className="title-block">
           <div className="title-row">
-            <p className="eyebrow">Digital Blue Badge Demo</p>
-            <span className="demo-pill">Council demo prototype</span>
+            <p className="eyebrow">Digital Blue Badge</p>
+            <span className="demo-pill">Prototype</span>
           </div>
           <h1>Parking Enforcement System</h1>
-          <p className="hero-note">Signed badge checks, locked parking sessions, and council case workflows.</p>
+          <p className="hero-note">Verify badges, manage sessions, and review enforcement cases.</p>
         </div>
         <div className="role-switcher" aria-label="Choose role">
           {[
@@ -656,7 +656,6 @@ function App() {
         <div className="auth-strip-copy">
           <strong>Signed in as {authUser.name}</strong>
           <span>{authUser.email} - {authUser.role}</span>
-          <p className="demo-note">Demo account controls.</p>
         </div>
         <details className="auth-controls">
           <summary>Sign in or switch account</summary>
