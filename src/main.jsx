@@ -193,6 +193,17 @@ function timestampNow() {
   return new Date().toISOString();
 }
 
+function normaliseVehicle(value) {
+  return value.trim().toUpperCase();
+}
+
+function isSessionActive(session, now = new Date()) {
+  if (!session.locked) return false;
+  const startedAt = new Date(session.startedAt);
+  const endsAt = new Date(startedAt.getTime() + session.durationMins * 60000);
+  return endsAt > now;
+}
+
 function mockGpsForLocation(location) {
   const lookup = [
     ['Oxford Street', '51.5152, -0.1419'],
@@ -283,6 +294,8 @@ function calculateRisk(badge, sessions, scans, query = {}) {
 function App() {
   const [role, setRole] = useState('holder');
   const [authUser, setAuthUser] = useState(demoUsers[0]);
+  const [loginEmail, setLoginEmail] = useState(demoUsers[0].email);
+  const [loginPassword, setLoginPassword] = useState('demo123');
   const [loginError, setLoginError] = useState('');
   const [badges, setBadges] = useState(initialBadges);
   const [sessions, setSessions] = useState(initialSessions);
@@ -303,13 +316,15 @@ function App() {
   const roleBadges = accessibleBadgesFor(authUser, badges);
   const selectedBadge = roleBadges.find((badge) => badge.id === selectedBadgeId) ?? roleBadges[0] ?? badges[0];
   const allowedRoles = allowedRolesFor(authUser);
+  const activeSessions = sessions.filter((session) => isSessionActive(session));
+  const openCases = cases.filter((item) => item.status !== 'Resolved');
 
   const riskByBadge = useMemo(() => {
     return Object.fromEntries(badges.map((badge) => [badge.id, calculateRisk(badge, sessions, scans)]));
   }, [badges, sessions, scans]);
 
   const officerRisk = lastScanResult?.risk ?? calculateRisk(selectedBadge, sessions, scans, {
-    vehicle: scanVehicle.toUpperCase(),
+    vehicle: normaliseVehicle(scanVehicle),
     location: scanLocation,
     time: timestampNow()
   });
@@ -325,6 +340,8 @@ function App() {
     setAuthUser(user);
     setRole(user.role);
     setSelectedBadgeId(accessibleBadgesFor(user, badges)[0]?.id ?? badges[0].id);
+    setLoginEmail(user.email);
+    setLoginPassword(user.password);
     setLastScanResult(null);
     setLoginError('');
   }
@@ -333,12 +350,14 @@ function App() {
     setAuthUser(nextUser);
     setRole(nextUser.role);
     setSelectedBadgeId(accessibleBadgesFor(nextUser, badges)[0]?.id ?? badges[0].id);
+    setLoginEmail(nextUser.email);
+    setLoginPassword(nextUser.password);
     setLastScanResult(null);
     setLoginError('');
   }
 
   function startSession(formData) {
-    if (sessions.some((session) => session.badgeId === selectedBadge.id && session.locked)) {
+    if (sessions.some((session) => session.badgeId === selectedBadge.id && isSessionActive(session))) {
       setSessionMessage('A locked active session already exists for this badge. End-of-session handling would be added in the production workflow.');
       return false;
     }
@@ -347,7 +366,7 @@ function App() {
     const session = {
       id: `PS-${Math.floor(24000 + Math.random() * 900)}`,
       badgeId: selectedBadge.id,
-      vehicle: formData.get('vehicle').toString().toUpperCase(),
+      vehicle: normaliseVehicle(formData.get('vehicle').toString()),
       location,
       gps: mockGpsForLocation(location),
       startedAt,
@@ -377,14 +396,15 @@ function App() {
 
   function runScan() {
     const normalized = normaliseScanInput(scanQuery);
+    const observedVehicle = normaliseVehicle(scanVehicle);
     const scannedAt = timestampNow();
     const device = scanLocation.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07';
     const badge =
       badges.find((item) => item.id.toUpperCase() === normalized) ??
       badges.find((item) => item.vehicle === normalized) ??
-      badges.find((item) => item.vehicle === scanVehicle.toUpperCase());
+      badges.find((item) => item.vehicle === observedVehicle);
     const risk = calculateRisk(badge, sessions, scans, {
-      vehicle: scanVehicle.toUpperCase(),
+      vehicle: observedVehicle,
       location: scanLocation,
       time: scannedAt,
       device
@@ -394,7 +414,7 @@ function App() {
       {
         id: `SC-${90200 + current.length}`,
         badgeId: badge?.id ?? normalized,
-        vehicle: scanVehicle.toUpperCase(),
+        vehicle: observedVehicle,
         location: scanLocation,
         officer: 'EO Current User',
         time: scannedAt,
@@ -407,7 +427,7 @@ function App() {
       badge,
       risk,
       query: normalized,
-      vehicle: scanVehicle.toUpperCase(),
+      vehicle: observedVehicle,
       location: scanLocation,
       scannedAt
     });
@@ -517,8 +537,8 @@ function App() {
             signIn(new FormData(event.currentTarget));
           }}
         >
-          <label>Email<input name="email" type="email" defaultValue={authUser.email} aria-label="Email address" /></label>
-          <label>Password<input name="password" type="password" defaultValue="demo123" aria-label="Password" /></label>
+          <label>Email<input name="email" type="email" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} aria-label="Email address" /></label>
+          <label>Password<input name="password" type="password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} aria-label="Password" /></label>
           <button className="secondary-button" type="submit"><ShieldCheck aria-hidden="true" size={20} /> Sign in</button>
         </form>
         {loginError && <p className="login-error" role="alert">{loginError}</p>}
@@ -526,9 +546,9 @@ function App() {
 
       <section className="summary-strip" aria-label="System summary">
         <Metric icon={BadgeCheck} label="Digital badges" value={badges.length} />
-        <Metric icon={Clock3} label="Active sessions" value={sessions.length} />
+        <Metric icon={Clock3} label="Active sessions" value={activeSessions.length} />
         <Metric icon={ShieldAlert} label="High risk" value={Object.values(riskByBadge).filter((risk) => risk.score >= 81).length} />
-        <Metric icon={FileText} label="Open cases" value={cases.length} />
+        <Metric icon={FileText} label="Open cases" value={openCases.length} />
       </section>
 
       {role === 'holder' && (
@@ -540,7 +560,7 @@ function App() {
           badge={lastScanResult ? lastScanResult.badge : selectedBadge}
           risk={officerRisk}
           scanResult={lastScanResult}
-          sessions={sessions}
+          sessions={activeSessions}
           scanQuery={scanQuery}
           setScanQuery={setScanQuery}
           scanLocation={scanLocation}
@@ -554,7 +574,7 @@ function App() {
         <AdminView
           badges={filteredBadges}
           allBadges={badges}
-          sessions={sessions}
+          sessions={activeSessions}
           scans={scans}
           cases={cases}
           riskByBadge={riskByBadge}
@@ -590,7 +610,7 @@ function Metric({ icon: Icon, label, value }) {
 }
 
 function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession, reportStolen, risk, sessionMessage }) {
-  const activeSession = sessions.find((session) => session.badgeId === badge.id);
+  const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   return (
     <div className="page-grid">
       <section className="panel badge-panel">
@@ -641,7 +661,7 @@ function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession,
 }
 
 function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions, startSession, reportStolen, sessionMessage }) {
-  const activeSession = sessions.find((session) => session.badgeId === selectedBadge.id);
+  const activeSession = sessions.find((session) => session.badgeId === selectedBadge.id && isSessionActive(session));
   return (
     <div className="page-grid">
       <section className="panel">
@@ -702,7 +722,7 @@ function SessionStartForm({ badge, activeSession, startSession }) {
 }
 
 function OfficerView({ badge, risk, scanResult, sessions, scanQuery, setScanQuery, scanLocation, setScanLocation, scanVehicle, setScanVehicle, runScan }) {
-  const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id) : null;
+  const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
   return (
     <div className="officer-layout">
