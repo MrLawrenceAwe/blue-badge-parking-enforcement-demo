@@ -1,15 +1,21 @@
 import { QRCodeSVG } from 'qrcode.react';
-import { Clock3, Gauge, Siren } from 'lucide-react';
+import { Clock3, ShieldCheck } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { verificationTokenForBadge } from '../../domain/sessionAttestation';
 import { formatDate } from '../../utils/date';
 import { SessionCard } from '../common/SessionCard';
 import { StatusPill } from '../common/StatusPill';
+import { StolenReportForm } from '../common/StolenReportForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
-export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession, reportStolen, risk, sessionMessage }) {
+export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession, extendSession, endSession, reportStolen, risk, sessionMessage }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   const verificationToken = verificationTokenForBadge(badge.id);
+  const accountMessage = risk.verdict === 'valid'
+    ? 'Badge ready for verification'
+    : risk.verdict === 'suspicious'
+      ? 'Council review in progress'
+      : 'Action required before use';
   return (
     <div className="page-grid">
       <section className="panel badge-panel">
@@ -40,15 +46,12 @@ export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startS
             aria-label={`Signed verification QR code for ${badge.id}`}
           />
         </div>
-        <div className={`risk-banner ${risk.severity}`}>
-          <Gauge aria-hidden="true" />
-          <strong>Fraud risk {risk.score}</strong>
-          <span>{risk.level}</span>
+        <div className={`account-status ${risk.severity}`}>
+          <ShieldCheck aria-hidden="true" />
+          <strong>{accountMessage}</strong>
+          <span>Officers can verify this badge using the signed QR code.</span>
         </div>
-        <button className="danger-button" onClick={reportStolen}>
-          <Siren aria-hidden="true" size={21} />
-          Report badge stolen
-        </button>
+        <StolenReportForm reportStolen={reportStolen} />
       </section>
 
       <section className="panel">
@@ -56,7 +59,7 @@ export function HolderView({ badge, badges, setSelectedBadgeId, sessions, startS
           <h2>Session Clock</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} />
+        <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
         {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
         {activeSession && <SessionCard session={activeSession} />}
       </section>
