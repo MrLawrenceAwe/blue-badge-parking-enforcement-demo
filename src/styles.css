@@ -48,12 +48,37 @@ main {
   padding: 22px 0;
 }
 
+.title-block {
+  display: grid;
+  gap: 10px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .eyebrow {
-  margin: 0 0 6px;
+  margin: 0;
   color: var(--blue-dark);
   font-weight: 700;
   text-transform: uppercase;
   font-size: 0.82rem;
+}
+
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #9bbbd1;
+  border-radius: 999px;
+  background: #d8e8f3;
+  color: var(--blue-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 h1,
@@ -67,6 +92,13 @@ h1 {
   margin-bottom: 0;
   font-size: clamp(2rem, 4vw, 3.5rem);
   line-height: 1.03;
+}
+
+.hero-note {
+  margin: 0;
+  max-width: 65ch;
+  color: var(--muted);
+  font-size: 1.02rem;
 }
 
 h2 {
@@ -148,6 +180,54 @@ h2 {
   display: block;
   color: var(--muted);
   margin-top: 4px;
+}
+
+.auth-strip-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.demo-note {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.demo-account-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.demo-account-button {
+  min-height: 72px;
+  border: 1px solid #9bbbd1;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 12px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.demo-account-button span,
+.demo-account-button small {
+  display: block;
+}
+
+.demo-account-button span {
+  font-weight: 700;
+}
+
+.demo-account-button small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.demo-account-button.active {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 2px var(--blue);
+  background: #f7fbff;
 }
 
 .auth-strip form {
