@@ -100,11 +100,11 @@ h1 {
   margin: 0;
   max-width: 65ch;
   color: var(--muted);
-  font-size: 1.02rem;
+  font-size: 0.98rem;
 }
 
 h2 {
-  font-size: 1.35rem;
+  font-size: 1.28rem;
   margin-bottom: 0;
   line-height: 1.2;
 }
@@ -145,7 +145,8 @@ h2 {
 }
 
 .tab-list button {
-  background: var(--surface);
+  border-color: #9bbbd1;
+  background: transparent;
   color: var(--blue-dark);
 }
 
@@ -169,8 +170,14 @@ h2 {
 }
 
 .secondary-button {
-  background: #fff;
+  border-color: #9bbbd1;
+  background: transparent;
   color: var(--blue);
+}
+
+.compact-button {
+  min-height: 40px;
+  padding: 8px 12px;
 }
 
 .danger-button {
@@ -184,7 +191,7 @@ h2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .auth-strip {
@@ -319,9 +326,9 @@ h2 {
   border: 1px solid var(--line);
   border-left: 6px solid var(--blue);
   border-radius: 6px;
-  padding: 9px 11px;
+  padding: 8px 10px;
   display: grid;
-  gap: 2px;
+  gap: 1px;
 }
 
 .metric span {
@@ -330,7 +337,7 @@ h2 {
 }
 
 .metric strong {
-  font-size: 1.55rem;
+  font-size: 1.45rem;
 }
 
 .page-grid,
@@ -346,7 +353,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   min-width: 0;
-  padding: 14px;
+  padding: 13px;
 }
 
 .panel-heading {
@@ -354,7 +361,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .field-label,
@@ -386,17 +393,17 @@ textarea {
 .digital-badge {
   border: 3px solid var(--blue);
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px;
   display: grid;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
   background: #f7fbff;
   margin-bottom: 16px;
 }
 
 .digital-badge h3 {
-  font-size: 1.55rem;
-  margin-bottom: 12px;
+  font-size: 1.45rem;
+  margin-bottom: 10px;
 }
 
 dl,
@@ -422,10 +429,10 @@ dd {
 .verification-result {
   border-radius: 8px;
   color: #fff;
-  padding: 16px;
+  padding: 14px;
   display: grid;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 5px;
+  margin-bottom: 14px;
 }
 
 .verification-result {
@@ -441,11 +448,11 @@ dd {
 }
 
 .verification-result h2 {
-  font-size: clamp(2rem, 6vw, 3.8rem);
+  font-size: clamp(1.85rem, 5vw, 3.2rem);
 }
 
 .compact-result h2 {
-  font-size: 2.2rem;
+  font-size: 2rem;
 }
 
 .compact-result p {
@@ -608,15 +615,15 @@ dd {
 
 .session-card {
   display: grid;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .session-card-main,
 .session-lock,
 .session-meta {
   display: grid;
-  gap: 5px;
+  gap: 4px;
 }
 
 .session-location {
@@ -670,12 +677,17 @@ dd {
 .timeline-item small {
   display: block;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 .timeline-item {
   display: grid;
   gap: 4px;
+}
+
+.scan-card {
+  display: grid;
+  gap: 3px;
 }
 
 .timeline-item span {
@@ -708,7 +720,7 @@ dd {
 
 .case-card {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .case-card label {
@@ -752,17 +764,47 @@ dd {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+}
+
+.admin-filters {
+  background: transparent;
+  border: 0;
+  padding: 0;
 }
 
 .admin-filters summary {
-  min-height: 36px;
+  width: fit-content;
+  min-height: 40px;
+  border: 1px solid #9bbbd1;
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--blue-dark);
   cursor: pointer;
   font-weight: 800;
+}
+
+.admin-filters[open] {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.filter-count {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
 }
 
 .full-span {
@@ -799,7 +841,7 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 10px 12px;
+  padding: 9px 12px;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -854,7 +896,7 @@ tr {
   }
 
   .metric {
-    min-height: 78px;
+    min-height: 68px;
     padding: 8px 10px;
   }
 
@@ -869,7 +911,15 @@ tr {
 
   .panel,
   .toolbar {
-    padding: 12px;
+    padding: 11px;
+  }
+
+  .admin-filters {
+    padding: 0;
+  }
+
+  .admin-filters[open] {
+    padding: 11px;
   }
 
   .verification-result {
@@ -946,7 +996,7 @@ tr {
     border: 1px solid var(--line);
     border-radius: 6px;
     background: #fbfcfd;
-    padding: 10px 12px;
+    padding: 9px 11px;
   }
 
   td {
@@ -998,7 +1048,7 @@ textarea:focus {
 
 @media (min-width: 720px) {
   main {
-    padding: 22px 26px;
+    padding: 20px 26px;
   }
 
   .app-header {
@@ -1055,7 +1105,19 @@ textarea:focus {
 
   .admin-layout .panel,
   .admin-layout .toolbar {
-    padding: 12px 14px;
+    padding: 11px 13px;
+  }
+
+  .admin-layout .admin-filters {
+    padding: 0;
+  }
+
+  .admin-layout .admin-filters[open] {
+    padding: 11px 13px;
+  }
+
+  .admin-layout {
+    font-size: 0.95rem;
   }
 
   .admin-layout input,

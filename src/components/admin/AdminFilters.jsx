@@ -1,9 +1,21 @@
 import { Search } from 'lucide-react';
 
 export function AdminFilters({ filters, filtersOpen, setFiltersOpen }) {
+  const activeFilterCount = [
+    filters.values.search,
+    filters.values.location,
+    filters.values.date,
+    filters.values.risk !== 'all',
+    filters.values.badgeStatus !== 'all'
+  ].filter(Boolean).length;
+
   return (
     <details className="toolbar admin-filters" aria-label="Dashboard filters" open={filtersOpen} onToggle={(event) => setFiltersOpen(event.currentTarget.open)}>
-      <summary><Search aria-hidden="true" size={18} /> Filters</summary>
+      <summary>
+        <Search aria-hidden="true" size={18} />
+        Filters
+        {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+      </summary>
       <div className="toolbar-fields">
         <label>Search<input value={filters.values.search} onChange={(event) => filters.setValues({ ...filters.values, search: event.target.value })} placeholder="Badge, VRM, holder, location, date, risk" /></label>
         <label>Risk level<select value={filters.values.risk} onChange={(event) => filters.setValues({ ...filters.values, risk: event.target.value })}><option value="all">All</option><option value="normal">Normal</option><option value="monitor">Monitor</option><option value="review">Officer review</option><option value="high">High priority</option></select></label>
