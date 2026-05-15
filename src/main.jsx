@@ -78,7 +78,7 @@ const initialSessions = [
     vehicle: 'LS24 HRT',
     location: 'Oxford Street W1C',
     gps: '51.5152, -0.1419',
-    startedAt: '2026-05-15T14:35:00+01:00',
+    startedAt: timestampMinutesAgo(25),
     durationMins: 180,
     locked: true
   },
@@ -88,7 +88,7 @@ const initialSessions = [
     vehicle: 'SE22 AEV',
     location: 'Bermondsey Street SE1',
     gps: '51.5009, -0.0811',
-    startedAt: '2026-05-15T12:10:00+01:00',
+    startedAt: timestampMinutesAgo(70),
     durationMins: 240,
     locked: true
   },
@@ -98,7 +98,7 @@ const initialSessions = [
     vehicle: 'KP72 GRC',
     location: 'Euston Road NW1',
     gps: '51.5286, -0.1339',
-    startedAt: '2026-05-15T15:20:00+01:00',
+    startedAt: timestampMinutesAgo(15),
     durationMins: 120,
     locked: true
   }
@@ -208,6 +208,9 @@ const issuedBadgeTokens = {
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const sessionProofStore = new Map();
+let nextSessionNumber = Math.max(
+  ...initialSessions.map((session) => Number(session.id.replace('PS-', ''))).filter(Number.isFinite)
+) + 1;
 let badgePublicKeyPromise;
 let sessionAttestationKeysPromise;
 
@@ -336,8 +339,22 @@ function timestampNow() {
   return new Date().toISOString();
 }
 
+function timestampMinutesAgo(minutes) {
+  return new Date(Date.now() - minutes * 60000).toISOString();
+}
+
 function normaliseVehicle(value) {
   return value.trim().toUpperCase();
+}
+
+function canonicalVehicle(value) {
+  return normaliseVehicle(value).replace(/\s+/g, '');
+}
+
+function createSessionId() {
+  const id = `PS-${nextSessionNumber}`;
+  nextSessionNumber += 1;
+  return id;
 }
 
 function verificationTokenForBadge(badgeId) {
@@ -408,7 +425,7 @@ function calculateRisk(badge, sessions, scans, query = {}) {
   if (badge.status === 'expired') events.push('Badge is expired');
   if (badge.status === 'suspended') events.push('Badge is suspended');
   if (badge.status === 'under review') events.push('Badge already under review');
-  if (query.vehicle && query.vehicle.toUpperCase() !== badge.vehicle) events.push('Badge used with unregistered vehicle');
+  if (query.vehicle && canonicalVehicle(query.vehicle) !== canonicalVehicle(badge.vehicle)) events.push('Badge used with unregistered vehicle');
 
   const badgeScans = scans.filter((scan) => scan.badgeId === badge.id);
   const failedScans = badgeScans.filter((scan) => scan.outcome !== 'valid').length + (query.includeCurrentFailure ? 1 : 0);
@@ -507,7 +524,16 @@ function App() {
         })
       )
     ).then((signedSessions) => {
-      if (!cancelled) setSessions(signedSessions);
+      if (!cancelled) {
+        setSessions((current) => {
+          const signedById = new Map(signedSessions.map((session) => [session.id, session]));
+          const currentIds = new Set(current.map((session) => session.id));
+          return [
+            ...current.map((session) => signedById.get(session.id) ?? session),
+            ...signedSessions.filter((session) => !currentIds.has(session.id))
+          ];
+        });
+      }
     });
     return () => {
       cancelled = true;
@@ -573,7 +599,7 @@ function App() {
     const startedAt = timestampNow();
     const location = formData.get('location').toString();
     const session = await createSignedSessionRecord({
-      id: `PS-${Math.floor(24000 + Math.random() * 900)}`,
+      id: createSessionId(),
       ...createSessionRecord({
         badgeId: selectedBadge.id,
         vehicle: normaliseVehicle(formData.get('vehicle').toString()),
@@ -659,7 +685,7 @@ function App() {
         : normalized.kind === 'qr-token'
           ? badges.find((item) => item.id === verifiedQrPayload?.badgeId)
         : normalized.kind === 'vehicle'
-          ? badges.find((item) => item.vehicle === normalized.value)
+          ? badges.find((item) => canonicalVehicle(item.vehicle) === canonicalVehicle(normalized.value))
           : null;
     const predictedOutcome = badge
       ? calculateRisk(badge, sessions, scans, {
