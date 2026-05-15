@@ -1,6 +1,6 @@
 # Blue Badge Parking Enforcement Demo
 
-A React/Vite prototype for a secure digital Blue Badge parking enforcement system for UK councils.
+A React/Vite prototype for a digital Blue Badge parking enforcement system for UK councils.
 
 ## Run locally
 
@@ -32,8 +32,8 @@ For a one-off share without a repo, run `npm run build` and upload the `dist/` f
 
 ## What is included
 
-- Digital badge profiles with secure QR codes and badge status
-- Locked digital parking session clock
+- Digital badge profiles with signed demo QR verification tokens and badge status
+- Locked digital parking session clock with tamper-evident demo attestation
 - Badge holder, carer, officer, and council admin views
 - Officer scan/lookup flow for badge ID, QR value, or vehicle registration
 - Rules-based fraud scoring and traffic-light verification outcomes
@@ -41,4 +41,4 @@ For a one-off share without a repo, run `npm run build` and upload the `dist/` f
 - Admin dashboard with sessions, scans, cases, fraud scores, filters, and reactivation
 - Accessible, high-contrast, mobile-first UI with large controls
 
-This is a demo prototype with realistic mock data and in-memory state. It is not production authentication, storage, or security.
+This is a demo prototype with realistic mock data and in-memory state. It shows the intended enforcement flows, role boundaries, and tamper-evident behaviour, but it is not production authentication, storage, or backend security.
