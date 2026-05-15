@@ -70,6 +70,10 @@ export function AdminView({
         <div className="panel">
           <div className="panel-heading"><h2>Case Management</h2><FileText aria-hidden="true" /></div>
           <label>Selected badge<select value={selectedBadge.id} onChange={(event) => actions.selectBadge(event.target.value)}>{allBadges.map((badge) => <option key={badge.id} value={badge.id}>{badge.id} - {badge.holder}</option>)}</select></label>
+          <div className="case-scope">
+            <strong>Cases for {selectedBadge.holder}</strong>
+            <span>{selectedBadge.id} - {selectedBadge.vehicle}</span>
+          </div>
           <div className="case-fields">
             <label>Status<select value={caseForm.status} onChange={(event) => caseForm.setStatus(event.target.value)}>{caseStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
             <label>Assigned to<input value={caseForm.assignee} onChange={(event) => caseForm.setAssignee(event.target.value)} aria-label="Assigned case officer or team" /></label>
@@ -84,9 +88,13 @@ export function AdminView({
           </div>
           {adminMessage && <p className="form-message" role="status">{adminMessage}</p>}
           <div className="list compact">
+            {!cases.length && (
+              <p className="plain-text">No open or historic case records are attached to this selected badge in the demo dataset.</p>
+            )}
             {cases.map((caseRecord) => (
               <article key={caseRecord.id} className="case-card">
                 <strong>{caseRecord.id}: {caseRecord.title}</strong>
+                <small>{caseRecord.badgeId}</small>
                 <label>Status<select value={caseRecord.status} onChange={(event) => actions.updateCase(caseRecord.id, { status: event.target.value })}>{caseStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
                 <label>Assigned to<input value={caseRecord.assignedTo} onChange={(event) => actions.updateCase(caseRecord.id, { assignedTo: event.target.value })} aria-label={`Assignee for ${caseRecord.id}`} /></label>
                 <div className="case-fields">

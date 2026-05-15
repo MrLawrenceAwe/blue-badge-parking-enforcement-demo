@@ -605,6 +605,7 @@ function App() {
   const filteredSessions = activeSessions.filter((session) => filteredBadgeIds.has(session.badgeId));
   const filteredScans = scans.filter((scan) => filteredBadgeIds.has(scan.badgeId));
   const filteredCases = cases.filter((caseRecord) => filteredBadgeIds.has(caseRecord.badgeId) || !knownBadgeIds.has(caseRecord.badgeId));
+  const selectedBadgeCases = filteredCases.filter((caseRecord) => caseRecord.badgeId === selectedBadge.id);
 
   const suspiciousCases = filteredCases.filter((caseRecord) => {
     const risk = riskByBadge[caseRecord.badgeId];
@@ -742,7 +743,7 @@ function App() {
           allBadges={badges}
           sessions={filteredSessions}
           scans={filteredScans}
-          cases={filteredCases}
+          cases={selectedBadgeCases}
           riskByBadge={riskByBadge}
           filters={{ values: filters, setValues: setFilters }}
           selectedBadge={selectedBadge}
