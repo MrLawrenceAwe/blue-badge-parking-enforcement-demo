@@ -17,20 +17,25 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
     <div className="officer-layout">
       <section className="panel scan-panel">
         <div className="panel-heading">
-          <h2>Scan or Verify</h2>
+          <h2>Scan or verify</h2>
           <QrCode aria-hidden="true" />
         </div>
         <label>QR, badge ID, or vehicle<input value={scanForm.query} onChange={(event) => scanActions.setQuery(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
         <label>Observed vehicle<input value={scanForm.vehicle} onChange={(event) => scanActions.setVehicle(event.target.value)} aria-label="Observed vehicle registration" /></label>
         <label>Scan location<input value={scanForm.location} onChange={(event) => scanActions.setLocation(event.target.value)} aria-label="Scan location" /></label>
-        <div className="case-fields">
-          <label>Contravention<select value={scanEvidence.values.contravention} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
-          <label>Outcome action<select value={scanEvidence.values.action} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
-        </div>
-        <label>Vehicle photo reference<input value={scanEvidence.values.vehiclePhoto} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, vehiclePhoto: event.target.value }))} placeholder="Camera roll ID, filename, or evidence ref" aria-label="Vehicle photo reference" /></label>
-        <label>Badge photo reference<input value={scanEvidence.values.badgePhoto} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, badgePhoto: event.target.value }))} placeholder="Badge image or bodycam reference" aria-label="Badge photo reference" /></label>
-        <label>Officer note<textarea value={scanEvidence.values.officerNote} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, officerNote: event.target.value }))} placeholder="Observation, conversation summary, visible badge condition" aria-label="Officer note" /></label>
         <button className="primary-button" onClick={scanActions.runScan}><Search aria-hidden="true" size={21} /> Verify now</button>
+        {scanResult && (
+          <div className="evidence-section">
+            <h3>Evidence</h3>
+            <div className="case-fields">
+              <label>Contravention<select value={scanEvidence.values.contravention} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+              <label>Outcome action<select value={scanEvidence.values.action} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+            </div>
+            <label>Vehicle photo<input value={scanEvidence.values.vehiclePhoto} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, vehiclePhoto: event.target.value }))} placeholder="Evidence reference" aria-label="Vehicle photo reference" /></label>
+            <label>Badge photo<input value={scanEvidence.values.badgePhoto} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, badgePhoto: event.target.value }))} placeholder="Evidence reference" aria-label="Badge photo reference" /></label>
+            <label>Officer note<textarea value={scanEvidence.values.officerNote} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, officerNote: event.target.value }))} placeholder="Observation or conversation summary" aria-label="Officer note" /></label>
+          </div>
+        )}
       </section>
 
       <div className="officer-decision-stack">
@@ -56,7 +61,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
 
         <section className="panel">
           <div className="panel-heading">
-            <h2>Badge Details</h2>
+            <h2>Badge details</h2>
             <Car aria-hidden="true" />
           </div>
           {isUnknown ? (

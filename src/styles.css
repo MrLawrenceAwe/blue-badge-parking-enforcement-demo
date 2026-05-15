@@ -11,7 +11,7 @@
   --amber: #b76e00;
   --red: #b10e1e;
   --black: #111111;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * {
@@ -45,7 +45,7 @@ select:disabled {
 main {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 14px;
+  padding: 12px;
 }
 
 .app-header {
@@ -57,7 +57,7 @@ main {
 
 .title-block {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .title-row {
@@ -71,8 +71,8 @@ main {
   margin: 0;
   color: var(--blue-dark);
   font-weight: 700;
-  text-transform: uppercase;
   font-size: 0.82rem;
+  letter-spacing: 0;
 }
 
 .demo-pill {
@@ -98,7 +98,7 @@ p {
 h1 {
   margin-bottom: 0;
   font-size: clamp(1.75rem, 3vw, 2.65rem);
-  line-height: 1.05;
+  line-height: 1.1;
 }
 
 .hero-note {
@@ -111,6 +111,7 @@ h1 {
 h2 {
   font-size: 1.35rem;
   margin-bottom: 0;
+  line-height: 1.2;
 }
 
 .role-switcher,
@@ -120,7 +121,15 @@ h2 {
   flex-wrap: wrap;
 }
 
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
 .role-switcher button,
+.tab-list button,
 .primary-button,
 .secondary-button,
 .danger-button {
@@ -140,6 +149,11 @@ h2 {
   color: var(--blue-dark);
 }
 
+.tab-list button {
+  background: var(--surface);
+  color: var(--blue-dark);
+}
+
 .role-switcher button:disabled {
   border-color: #aeb9c0;
   color: #6f7b84;
@@ -148,12 +162,14 @@ h2 {
 }
 
 .role-switcher button.active,
+.tab-list button.active,
 .primary-button {
   background: var(--blue);
   color: #fff;
 }
 
-.role-switcher button.active {
+.role-switcher button.active,
+.tab-list button.active {
   border-color: var(--blue-dark);
 }
 
@@ -308,14 +324,14 @@ h2 {
   border: 1px solid var(--line);
   border-left: 6px solid var(--blue);
   border-radius: 6px;
-  padding: 10px 12px;
+  padding: 9px 11px;
   display: grid;
   gap: 2px;
 }
 
 .metric span {
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .metric strong {
@@ -351,7 +367,7 @@ label {
   display: grid;
   gap: 7px;
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 650;
   margin-bottom: 14px;
 }
 
@@ -403,7 +419,7 @@ dt {
 
 dd {
   margin: 0;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .risk-banner,
@@ -445,6 +461,18 @@ dd {
   align-self: start;
   display: grid;
   gap: 14px;
+}
+
+.evidence-section {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 14px;
+}
+
+.evidence-section h3 {
+  margin-bottom: 0;
 }
 
 .detail-list-grid {
@@ -703,7 +731,7 @@ dd {
 
 .plain-text {
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.45;
 }
 
 .scan-panel {
@@ -740,6 +768,14 @@ dd {
   color: var(--blue-dark);
   cursor: pointer;
   font-weight: 800;
+}
+
+.full-span {
+  grid-column: 1 / -1;
+}
+
+.risk-panel {
+  grid-column: 1 / -1;
 }
 
 .admin-filters[open] summary {
@@ -803,6 +839,44 @@ tr {
 }
 
 @media (max-width: 719px) {
+  main {
+    padding: 10px;
+  }
+
+  .app-header {
+    gap: 10px;
+    padding-top: 10px;
+  }
+
+  .role-switcher button,
+  .tab-list button {
+    min-height: 42px;
+    padding: 8px 12px;
+  }
+
+  .summary-strip {
+    gap: 6px;
+  }
+
+  .metric {
+    min-height: 78px;
+    padding: 8px 10px;
+  }
+
+  .metric svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .metric span {
+    font-size: 0.94rem;
+  }
+
+  .panel,
+  .toolbar {
+    padding: 12px;
+  }
+
   .verification-result {
     min-height: 0;
     align-content: start;
@@ -918,6 +992,11 @@ textarea:focus {
 }
 
 .role-switcher button.active:focus-visible {
+  outline: 3px solid #9bbbd1;
+  outline-offset: 2px;
+}
+
+.tab-list button.active:focus-visible {
   outline: 3px solid #9bbbd1;
   outline-offset: 2px;
 }

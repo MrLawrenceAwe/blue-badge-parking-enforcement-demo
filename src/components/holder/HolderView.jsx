@@ -35,7 +35,7 @@ export function HolderView({
     <div className="page-grid">
       <section className="panel badge-panel">
         <div className="panel-heading">
-          <h2>Digital Badge</h2>
+          <h2>Digital badge</h2>
           <StatusPill status={badge.status} />
         </div>
         <label className="field-label" htmlFor="badge-select">Badge profile</label>
@@ -88,7 +88,7 @@ export function HolderView({
 
       <section className="panel">
         <div className="panel-heading">
-          <h2>Session Clock</h2>
+          <h2>Session clock</h2>
           <Clock3 aria-hidden="true" />
         </div>
         <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
@@ -99,7 +99,7 @@ export function HolderView({
           {notifications.map((notification) => (
             <small key={notification.id}>{notification.channel} at {new Date(notification.time).toLocaleString('en-GB')}: {notification.message}</small>
           ))}
-          {!notifications.length && <small>No notifications for this badge in the demo.</small>}
+          {!notifications.length && <small>No notifications for this badge.</small>}
         </div>
       </section>
     </div>
