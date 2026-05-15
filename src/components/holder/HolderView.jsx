@@ -1,11 +1,13 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { Clock3, ShieldCheck } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
-import { verificationTokenForBadge } from '../../domain/sessionAttestation';
+import { verificationTokenForBadge } from '../../domain/badgeTokens';
 import { formatDate } from '../../utils/date';
 import { SessionCard } from '../common/SessionCard';
 import { StatusPill } from '../common/StatusPill';
 import { StolenReportForm } from '../common/StolenReportForm';
+import { BadgeNotifications } from '../common/BadgeNotifications';
+import { ReplacementRequestForm } from '../common/ReplacementRequestForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
 export function HolderView({
@@ -68,21 +70,11 @@ export function HolderView({
         </div>
         <StolenReportForm reportStolen={reportStolen} />
         {badge.status === 'stolen' && (
-          <form
-            className="replacement-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              requestReplacementBadge(new FormData(event.currentTarget));
-            }}
-          >
-            <h3>Replacement request</h3>
-            <label>Crime, loss, or council reference<input name="reference" value={replacementForm.values.reference} onChange={(event) => replacementForm.setValues((current) => ({ ...current, reference: event.target.value }))} required /></label>
-            <label>Temporary permit<select name="temporaryPermit" value={replacementForm.values.temporaryPermit} onChange={(event) => replacementForm.setValues((current) => ({ ...current, temporaryPermit: event.target.value }))}><option>Requested</option><option>Not required</option><option>Pending</option></select></label>
-            <button className="secondary-button" type="submit">Request replacement</button>
-            {replacementRequests.map((request) => (
-              <small key={request.id}>{request.id}: {request.status} - {request.reference} - temporary permit {request.temporaryPermit.toLowerCase()}</small>
-            ))}
-          </form>
+          <ReplacementRequestForm
+            replacementForm={replacementForm}
+            replacementRequests={replacementRequests}
+            requestReplacementBadge={requestReplacementBadge}
+          />
         )}
       </section>
 
@@ -94,13 +86,7 @@ export function HolderView({
         <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
         {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
         {activeSession && <SessionCard session={activeSession} />}
-        <div className="timeline-list">
-          <h3>Notifications</h3>
-          {notifications.map((notification) => (
-            <small key={notification.id}>{notification.channel} at {new Date(notification.time).toLocaleString('en-GB')}: {notification.message}</small>
-          ))}
-          {!notifications.length && <small>No notifications for this badge.</small>}
-        </div>
+        <BadgeNotifications notifications={notifications} />
       </section>
     </div>
   );

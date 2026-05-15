@@ -1,25 +1,13 @@
-import { badgeVerificationPublicKey, initialSessions, issuedBadgeTokens } from '../data/demoData';
+import { initialSessions } from '../data/demoData';
+import { bytesToBase64Url } from './base64Url';
 
 const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
 const sessionProofStore = new Map();
 
 let nextSessionNumber = Math.max(
   ...initialSessions.map((session) => Number(session.id.replace('PS-', ''))).filter(Number.isFinite)
 ) + 1;
-let badgePublicKeyPromise;
-let sessionAttestationKeysPromise;
-
-function base64UrlToBytes(value) {
-  const normalised = value.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = normalised + '='.repeat((4 - (normalised.length % 4 || 4)) % 4);
-  return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
-}
-
-function bytesToBase64Url(bytes) {
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-}
+let sessionProofKeysPromise;
 
 function canonicalSessionPayload(session) {
   return JSON.stringify({
@@ -32,25 +20,9 @@ function canonicalSessionPayload(session) {
   });
 }
 
-async function getBadgeVerificationPublicKey() {
-  if (!badgePublicKeyPromise) {
-    badgePublicKeyPromise = crypto.subtle.importKey(
-      'jwk',
-      badgeVerificationPublicKey,
-      {
-        name: 'ECDSA',
-        namedCurve: 'P-256'
-      },
-      false,
-      ['verify']
-    );
-  }
-  return badgePublicKeyPromise;
-}
-
 async function getSessionAttestationKeys() {
-  if (!sessionAttestationKeysPromise) {
-    sessionAttestationKeysPromise = crypto.subtle.generateKey(
+  if (!sessionProofKeysPromise) {
+    sessionProofKeysPromise = crypto.subtle.generateKey(
       {
         name: 'ECDSA',
         namedCurve: 'P-256'
@@ -59,25 +31,7 @@ async function getSessionAttestationKeys() {
       ['sign', 'verify']
     );
   }
-  return sessionAttestationKeysPromise;
-}
-
-export async function verifyBadgeToken(token) {
-  const [payloadPart, signaturePart] = token.split('.');
-  if (!payloadPart || !signaturePart) return null;
-  try {
-    const publicKey = await getBadgeVerificationPublicKey();
-    const verified = await crypto.subtle.verify(
-      { name: 'ECDSA', hash: 'SHA-256' },
-      publicKey,
-      base64UrlToBytes(signaturePart),
-      textEncoder.encode(payloadPart)
-    );
-    if (!verified) return null;
-    return JSON.parse(textDecoder.decode(base64UrlToBytes(payloadPart)));
-  } catch {
-    return null;
-  }
+  return sessionProofKeysPromise;
 }
 
 export async function createSignedSessionRecord(sessionRecord) {
@@ -109,10 +63,6 @@ export function createSessionId() {
   const id = `PS-${nextSessionNumber}`;
   nextSessionNumber += 1;
   return id;
-}
-
-export function verificationTokenForBadge(badgeId) {
-  return issuedBadgeTokens[badgeId] ?? null;
 }
 
 export function isSessionRecordTrusted(session) {
