@@ -81,6 +81,7 @@ function App() {
   const [sessionMessage, setSessionMessage] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
   const [officerMessage, setOfficerMessage] = useState('');
+  const [demoDrawerOpen, setDemoDrawerOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,6 +137,7 @@ function App() {
     setLastScanResult(null);
     setLoginError('');
     setOfficerMessage('');
+    setDemoDrawerOpen(false);
   }
 
   function appendAuditEvent({ badgeId, type, actor = authUser.name, detail }) {
@@ -632,9 +634,16 @@ function App() {
             ['officer', ShieldCheck, 'Officer'],
             ['admin', LayoutDashboard, 'Admin']
           ].map(([value, Icon, label]) => {
+            const demoUser = demoUsers.find((user) => user.role === value);
             const canAccess = availableDemoRoles.includes(value);
             return (
-              <button key={value} className={role === value ? 'active' : ''} onClick={() => canAccess && setRole(value)} aria-pressed={role === value} disabled={!canAccess} title={canAccess ? label : 'Sign in with this role to access'}>
+              <button
+                key={value}
+                className={role === value ? 'active' : ''}
+                onClick={() => (canAccess ? setRole(value) : selectDemoUser(demoUser))}
+                aria-pressed={role === value}
+                title={canAccess ? label : `Switch to ${label.toLowerCase()} demo`}
+              >
                 <Icon aria-hidden="true" size={19} />
                 {label}
               </button>
@@ -649,7 +658,7 @@ function App() {
           <span>{authUser.email} - {authUser.role}</span>
           <p className="demo-note">Use demo accounts to switch journeys when needed.</p>
         </div>
-        <details className="demo-account-drawer">
+        <details className="demo-account-drawer" open={demoDrawerOpen} onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}>
           <summary>Switch demo account</summary>
           <div className="demo-account-list" aria-label="Quick demo accounts">
             {demoAccountOrder.map((demoRole) => {

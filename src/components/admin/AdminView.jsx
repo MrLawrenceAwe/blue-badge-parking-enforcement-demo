@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Clock3, FileText, Gauge, QrCode, Search, ShieldAlert, ShieldCheck, Siren } from 'lucide-react';
 import { formatTime } from '../../utils/date';
 import { SessionCard } from '../common/SessionCard';
@@ -25,18 +26,31 @@ export function AdminView({
   suspiciousCases,
   stolenOrSuspendedBadges
 }) {
+  const [filtersOpen, setFiltersOpen] = useState(() => (typeof window === 'undefined' ? true : window.matchMedia('(min-width: 720px)').matches));
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 720px)');
+    const syncFilters = () => setFiltersOpen(mediaQuery.matches);
+    syncFilters();
+    mediaQuery.addEventListener('change', syncFilters);
+    return () => mediaQuery.removeEventListener('change', syncFilters);
+  }, []);
+
   return (
     <div className="admin-layout">
-      <section className="toolbar" aria-label="Dashboard filters">
-        <label><Search aria-hidden="true" size={18} /> Search<input value={filters.values.search} onChange={(event) => filters.setValues({ ...filters.values, search: event.target.value })} placeholder="Badge, VRM, holder, location, date, risk" /></label>
-        <label>Risk level<select value={filters.values.risk} onChange={(event) => filters.setValues({ ...filters.values, risk: event.target.value })}><option value="all">All</option><option value="normal">Normal</option><option value="monitor">Monitor</option><option value="officer review">Officer review</option><option value="high priority">High priority</option></select></label>
-        <label>Location<input value={filters.values.location} onChange={(event) => filters.setValues({ ...filters.values, location: event.target.value })} placeholder="Town, street, zone" /></label>
-        <label>Date<input type="date" value={filters.values.date} onChange={(event) => filters.setValues({ ...filters.values, date: event.target.value })} /></label>
-        <label>Badge status<select value={filters.values.badgeStatus} onChange={(event) => filters.setValues({ ...filters.values, badgeStatus: event.target.value })}><option value="all">All</option><option value="valid">Valid</option><option value="under review">Under review</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="stolen">Stolen</option></select></label>
-      </section>
+      <details className="toolbar admin-filters" aria-label="Dashboard filters" open={filtersOpen} onToggle={(event) => setFiltersOpen(event.currentTarget.open)}>
+        <summary><Search aria-hidden="true" size={18} /> Filters</summary>
+        <div className="toolbar-fields">
+          <label>Search<input value={filters.values.search} onChange={(event) => filters.setValues({ ...filters.values, search: event.target.value })} placeholder="Badge, VRM, holder, location, date, risk" /></label>
+          <label>Risk level<select value={filters.values.risk} onChange={(event) => filters.setValues({ ...filters.values, risk: event.target.value })}><option value="all">All</option><option value="normal">Normal</option><option value="monitor">Monitor</option><option value="officer review">Officer review</option><option value="high priority">High priority</option></select></label>
+          <label>Location<input value={filters.values.location} onChange={(event) => filters.setValues({ ...filters.values, location: event.target.value })} placeholder="Town, street, zone" /></label>
+          <label>Date<input type="date" value={filters.values.date} onChange={(event) => filters.setValues({ ...filters.values, date: event.target.value })} /></label>
+          <label>Badge status<select value={filters.values.badgeStatus} onChange={(event) => filters.setValues({ ...filters.values, badgeStatus: event.target.value })}><option value="all">All</option><option value="valid">Valid</option><option value="under review">Under review</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="stolen">Stolen</option></select></label>
+        </div>
+      </details>
 
       <section className="dashboard-grid">
-        <div className="panel">
+        <div className="panel risk-panel">
           <div className="panel-heading"><h2>Fraud Risk Scores</h2><Gauge aria-hidden="true" /></div>
           <div className="table-wrap">
             <table>
@@ -56,10 +70,10 @@ export function AdminView({
                     role="button"
                     aria-label={`Select badge ${badge.id}`}
                   >
-                    <td>{badge.id}<br /><small>{badge.holder}</small></td>
-                    <td>{badge.vehicle}</td>
-                    <td><StatusPill status={badge.status} /></td>
-                    <td><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskByBadge[badge.id].level}</small></td>
+                    <td data-label="Badge">{badge.id}<br /><small>{badge.holder}</small></td>
+                    <td data-label="Vehicle">{badge.vehicle}</td>
+                    <td data-label="Status"><StatusPill status={badge.status} /></td>
+                    <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskByBadge[badge.id].level}</small></td>
                   </tr>
                 ))}
               </tbody>
@@ -67,7 +81,7 @@ export function AdminView({
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel case-management-panel">
           <div className="panel-heading"><h2>Case Management</h2><FileText aria-hidden="true" /></div>
           <label>Selected badge<select value={selectedBadge.id} onChange={(event) => actions.selectBadge(event.target.value)}>{allBadges.map((badge) => <option key={badge.id} value={badge.id}>{badge.id} - {badge.holder}</option>)}</select></label>
           <div className="case-scope">
@@ -129,7 +143,7 @@ export function AdminView({
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel risk-rules-panel">
           <div className="panel-heading"><h2>Council Risk Rules</h2><Gauge aria-hidden="true" /></div>
           <div className="case-fields">
             <label>High risk threshold<input type="number" min="1" max="100" value={riskRules.highRiskThreshold} onChange={(event) => actions.updateRiskRule('highRiskThreshold', event.target.value)} /></label>
@@ -140,12 +154,12 @@ export function AdminView({
           <p className="plain-text">Risk scores recalculate immediately using the configured thresholds and the explanation shown to officers.</p>
         </div>
 
-        <div className="panel">
+        <div className="panel active-sessions-panel">
           <div className="panel-heading"><h2>Active Sessions</h2><Clock3 aria-hidden="true" /></div>
           <div className="list compact">{sessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
         </div>
 
-        <div className="panel">
+        <div className="panel recent-scans-panel">
           <div className="panel-heading"><h2>Recent Scans</h2><QrCode aria-hidden="true" /></div>
           <div className="list compact">
             {scans.map((scan) => (
@@ -158,7 +172,7 @@ export function AdminView({
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel suspicious-cases-panel">
           <div className="panel-heading"><h2>Suspicious Cases</h2><ShieldAlert aria-hidden="true" /></div>
           <div className="list compact">
             {suspiciousCases.map((caseRecord) => (
@@ -172,7 +186,7 @@ export function AdminView({
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel badge-status-panel">
           <div className="panel-heading"><h2>Stolen or Suspended Badges</h2><Siren aria-hidden="true" /></div>
           <div className="list compact">
             {stolenOrSuspendedBadges.map((badge) => (
