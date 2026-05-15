@@ -10,6 +10,7 @@ export function buildSessionPayload({ badgeId, vehicle, location, gps, startedAt
 }
 
 export function isSessionActive(session, now = new Date()) {
+  if (session.endedAt) return false;
   if (!session.locked) return false;
   const startedAt = new Date(session.startedAt);
   const endsAt = new Date(startedAt.getTime() + session.durationMins * 60000);

@@ -4,12 +4,14 @@ import { formatTime } from '../../utils/date';
 
 export function SessionCard({ session }) {
   const integrityState = sessionIntegrityState(session);
+  const sessionState = session.endedAt ? `Ended ${formatTime(session.endedAt)}` : 'Active session';
   return (
     <article className="session-card">
       <div>
         <strong>{session.vehicle}</strong>
         <span><MapPin aria-hidden="true" size={16} /> {session.location}</span>
         <small>GPS {session.gps}</small>
+        <small>{sessionState}</small>
       </div>
       <div>
         <small>

@@ -56,6 +56,7 @@ function App() {
   const [filters, setFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
   const [sessionMessage, setSessionMessage] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
+  const [officerMessage, setOfficerMessage] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -110,6 +111,7 @@ function App() {
     setLoginPassword(nextUser.password);
     setLastScanResult(null);
     setLoginError('');
+    setOfficerMessage('');
   }
 
   async function startSession(formData) {
@@ -143,10 +145,51 @@ function App() {
     return true;
   }
 
-  function reportStolen() {
+  async function extendSession(sessionId, extraMins) {
+    if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role) {
+      setSessionMessage('Only the holder or delegated carer can extend a parking session in the demo.');
+      return;
+    }
+    const session = sessions.find((sessionRecord) => sessionRecord.id === sessionId);
+    if (!session || !authUser.badgeIds.includes(session.badgeId)) {
+      setSessionMessage('This session is not available to the signed-in user.');
+      return;
+    }
+    const updatedSession = await createSignedSessionRecord({
+      ...session,
+      durationMins: Math.min(session.durationMins + extraMins, 240)
+    });
+    setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? updatedSession : sessionRecord)));
+    setSessionMessage(updatedSession.durationMins === session.durationMins
+      ? 'This session is already at the maximum 4 hour duration.'
+      : 'Session extended and re-signed. The original arrival details remain locked.');
+  }
+
+  function endSession(sessionId) {
+    if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role) {
+      setSessionMessage('Only the holder or delegated carer can end a parking session in the demo.');
+      return;
+    }
+    const session = sessions.find((sessionRecord) => sessionRecord.id === sessionId);
+    if (!session || !authUser.badgeIds.includes(session.badgeId)) {
+      setSessionMessage('This session is not available to the signed-in user.');
+      return;
+    }
+    setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? { ...sessionRecord, endedAt: timestampNow() } : sessionRecord)));
+    setSessionMessage('Session ended. The signed arrival record remains available for enforcement audit.');
+  }
+
+  function reportStolen(formData) {
     if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role || !authUser.badgeIds.includes(selectedBadge.id)) {
       setSessionMessage('Only the holder or delegated carer for this badge can report it stolen in the demo.');
-      return;
+      return false;
+    }
+    const details = formData?.get('details')?.toString().trim();
+    const contact = formData?.get('contact')?.toString().trim();
+    const confirmed = formData?.get('confirmed') === 'yes';
+    if (!details || !contact || !confirmed) {
+      setSessionMessage('Confirm the deactivation and provide incident details before reporting the badge stolen.');
+      return false;
     }
     setSessionMessage('Badge reported stolen. The badge is now deactivated for new parking sessions and will return a black high-risk result to officers.');
     setBadges((current) => current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)));
@@ -157,11 +200,12 @@ function App() {
         title: 'Badge reported stolen by holder',
         status: 'High priority',
         assignedTo: 'Fraud Team A',
-        notes: ['Immediate digital deactivation triggered from holder portal.'],
-        evidence: 'Holder report'
+        notes: [`Immediate digital deactivation triggered from holder portal. Details: ${details}. Contact: ${contact}.`],
+        evidence: 'Holder report with confirmed deactivation'
       },
       ...current
     ]);
+    return true;
   }
 
   function reactivateBadgeAfterReview() {
@@ -251,6 +295,7 @@ function App() {
       scannedAt
     });
     if (badge) setSelectedBadgeId(badge.id);
+    setOfficerMessage('');
   }
 
   function findScannedBadge(scanInput, verifiedQrPayload) {
@@ -278,6 +323,34 @@ function App() {
     setCaseStatus('Open');
     setCaseAssignee('Unassigned');
     setCaseEvidence('');
+  }
+
+  function createCaseFromScan() {
+    if (authUser.role !== 'officer' || role !== 'officer') {
+      setOfficerMessage('Only an enforcement officer can open an enforcement case from a scan.');
+      return;
+    }
+    if (!lastScanResult) {
+      setOfficerMessage('Run a scan before opening an enforcement case.');
+      return;
+    }
+    const badgeId = lastScanResult.badge?.id ?? lastScanResult.query;
+    const risk = lastScanResult.risk;
+    setCases((current) => [
+      {
+        id: `CASE-${4200 + current.length}`,
+        badgeId,
+        title: `Officer scan escalation - ${risk.level}`,
+        status: risk.score >= 81 ? 'High priority' : 'Officer review',
+        assignedTo: risk.score >= 81 ? 'Fraud Team A' : 'Duty review team',
+        notes: [
+          `Officer scan at ${lastScanResult.location} for vehicle ${lastScanResult.vehicle}. Verdict: ${risk.verdict}. Alerts: ${risk.events.join('; ')}.`
+        ],
+        evidence: 'Officer scan log'
+      },
+      ...current
+    ]);
+    setOfficerMessage(`Enforcement case opened for ${badgeId}.`);
   }
 
   function updateCase(caseId, caseUpdates) {
@@ -315,12 +388,18 @@ function App() {
     return matchesSearch && matchesRisk && matchesLocation && matchesDate && matchesStatus;
   });
 
-  const suspiciousCases = cases.filter((caseRecord) => {
+  const filteredBadgeIds = new Set(filteredBadges.map((badge) => badge.id));
+  const knownBadgeIds = new Set(badges.map((badge) => badge.id));
+  const filteredSessions = activeSessions.filter((session) => filteredBadgeIds.has(session.badgeId));
+  const filteredScans = scans.filter((scan) => filteredBadgeIds.has(scan.badgeId));
+  const filteredCases = cases.filter((caseRecord) => filteredBadgeIds.has(caseRecord.badgeId) || !knownBadgeIds.has(caseRecord.badgeId));
+
+  const suspiciousCases = filteredCases.filter((caseRecord) => {
     const risk = riskByBadge[caseRecord.badgeId];
     return caseRecord.status !== 'Resolved' && (risk?.score >= 31 || ['Officer review', 'High priority', 'Evidence requested'].includes(caseRecord.status));
   });
 
-  const stolenOrSuspendedBadges = badges.filter((badge) => ['stolen', 'suspended'].includes(badge.status));
+  const stolenOrSuspendedBadges = filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status));
 
   return (
     <main>
@@ -396,9 +475,32 @@ function App() {
       </section>
 
       {role === 'holder' && (
-        <HolderView badge={selectedBadge} badges={roleBadges} setSelectedBadgeId={setSelectedBadgeId} sessions={sessions} startSession={startSession} reportStolen={reportStolen} risk={riskByBadge[selectedBadge.id]} sessionMessage={sessionMessage} />
+        <HolderView
+          badge={selectedBadge}
+          badges={roleBadges}
+          setSelectedBadgeId={setSelectedBadgeId}
+          sessions={sessions}
+          startSession={startSession}
+          extendSession={extendSession}
+          endSession={endSession}
+          reportStolen={reportStolen}
+          risk={riskByBadge[selectedBadge.id]}
+          sessionMessage={sessionMessage}
+        />
       )}
-      {role === 'carer' && <CarerView badges={roleBadges} selectedBadge={selectedBadge} setSelectedBadgeId={setSelectedBadgeId} sessions={sessions} startSession={startSession} reportStolen={reportStolen} sessionMessage={sessionMessage} />}
+      {role === 'carer' && (
+        <CarerView
+          badges={roleBadges}
+          selectedBadge={selectedBadge}
+          setSelectedBadgeId={setSelectedBadgeId}
+          sessions={sessions}
+          startSession={startSession}
+          extendSession={extendSession}
+          endSession={endSession}
+          reportStolen={reportStolen}
+          sessionMessage={sessionMessage}
+        />
+      )}
       {role === 'officer' && (
         <OfficerView
           badge={lastScanResult ? lastScanResult.badge : selectedBadge}
@@ -406,16 +508,17 @@ function App() {
           scanResult={lastScanResult}
           sessions={activeSessions}
           scanForm={{ query: scanQuery, location: scanLocation, vehicle: scanVehicle }}
-          scanActions={{ setQuery: setScanQuery, setLocation: setScanLocation, setVehicle: setScanVehicle, runScan }}
+          scanActions={{ setQuery: setScanQuery, setLocation: setScanLocation, setVehicle: setScanVehicle, runScan, createCaseFromScan }}
+          officerMessage={officerMessage}
         />
       )}
       {role === 'admin' && (
         <AdminView
           badges={filteredBadges}
           allBadges={badges}
-          sessions={activeSessions}
-          scans={scans}
-          cases={cases}
+          sessions={filteredSessions}
+          scans={filteredScans}
+          cases={filteredCases}
           riskByBadge={riskByBadge}
           filters={{ values: filters, setValues: setFilters }}
           selectedBadge={selectedBadge}

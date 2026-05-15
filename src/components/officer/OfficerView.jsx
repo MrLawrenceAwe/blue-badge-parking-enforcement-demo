@@ -1,13 +1,14 @@
-import { Car, QrCode, Search } from 'lucide-react';
+import { Car, FileText, QrCode, Search } from 'lucide-react';
 import { statusLabel } from '../../domain/badges';
 import { isSessionActive } from '../../domain/sessions';
 import { formatDate } from '../../utils/date';
 import { FraudEvents } from '../common/FraudEvents';
 import { SessionCard } from '../common/SessionCard';
 
-export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanActions }) {
+export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanActions, officerMessage }) {
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
+  const canEscalate = scanResult && risk.verdict !== 'valid';
   return (
     <div className="officer-layout">
       <section className="panel scan-panel">
@@ -25,6 +26,13 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanA
         <p>Verification result</p>
         <h2>{risk.verdict === 'valid' ? 'Valid' : risk.verdict === 'suspicious' ? 'Suspicious' : risk.verdict === 'stolen / deactivated' ? 'Stolen / deactivated' : 'Invalid'}</h2>
         <strong>Risk score {risk.score}</strong>
+        {canEscalate && (
+          <button className="secondary-button result-action" onClick={scanActions.createCaseFromScan}>
+            <FileText aria-hidden="true" size={20} />
+            Open enforcement case
+          </button>
+        )}
+        {officerMessage && <p className="result-message" role="status">{officerMessage}</p>}
       </section>
 
       <section className="panel">

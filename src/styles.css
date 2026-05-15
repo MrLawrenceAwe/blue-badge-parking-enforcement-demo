@@ -365,6 +365,7 @@ dd {
 }
 
 .risk-banner,
+.account-status,
 .verification-result {
   border-radius: 8px;
   color: #fff;
@@ -430,6 +431,47 @@ dd {
 .session-form {
   display: grid;
   gap: 4px;
+}
+
+.session-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.stolen-report-form {
+  border: 1px solid #f0a8b0;
+  border-left: 6px solid var(--red);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff7f8;
+  display: grid;
+  gap: 10px;
+}
+
+.checkbox-label {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  color: var(--ink);
+}
+
+.checkbox-label input {
+  width: auto;
+  min-height: auto;
+}
+
+.button-row .danger-button {
+  width: auto;
+}
+
+.result-action {
+  width: fit-content;
+  margin-top: 10px;
+}
+
+.result-message {
+  margin: 0;
+  font-weight: 700;
 }
 
 .session-card,

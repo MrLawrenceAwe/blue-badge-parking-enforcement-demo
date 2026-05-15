@@ -1,10 +1,11 @@
-import { Clock3, FileText, Siren, UsersRound } from 'lucide-react';
+import { Clock3, FileText, UsersRound } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { SessionCard } from '../common/SessionCard';
 import { StatusPill } from '../common/StatusPill';
+import { StolenReportForm } from '../common/StolenReportForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
-export function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions, startSession, reportStolen, sessionMessage }) {
+export function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions, startSession, extendSession, endSession, reportStolen, sessionMessage }) {
   const activeSession = sessions.find((session) => session.badgeId === selectedBadge.id && isSessionActive(session));
   return (
     <div className="page-grid">
@@ -35,12 +36,9 @@ export function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions,
           <h2>Delegated Session</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} />
+        <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
         {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
-        <button className="danger-button" onClick={reportStolen}>
-          <Siren aria-hidden="true" size={21} />
-          Report badge stolen
-        </button>
+        <StolenReportForm reportStolen={reportStolen} />
       </section>
     </div>
   );
