@@ -549,7 +549,7 @@ dd {
   gap: 10px;
 }
 
-.replacement-form {
+.replacement-request-form {
   border: 1px solid #9bbbd1;
   border-left: 6px solid var(--blue);
   border-radius: 8px;
@@ -598,7 +598,7 @@ dd {
 .session-card,
 .scan-card,
 .case-card,
-.record-button,
+.badge-record-button,
 .timeline-item {
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -649,7 +649,7 @@ dd {
   display: block;
 }
 
-.record-button {
+.badge-record-button {
   width: 100%;
   min-height: 68px;
   text-align: left;
@@ -659,12 +659,12 @@ dd {
   gap: 12px;
 }
 
-.record-button.selected {
+.badge-record-button.selected {
   border-color: var(--blue);
   outline: 3px solid #cce1f2;
 }
 
-.record-button small,
+.badge-record-button small,
 .scan-card small,
 .case-card small,
 .timeline-item small {

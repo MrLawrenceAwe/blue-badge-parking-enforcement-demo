@@ -1,5 +1,5 @@
 import { MapPin } from 'lucide-react';
-import { sessionIntegrityState } from '../../domain/sessionAttestation';
+import { sessionIntegrityState } from '../../domain/sessionProofs';
 import { formatTime } from '../../utils/date';
 
 export function SessionCard({ session }) {
