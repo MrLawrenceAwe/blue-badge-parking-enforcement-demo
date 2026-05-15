@@ -177,10 +177,11 @@ h2 {
   border: 1px solid #9bbbd1;
   border-left: 6px solid var(--blue);
   border-radius: 8px;
-  padding: 14px;
+  padding: 12px 14px;
   margin-bottom: 16px;
   display: grid;
   gap: 12px;
+  align-items: start;
 }
 
 .auth-strip span {
@@ -197,6 +198,27 @@ h2 {
 .demo-note {
   margin: 4px 0 0;
   color: var(--muted);
+}
+
+.demo-account-drawer {
+  min-width: 0;
+}
+
+.demo-account-drawer summary {
+  min-height: 48px;
+  border: 2px solid var(--blue);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--blue-dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.demo-account-drawer[open] summary {
+  margin-bottom: 10px;
 }
 
 .demo-account-list {
@@ -241,6 +263,7 @@ h2 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+  min-width: 0;
 }
 
 .auth-strip label {
@@ -293,6 +316,7 @@ h2 {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
+  min-width: 0;
   padding: 16px;
 }
 
@@ -486,15 +510,45 @@ dd {
 
 .session-card {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   margin-top: 12px;
 }
 
-.session-card span {
+.session-card-main,
+.session-lock,
+.session-meta {
+  display: grid;
+  gap: 5px;
+}
+
+.session-location {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   color: var(--muted);
+  line-height: 1.35;
+}
+
+.session-location svg {
+  flex: 0 0 auto;
+}
+
+.session-meta {
+  color: var(--muted);
+}
+
+.session-meta small,
+.session-lock small {
+  display: block;
+}
+
+.session-lock {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.session-lock b {
+  display: block;
 }
 
 .record-button {
@@ -545,9 +599,7 @@ dd {
 }
 
 .compact {
-  max-height: 390px;
-  overflow: auto;
-  padding-right: 4px;
+  min-width: 0;
 }
 
 .plain-text {
@@ -593,6 +645,8 @@ dd {
 
 .table-wrap {
   overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
 }
 
 table {
@@ -619,6 +673,7 @@ tr {
 
 tr:focus,
 button:focus-visible,
+summary:focus-visible,
 input:focus,
 select:focus,
 textarea:focus {
@@ -641,12 +696,12 @@ textarea:focus {
   }
 
   .auth-strip {
-    grid-template-columns: 1fr 2fr;
-    align-items: end;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 0.9fr) minmax(0, 1.4fr);
+    align-items: start;
   }
 
   .auth-strip form {
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) auto;
     align-items: end;
   }
 

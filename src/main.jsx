@@ -434,26 +434,29 @@ function App() {
         <div className="auth-strip-copy">
           <strong>Signed in as {authUser.name}</strong>
           <span>{authUser.email} - {authUser.role}</span>
-          <p className="demo-note">Use the quick demo accounts below to switch between the main user journeys.</p>
+          <p className="demo-note">Use demo accounts to switch journeys when needed.</p>
         </div>
-        <div className="demo-account-list" aria-label="Quick demo accounts">
-          {demoAccountOrder.map((demoRole) => {
-            const demoUser = demoUsers.find((user) => user.role === demoRole);
-            const isActive = authUser.email === demoUser.email;
-            return (
-              <button
-                key={demoUser.email}
-                type="button"
-                className={`demo-account-button${isActive ? ' active' : ''}`}
-                onClick={() => selectDemoUser(demoUser)}
-                aria-pressed={isActive}
-              >
-                <span>{labelForRole(demoUser.role)}</span>
-                <small>{demoUser.email}</small>
-              </button>
-            );
-          })}
-        </div>
+        <details className="demo-account-drawer">
+          <summary>Switch demo account</summary>
+          <div className="demo-account-list" aria-label="Quick demo accounts">
+            {demoAccountOrder.map((demoRole) => {
+              const demoUser = demoUsers.find((user) => user.role === demoRole);
+              const isActive = authUser.email === demoUser.email;
+              return (
+                <button
+                  key={demoUser.email}
+                  type="button"
+                  className={`demo-account-button${isActive ? ' active' : ''}`}
+                  onClick={() => selectDemoUser(demoUser)}
+                  aria-pressed={isActive}
+                >
+                  <span>{labelForRole(demoUser.role)}</span>
+                  <small>{demoUser.email}</small>
+                </button>
+              );
+            })}
+          </div>
+        </details>
         <form
           onSubmit={(event) => {
             event.preventDefault();
