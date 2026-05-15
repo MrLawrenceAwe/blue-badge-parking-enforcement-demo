@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Clock3, FileText, Gauge, QrCode, Search, ShieldAlert, ShieldCheck, Siren } from 'lucide-react';
 import { formatTime } from '../../utils/date';
 import { SessionCard } from '../common/SessionCard';
@@ -26,15 +26,7 @@ export function AdminView({
   suspiciousCases,
   stolenOrSuspendedBadges
 }) {
-  const [filtersOpen, setFiltersOpen] = useState(() => (typeof window === 'undefined' ? true : window.matchMedia('(min-width: 720px)').matches));
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 720px)');
-    const syncFilters = () => setFiltersOpen(mediaQuery.matches);
-    syncFilters();
-    mediaQuery.addEventListener('change', syncFilters);
-    return () => mediaQuery.removeEventListener('change', syncFilters);
-  }, []);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
     <div className="admin-layout">
