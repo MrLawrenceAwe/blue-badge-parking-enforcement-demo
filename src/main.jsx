@@ -625,7 +625,7 @@ function App() {
             <span className="demo-pill">Council demo prototype</span>
           </div>
           <h1>Parking Enforcement System</h1>
-          <p className="hero-note">Interactive concept showing signed badge verification, locked parking sessions, and council enforcement workflows for stakeholder demos.</p>
+          <p className="hero-note">Signed badge checks, locked parking sessions, and council case workflows.</p>
         </div>
         <div className="role-switcher" aria-label="Choose role">
           {[
@@ -656,40 +656,43 @@ function App() {
         <div className="auth-strip-copy">
           <strong>Signed in as {authUser.name}</strong>
           <span>{authUser.email} - {authUser.role}</span>
-          <p className="demo-note">Use demo accounts to switch journeys when needed.</p>
+          <p className="demo-note">Demo account controls.</p>
         </div>
-        <details className="demo-account-drawer" open={demoDrawerOpen} onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}>
-          <summary>Switch demo account</summary>
-          <div className="demo-account-list" aria-label="Quick demo accounts">
-            {demoAccountOrder.map((demoRole) => {
-              const demoUser = demoUsers.find((user) => user.role === demoRole);
-              const isActive = authUser.email === demoUser.email;
-              return (
-                <button
-                  key={demoUser.email}
-                  type="button"
-                  className={`demo-account-button${isActive ? ' active' : ''}`}
-                  onClick={() => selectDemoUser(demoUser)}
-                  aria-pressed={isActive}
-                >
-                  <span>{labelForRole(demoUser.role)}</span>
-                  <small>{demoUser.email}</small>
-                </button>
-              );
-            })}
-          </div>
+        <details className="auth-controls">
+          <summary>Sign in or switch account</summary>
+          <details className="demo-account-drawer" open={demoDrawerOpen} onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}>
+            <summary>Switch demo account</summary>
+            <div className="demo-account-list" aria-label="Quick demo accounts">
+              {demoAccountOrder.map((demoRole) => {
+                const demoUser = demoUsers.find((user) => user.role === demoRole);
+                const isActive = authUser.email === demoUser.email;
+                return (
+                  <button
+                    key={demoUser.email}
+                    type="button"
+                    className={`demo-account-button${isActive ? ' active' : ''}`}
+                    onClick={() => selectDemoUser(demoUser)}
+                    aria-pressed={isActive}
+                  >
+                    <span>{labelForRole(demoUser.role)}</span>
+                    <small>{demoUser.email}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </details>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              signIn(new FormData(event.currentTarget));
+            }}
+          >
+            <label>Email<input name="email" type="email" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} aria-label="Email address" /></label>
+            <label>Password<input name="password" type="password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} aria-label="Password" /></label>
+            <button className="secondary-button" type="submit"><ShieldCheck aria-hidden="true" size={20} /> Sign in</button>
+          </form>
+          {loginError && <p className="login-error" role="alert">{loginError}</p>}
         </details>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            signIn(new FormData(event.currentTarget));
-          }}
-        >
-          <label>Email<input name="email" type="email" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} aria-label="Email address" /></label>
-          <label>Password<input name="password" type="password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} aria-label="Password" /></label>
-          <button className="secondary-button" type="submit"><ShieldCheck aria-hidden="true" size={20} /> Sign in</button>
-        </form>
-        {loginError && <p className="login-error" role="alert">{loginError}</p>}
       </section>
 
       <section className="summary-strip" aria-label="System summary">

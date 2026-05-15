@@ -45,14 +45,14 @@ select:disabled {
 main {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 14px;
 }
 
 .app-header {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
-  padding: 22px 0;
+  gap: 14px;
+  padding: 14px 0 12px;
 }
 
 .title-block {
@@ -97,8 +97,8 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(1.85rem, 3.4vw, 3rem);
-  line-height: 1.03;
+  font-size: clamp(1.75rem, 3vw, 2.65rem);
+  line-height: 1.05;
 }
 
 .hero-note {
@@ -124,7 +124,7 @@ h2 {
 .primary-button,
 .secondary-button,
 .danger-button {
-  min-height: 48px;
+  min-height: 44px;
   border-radius: 6px;
   border: 2px solid var(--blue);
   display: inline-flex;
@@ -172,8 +172,8 @@ h2 {
 .summary-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .auth-strip {
@@ -181,11 +181,11 @@ h2 {
   border: 1px solid #9bbbd1;
   border-left: 6px solid var(--blue);
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
   display: grid;
-  gap: 10px;
-  align-items: start;
+  gap: 8px;
+  align-items: center;
 }
 
 .auth-strip span {
@@ -200,7 +200,7 @@ h2 {
 }
 
 .demo-note {
-  margin: 2px 0 0;
+  margin: 0;
   color: var(--muted);
 }
 
@@ -208,6 +208,7 @@ h2 {
   min-width: 0;
 }
 
+.auth-controls summary,
 .demo-account-drawer summary {
   min-height: 40px;
   border: 2px solid var(--blue);
@@ -219,6 +220,19 @@ h2 {
   align-items: center;
   padding: 8px 12px;
   font-weight: 700;
+}
+
+.auth-controls {
+  min-width: 0;
+}
+
+.auth-controls[open] {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-controls[open] > summary {
+  margin-bottom: 0;
 }
 
 .demo-account-drawer[open] summary {
@@ -263,7 +277,7 @@ h2 {
   background: #f7fbff;
 }
 
-.auth-strip form {
+.auth-controls form {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
@@ -294,25 +308,25 @@ h2 {
   border: 1px solid var(--line);
   border-left: 6px solid var(--blue);
   border-radius: 6px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   display: grid;
-  gap: 4px;
+  gap: 2px;
 }
 
 .metric span {
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .metric strong {
-  font-size: 1.7rem;
+  font-size: 1.55rem;
 }
 
 .page-grid,
 .officer-layout,
 .dashboard-grid {
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .panel,
@@ -321,7 +335,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   min-width: 0;
-  padding: 15px;
+  padding: 14px;
 }
 
 .panel-heading {
@@ -344,7 +358,7 @@ label {
 input,
 select,
 textarea {
-  min-height: 48px;
+  min-height: 44px;
   border: 2px solid #7b8b95;
   border-radius: 4px;
   padding: 10px;
@@ -389,7 +403,7 @@ dt {
 
 dd {
   margin: 0;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .risk-banner,
@@ -404,7 +418,7 @@ dd {
 }
 
 .verification-result {
-  min-height: 210px;
+  min-height: 168px;
   align-content: center;
 }
 
@@ -416,7 +430,7 @@ dd {
 }
 
 .verification-result h2 {
-  font-size: clamp(2rem, 7vw, 4.4rem);
+  font-size: clamp(2rem, 6vw, 3.8rem);
 }
 
 .compact-result h2 {
@@ -425,6 +439,21 @@ dd {
 
 .compact-result p {
   margin-bottom: 2px;
+}
+
+.officer-decision-stack {
+  align-self: start;
+  display: grid;
+  gap: 14px;
+}
+
+.detail-list-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-list-grid > div:first-child,
+.detail-list-grid > div:last-child {
+  grid-column: 1 / -1;
 }
 
 .result-detail {
@@ -550,7 +579,7 @@ dd {
 .timeline-item {
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 12px;
+  padding: 11px;
   background: #fbfcfd;
 }
 
@@ -699,12 +728,12 @@ dd {
 .toolbar {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .admin-filters summary {
-  min-height: 48px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -714,7 +743,7 @@ dd {
 }
 
 .admin-filters[open] summary {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .toolbar-fields {
@@ -739,7 +768,7 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 11px 12px;
+  padding: 10px 12px;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -908,26 +937,15 @@ textarea:focus {
   }
 
   .auth-strip {
-    grid-template-columns: minmax(260px, 0.8fr) minmax(420px, 1.5fr);
-    grid-template-areas:
-      "copy form"
-      "drawer drawer";
-    align-items: start;
+    grid-template-columns: minmax(220px, 1fr) auto;
+    align-items: center;
   }
 
-  .auth-strip-copy {
-    grid-area: copy;
+  .auth-controls[open] {
+    grid-column: 1 / -1;
   }
 
-  .demo-account-drawer {
-    grid-area: drawer;
-  }
-
-  .auth-strip form {
-    grid-area: form;
-  }
-
-  .auth-strip form {
+  .auth-controls form {
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) auto;
     align-items: end;
   }
@@ -942,7 +960,7 @@ textarea:focus {
   }
 
   .officer-layout .panel:last-child {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .digital-badge {
@@ -959,5 +977,15 @@ textarea:focus {
 
   .dashboard-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-layout .panel,
+  .admin-layout .toolbar {
+    padding: 12px 14px;
+  }
+
+  .admin-layout input,
+  .admin-layout select {
+    min-height: 40px;
   }
 }
