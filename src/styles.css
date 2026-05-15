@@ -383,20 +383,20 @@ dd {
   font-size: clamp(2rem, 7vw, 4.4rem);
 }
 
-.green {
+.risk-low {
   background: var(--green);
 }
 
-.amber {
+.risk-watch {
   background: var(--amber);
   color: #101820;
 }
 
-.red {
+.risk-high {
   background: var(--red);
 }
 
-.black {
+.risk-critical {
   background: var(--black);
 }
 
