@@ -12,6 +12,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
   const canEscalate = scanResult && risk.verdict !== 'valid';
+  const isValid = risk.verdict === 'valid';
   return (
     <div className="officer-layout">
       <section className="panel scan-panel">
@@ -32,12 +33,16 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
         <button className="primary-button" onClick={scanActions.runScan}><Search aria-hidden="true" size={21} /> Verify now</button>
       </section>
 
-      <section className={`verification-result ${risk.severity}`} aria-live="polite">
-        <p>Verification result</p>
-        <h2>{risk.verdict === 'valid' ? 'Valid' : risk.verdict === 'suspicious' ? 'Suspicious' : risk.verdict === 'stolen / deactivated' ? 'Stolen / deactivated' : 'Invalid'}</h2>
-        <strong>Risk score {risk.score}</strong>
-        <div className="risk-explanation">
-          {risk.explanation.map((item) => <small key={item}>{item}</small>)}
+      <section className={`verification-result ${risk.severity}${isValid ? ' compact-result' : ''}`} aria-live="polite">
+        <div>
+          <p>Verification result</p>
+          <h2>{isValid ? 'Valid' : risk.verdict === 'suspicious' ? 'Suspicious' : risk.verdict === 'stolen / deactivated' ? 'Stolen / deactivated' : 'Invalid'}</h2>
+        </div>
+        <div className="result-detail">
+          <strong>Risk score {risk.score}</strong>
+          <div className="risk-explanation">
+            {risk.explanation.map((item) => <small key={item}>{item}</small>)}
+          </div>
         </div>
         {canEscalate && (
           <button className="secondary-button result-action" onClick={scanActions.createCaseFromScan}>
