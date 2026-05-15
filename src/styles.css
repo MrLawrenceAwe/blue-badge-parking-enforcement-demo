@@ -35,6 +35,13 @@ button {
   cursor: pointer;
 }
 
+button:disabled,
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 main {
   max-width: 1240px;
   margin: 0 auto;
@@ -243,6 +250,15 @@ h2 {
 .login-error {
   margin: 0;
   color: var(--red);
+  font-weight: 700;
+}
+
+.form-message {
+  border-left: 5px solid var(--blue);
+  background: #e8f2fa;
+  color: var(--ink);
+  margin: 12px 0 0;
+  padding: 10px;
   font-weight: 700;
 }
 

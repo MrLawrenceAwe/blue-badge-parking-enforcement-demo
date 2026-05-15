@@ -77,6 +77,7 @@ const initialSessions = [
     badgeId: 'BB-WCC-104928',
     vehicle: 'LS24 HRT',
     location: 'Oxford Street W1C',
+    gps: '51.5152, -0.1419',
     startedAt: '2026-05-15T14:35:00+01:00',
     durationMins: 180,
     locked: true
@@ -86,6 +87,7 @@ const initialSessions = [
     badgeId: 'BB-SWK-773019',
     vehicle: 'SE22 AEV',
     location: 'Bermondsey Street SE1',
+    gps: '51.5009, -0.0811',
     startedAt: '2026-05-15T12:10:00+01:00',
     durationMins: 240,
     locked: true
@@ -95,6 +97,7 @@ const initialSessions = [
     badgeId: 'BB-CAM-550912',
     vehicle: 'KP72 GRC',
     location: 'Euston Road NW1',
+    gps: '51.5286, -0.1339',
     startedAt: '2026-05-15T15:20:00+01:00',
     durationMins: 120,
     locked: true
@@ -190,6 +193,17 @@ function timestampNow() {
   return new Date().toISOString();
 }
 
+function mockGpsForLocation(location) {
+  const lookup = [
+    ['Oxford Street', '51.5152, -0.1419'],
+    ['Bermondsey Street', '51.5009, -0.0811'],
+    ['Euston Road', '51.5286, -0.1339'],
+    ['Charing Cross', '51.5080, -0.1247'],
+    ['Heathrow', '51.4700, -0.4543']
+  ];
+  return lookup.find(([place]) => location.toLowerCase().includes(place.toLowerCase()))?.[1] ?? '51.5072, -0.1276';
+}
+
 function normaliseScanInput(value) {
   const trimmed = value.trim();
   const qrPrefix = 'bluebadge://verify/';
@@ -221,7 +235,7 @@ function labelForRole(role) {
 function calculateRisk(badge, sessions, scans, query = {}) {
   const events = [];
   if (!badge) {
-    return { score: 100, level: 'auto-suspend / high priority alert', events: ['Unknown badge or vehicle'], colour: 'black' };
+    return { score: 100, level: 'auto-suspend / high priority alert', events: ['Unknown badge or vehicle'], colour: 'red' };
   }
 
   if (badge.status === 'stolen') events.push('Badge used after being reported stolen');
@@ -260,7 +274,7 @@ function calculateRisk(badge, sessions, scans, query = {}) {
   }
   score = Math.min(100, score);
 
-  if (score >= 81) return { score, level: 'auto-suspend / high priority alert', events, colour: badge.status === 'stolen' ? 'black' : 'red' };
+  if (score >= 81) return { score, level: 'auto-suspend / high priority alert', events, colour: ['stolen', 'suspended'].includes(badge.status) ? 'black' : 'red' };
   if (score >= 61) return { score, level: 'officer review', events, colour: 'red' };
   if (score >= 31) return { score, level: 'monitor', events, colour: 'amber' };
   return { score, level: 'normal', events: events.length ? events : ['No active risk events'], colour: 'green' };
@@ -284,6 +298,7 @@ function App() {
   const [caseAssignee, setCaseAssignee] = useState('Unassigned');
   const [caseEvidence, setCaseEvidence] = useState('');
   const [filters, setFilters] = useState({ search: '', risk: 'all' });
+  const [sessionMessage, setSessionMessage] = useState('');
 
   const roleBadges = accessibleBadgesFor(authUser, badges);
   const selectedBadge = roleBadges.find((badge) => badge.id === selectedBadgeId) ?? roleBadges[0] ?? badges[0];
@@ -323,17 +338,25 @@ function App() {
   }
 
   function startSession(formData) {
+    if (sessions.some((session) => session.badgeId === selectedBadge.id && session.locked)) {
+      setSessionMessage('A locked active session already exists for this badge. End-of-session handling would be added in the production workflow.');
+      return false;
+    }
     const startedAt = timestampNow();
+    const location = formData.get('location').toString();
     const session = {
       id: `PS-${Math.floor(24000 + Math.random() * 900)}`,
       badgeId: selectedBadge.id,
       vehicle: formData.get('vehicle').toString().toUpperCase(),
-      location: formData.get('location').toString(),
+      location,
+      gps: mockGpsForLocation(location),
       startedAt,
       durationMins: Number(formData.get('duration')),
       locked: true
     };
     setSessions((current) => [session, ...current]);
+    setSessionMessage('Session started and locked. Arrival time, GPS, vehicle, and duration can no longer be edited.');
+    return true;
   }
 
   function reportStolen() {
@@ -366,7 +389,7 @@ function App() {
       time: scannedAt,
       device
     });
-    const outcome = risk.colour === 'green' ? 'valid' : risk.colour === 'black' ? 'stolen' : 'review';
+    const outcome = risk.colour === 'green' ? 'valid' : risk.colour === 'amber' ? 'review' : risk.colour === 'black' ? 'deactivated' : 'invalid';
     setScans((current) => [
       {
         id: `SC-${90200 + current.length}`,
@@ -509,9 +532,9 @@ function App() {
       </section>
 
       {role === 'holder' && (
-        <HolderView badge={selectedBadge} badges={roleBadges} setSelectedBadgeId={setSelectedBadgeId} sessions={sessions} startSession={startSession} reportStolen={reportStolen} risk={riskByBadge[selectedBadge.id]} />
+        <HolderView badge={selectedBadge} badges={roleBadges} setSelectedBadgeId={setSelectedBadgeId} sessions={sessions} startSession={startSession} reportStolen={reportStolen} risk={riskByBadge[selectedBadge.id]} sessionMessage={sessionMessage} />
       )}
-      {role === 'carer' && <CarerView badges={roleBadges} selectedBadge={selectedBadge} setSelectedBadgeId={setSelectedBadgeId} sessions={sessions} />}
+      {role === 'carer' && <CarerView badges={roleBadges} selectedBadge={selectedBadge} setSelectedBadgeId={setSelectedBadgeId} sessions={sessions} startSession={startSession} reportStolen={reportStolen} sessionMessage={sessionMessage} />}
       {role === 'officer' && (
         <OfficerView
           badge={lastScanResult ? lastScanResult.badge : selectedBadge}
@@ -566,7 +589,7 @@ function Metric({ icon: Icon, label, value }) {
   );
 }
 
-function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession, reportStolen, risk }) {
+function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession, reportStolen, risk, sessionMessage }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id);
   return (
     <div className="page-grid">
@@ -609,26 +632,16 @@ function HolderView({ badge, badges, setSelectedBadgeId, sessions, startSession,
           <h2>Digital Time Clock</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <form
-          className="session-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            startSession(new FormData(event.currentTarget));
-            event.currentTarget.reset();
-          }}
-        >
-          <label>Vehicle registration<input name="vehicle" defaultValue={badge.vehicle} aria-label="Vehicle registration" required /></label>
-          <label>Location text<input name="location" defaultValue="Oxford Street W1C" aria-label="Parking location" required /></label>
-          <label>Session duration<select name="duration" defaultValue="180" aria-label="Session duration"><option value="60">1 hour</option><option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option></select></label>
-          <button type="submit" className="primary-button"><Clock3 aria-hidden="true" size={21} /> Start locked session</button>
-        </form>
+        <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} />
+        {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
         {activeSession && <SessionCard session={activeSession} />}
       </section>
     </div>
   );
 }
 
-function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions }) {
+function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions, startSession, reportStolen, sessionMessage }) {
+  const activeSession = sessions.find((session) => session.badgeId === selectedBadge.id);
   return (
     <div className="page-grid">
       <section className="panel">
@@ -653,7 +666,38 @@ function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions }) {
         <p className="plain-text">Carers can help manage delegated badge access, check the current badge state, and confirm the locked parking session details without changing arrival time after start.</p>
         {sessions.filter((session) => session.badgeId === selectedBadge.id).map((session) => <SessionCard key={session.id} session={session} />)}
       </section>
+      <section className="panel">
+        <div className="panel-heading">
+          <h2>Delegated Session</h2>
+          <Clock3 aria-hidden="true" />
+        </div>
+        <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} />
+        {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
+        <button className="danger-button" onClick={reportStolen}>
+          <Siren aria-hidden="true" size={21} />
+          Report badge stolen
+        </button>
+      </section>
     </div>
+  );
+}
+
+function SessionStartForm({ badge, activeSession, startSession }) {
+  return (
+    <form
+      className="session-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const started = startSession(new FormData(event.currentTarget));
+        if (started) event.currentTarget.reset();
+      }}
+    >
+      <label>Vehicle registration<input name="vehicle" defaultValue={badge.vehicle} aria-label="Vehicle registration" required disabled={Boolean(activeSession)} /></label>
+      <label>Location text<input name="location" defaultValue="Oxford Street W1C" aria-label="Parking location" required disabled={Boolean(activeSession)} /></label>
+      <label>GPS capture<input value={activeSession?.gps ?? 'Captured automatically when session starts'} aria-label="GPS coordinates captured when session starts" readOnly /></label>
+      <label>Session duration<select name="duration" defaultValue="180" aria-label="Session duration" disabled={Boolean(activeSession)}><option value="60">1 hour</option><option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option></select></label>
+      <button type="submit" className="primary-button" disabled={Boolean(activeSession)}><Clock3 aria-hidden="true" size={21} /> Start locked session</button>
+    </form>
   );
 }
 
@@ -825,6 +869,7 @@ function SessionCard({ session }) {
       <div>
         <strong>{session.vehicle}</strong>
         <span><MapPin aria-hidden="true" size={16} /> {session.location}</span>
+        <small>GPS {session.gps}</small>
       </div>
       <div>
         <small>Arrival locked</small>
