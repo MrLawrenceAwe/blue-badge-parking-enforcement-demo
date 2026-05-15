@@ -15,7 +15,17 @@ import { AdminView } from './components/admin/AdminView';
 import { Metric } from './components/common/Metric';
 import { HolderView } from './components/holder/HolderView';
 import { OfficerView } from './components/officer/OfficerView';
-import { demoAccountOrder, demoUsers, initialBadges, initialCases, initialScans, initialSessions } from './data/demoData';
+import {
+  demoAccountOrder,
+  demoUsers,
+  initialAuditEvents,
+  initialBadges,
+  initialCases,
+  initialNotifications,
+  initialReplacementRequests,
+  initialScans,
+  initialSessions
+} from './data/demoData';
 import {
   accessibleBadgesFor,
   availableDemoRolesFor,
@@ -26,7 +36,7 @@ import {
   vehicleSearchKey
 } from './domain/badges';
 import { mockGpsForLocation } from './domain/locations';
-import { evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForRisk } from './domain/risk';
+import { defaultRiskRules, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForRisk } from './domain/risk';
 import { parseScanInput } from './domain/scanInput';
 import { createSessionId, createSignedSessionRecord, verifyBadgeToken } from './domain/sessionAttestation';
 import { buildSessionPayload, isSessionActive } from './domain/sessions';
@@ -43,16 +53,30 @@ function App() {
   const [sessions, setSessions] = useState(() => initialSessions.map((session) => ({ ...session, locked: true })));
   const [scans, setScans] = useState(initialScans);
   const [cases, setCases] = useState(initialCases);
+  const [auditEvents, setAuditEvents] = useState(initialAuditEvents);
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const [replacementRequests, setReplacementRequests] = useState(initialReplacementRequests);
+  const [riskRules, setRiskRules] = useState(defaultRiskRules);
   const [selectedBadgeId, setSelectedBadgeId] = useState('BB-WCC-104928');
   const [scanQuery, setScanQuery] = useState('BB-WCC-104928');
   const [scanLocation, setScanLocation] = useState('Oxford Street W1C');
   const [scanVehicle, setScanVehicle] = useState('LS24 HRT');
+  const [scanEvidence, setScanEvidence] = useState({
+    contravention: 'No action',
+    action: 'No action',
+    officerNote: '',
+    vehiclePhoto: '',
+    badgePhoto: ''
+  });
   const [lastScanResult, setLastScanResult] = useState(null);
   const [caseNote, setCaseNote] = useState('');
   const [caseStatus, setCaseStatus] = useState('Open');
   const [caseAssignee, setCaseAssignee] = useState('Unassigned');
   const [caseEvidence, setCaseEvidence] = useState('');
+  const [caseDueDate, setCaseDueDate] = useState('');
+  const [caseClosureReason, setCaseClosureReason] = useState('');
   const [caseNoteDrafts, setCaseNoteDrafts] = useState({});
+  const [replacementForm, setReplacementForm] = useState({ reference: '', temporaryPermit: 'Requested' });
   const [filters, setFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
   const [sessionMessage, setSessionMessage] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
@@ -83,14 +107,14 @@ function App() {
   const openCases = cases.filter((caseRecord) => caseRecord.status !== 'Resolved');
 
   const riskByBadge = useMemo(() => {
-    return Object.fromEntries(badges.map((badge) => [badge.id, evaluateBadgeRisk(badge, sessions, scans)]));
-  }, [badges, sessions, scans]);
+    return Object.fromEntries(badges.map((badge) => [badge.id, evaluateBadgeRisk(badge, sessions, scans, {}, riskRules)]));
+  }, [badges, sessions, scans, riskRules]);
 
   const officerRisk = lastScanResult?.risk ?? evaluateBadgeRisk(selectedBadge, sessions, scans, {
     vehicle: normaliseVehicle(scanVehicle),
     location: scanLocation,
     time: timestampNow()
-  });
+  }, riskRules);
 
   function signIn(formData) {
     const email = formData.get('email').toString().trim().toLowerCase();
@@ -112,6 +136,34 @@ function App() {
     setLastScanResult(null);
     setLoginError('');
     setOfficerMessage('');
+  }
+
+  function appendAuditEvent({ badgeId, type, actor = authUser.name, detail }) {
+    setAuditEvents((current) => [
+      {
+        id: `AUD-${1000 + current.length + 1}`,
+        badgeId,
+        type,
+        actor,
+        time: timestampNow(),
+        detail
+      },
+      ...current
+    ]);
+  }
+
+  function queueNotification({ badgeId, recipient, channel = 'Email', message }) {
+    setNotifications((current) => [
+      {
+        id: `NOT-${1000 + current.length + 1}`,
+        badgeId,
+        recipient,
+        channel,
+        time: timestampNow(),
+        message
+      },
+      ...current
+    ]);
   }
 
   async function startSession(formData) {
@@ -141,6 +193,11 @@ function App() {
       })
     });
     setSessions((current) => [session, ...current]);
+    appendAuditEvent({
+      badgeId: selectedBadge.id,
+      type: 'Session started',
+      detail: `Locked session ${session.id} started at ${location} for ${session.durationMins} minutes.`
+    });
     setSessionMessage('Session started and locked. Arrival time, GPS, vehicle, and duration are bound to a signed demo attestation and will flag as tampered if changed.');
     return true;
   }
@@ -160,6 +217,11 @@ function App() {
       durationMins: Math.min(session.durationMins + extraMins, 240)
     });
     setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? updatedSession : sessionRecord)));
+    appendAuditEvent({
+      badgeId: session.badgeId,
+      type: 'Session extended',
+      detail: `Session ${sessionId} extended to ${updatedSession.durationMins} minutes.`
+    });
     setSessionMessage(updatedSession.durationMins === session.durationMins
       ? 'This session is already at the maximum 4 hour duration.'
       : 'Session extended and re-signed. The original arrival details remain locked.');
@@ -176,6 +238,11 @@ function App() {
       return;
     }
     setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? { ...sessionRecord, endedAt: timestampNow() } : sessionRecord)));
+    appendAuditEvent({
+      badgeId: session.badgeId,
+      type: 'Session ended',
+      detail: `Session ${sessionId} ended by ${authUser.name}.`
+    });
     setSessionMessage('Session ended. The signed arrival record remains available for enforcement audit.');
   }
 
@@ -200,11 +267,67 @@ function App() {
         title: 'Badge reported stolen by holder',
         status: 'High priority',
         assignedTo: 'Fraud Team A',
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        closureReason: '',
         notes: [`Immediate digital deactivation triggered from holder portal. Details: ${details}. Contact: ${contact}.`],
-        evidence: 'Holder report with confirmed deactivation'
+        evidence: 'Holder report with confirmed deactivation',
+        evidenceItems: [
+          { type: 'Holder report', reference: contact, addedBy: authUser.name, addedAt: timestampNow() }
+        ]
       },
       ...current
     ]);
+    appendAuditEvent({
+      badgeId: selectedBadge.id,
+      type: 'Badge deactivated',
+      detail: `Holder/carer stolen report confirmed. Contact: ${contact}.`
+    });
+    queueNotification({
+      badgeId: selectedBadge.id,
+      recipient: selectedBadge.email,
+      message: 'Your badge has been deactivated after a stolen badge report. A fraud review case has been opened.'
+    });
+    return true;
+  }
+
+  function requestReplacementBadge(formData) {
+    if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role || !authUser.badgeIds.includes(selectedBadge.id)) {
+      setSessionMessage('Only the holder or delegated carer for this badge can request a replacement in the demo.');
+      return false;
+    }
+    if (selectedBadge.status !== 'stolen') {
+      setSessionMessage('Replacement requests are available after a badge has been reported stolen.');
+      return false;
+    }
+    const reference = formData.get('reference').toString().trim();
+    const temporaryPermit = formData.get('temporaryPermit').toString();
+    if (!reference) {
+      setSessionMessage('Add a crime, loss, or council reference before requesting a replacement.');
+      return false;
+    }
+    setReplacementRequests((current) => [
+      {
+        id: `REP-${1000 + current.length + 1}`,
+        badgeId: selectedBadge.id,
+        status: 'Pending evidence review',
+        requestedAt: timestampNow(),
+        reference,
+        temporaryPermit
+      },
+      ...current
+    ]);
+    appendAuditEvent({
+      badgeId: selectedBadge.id,
+      type: 'Replacement requested',
+      detail: `Replacement requested with reference ${reference}; temporary permit ${temporaryPermit.toLowerCase()}.`
+    });
+    queueNotification({
+      badgeId: selectedBadge.id,
+      recipient: selectedBadge.email,
+      message: `Replacement request received. Reference: ${reference}.`
+    });
+    setReplacementForm({ reference: '', temporaryPermit: 'Requested' });
+    setSessionMessage('Replacement request recorded and notification queued.');
     return true;
   }
 
@@ -226,10 +349,20 @@ function App() {
     setCases((current) =>
       current.map((caseRecord) =>
         caseRecord.badgeId === selectedBadge.id && caseRecord.status !== 'Resolved'
-          ? { ...caseRecord, status: 'Resolved', notes: [...caseRecord.notes, `Admin reactivation review completed: ${reviewNote}`] }
+          ? { ...caseRecord, status: 'Resolved', closureReason: 'Reactivated after review', notes: [...caseRecord.notes, `Admin reactivation review completed: ${reviewNote}`] }
           : caseRecord
       )
     );
+    appendAuditEvent({
+      badgeId: selectedBadge.id,
+      type: 'Badge reactivated',
+      detail: `Admin review completed: ${reviewNote}.`
+    });
+    queueNotification({
+      badgeId: selectedBadge.id,
+      recipient: selectedBadge.email,
+      message: `Badge ${selectedBadge.id} has been reactivated after council review.`
+    });
     setAdminMessage(`Badge ${selectedBadge.id} reactivated after admin review.`);
     setCaseNote('');
   }
@@ -261,7 +394,7 @@ function App() {
         gps: observedGps,
         time: scannedAt,
         device
-      }).verdict
+      }, riskRules).verdict
       : 'invalid';
     const risk = evaluateBadgeRisk(badge, sessions, scans, {
       vehicle: observedVehicle,
@@ -270,11 +403,12 @@ function App() {
       time: scannedAt,
       device,
       includeCurrentFailure: predictedOutcome !== 'valid'
-    });
+    }, riskRules);
 
+    const scanId = `SC-${90200 + scans.length}`;
     setScans((current) => [
       {
-        id: `SC-${90200 + current.length}`,
+        id: scanId,
         badgeId: badge?.id ?? scanInput.value,
         vehicle: observedVehicle,
         location: scanLocation,
@@ -282,7 +416,15 @@ function App() {
         officer: 'EO Current User',
         time: scannedAt,
         device,
-        outcome: scanOutcomeForRisk(risk)
+        outcome: scanOutcomeForRisk(risk),
+        contravention: scanEvidence.contravention,
+        action: scanEvidence.action,
+        officerNote: scanEvidence.officerNote,
+        evidenceItems: [
+          scanEvidence.vehiclePhoto && { type: 'Vehicle photo', reference: scanEvidence.vehiclePhoto, addedBy: 'EO Current User', addedAt: scannedAt },
+          scanEvidence.badgePhoto && { type: 'Badge photo', reference: scanEvidence.badgePhoto, addedBy: 'EO Current User', addedAt: scannedAt },
+          scanEvidence.officerNote && { type: 'Officer note', reference: scanEvidence.officerNote, addedBy: 'EO Current User', addedAt: scannedAt }
+        ].filter(Boolean)
       },
       ...current
     ]);
@@ -292,7 +434,15 @@ function App() {
       query: verifiedQrPayload?.badgeId ?? scanInput.value,
       vehicle: observedVehicle,
       location: scanLocation,
-      scannedAt
+      scannedAt,
+      scanId,
+      evidence: scanEvidence
+    });
+    appendAuditEvent({
+      badgeId: badge?.id ?? scanInput.value,
+      type: 'Officer scan',
+      actor: 'EO Current User',
+      detail: `${scanOutcomeForRisk(risk)} scan at ${scanLocation}. Action: ${scanEvidence.action}.`
     });
     if (badge) setSelectedBadgeId(badge.id);
     setOfficerMessage('');
@@ -307,22 +457,41 @@ function App() {
 
   function addCase() {
     const risk = riskByBadge[selectedBadge.id];
+    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === selectedBadge.id && caseRecord.status !== 'Resolved');
+    if (duplicateOpenCase) {
+      setAdminMessage(`Open case ${duplicateOpenCase.id} already exists for ${selectedBadge.id}. Add evidence or notes to that case instead of creating a duplicate.`);
+      return;
+    }
+    const caseId = `CASE-${4200 + cases.length}`;
     setCases((current) => [
       {
-        id: `CASE-${4200 + current.length}`,
+        id: caseId,
         badgeId: selectedBadge.id,
         title: `${selectedBadge.holder} - ${risk.level}`,
         status: risk.score >= 81 && caseStatus === 'Open' ? 'High priority' : caseStatus,
         assignedTo: caseAssignee,
+        dueDate: caseDueDate,
+        closureReason: caseClosureReason,
         notes: [caseNote || 'Case opened from admin dashboard.'],
-        evidence: caseEvidence || 'Evidence upload pending'
+        evidence: caseEvidence || 'Evidence upload pending',
+        evidenceItems: caseEvidence
+          ? [{ type: 'Admin evidence', reference: caseEvidence, addedBy: authUser.name, addedAt: timestampNow() }]
+          : []
       },
       ...current
     ]);
+    appendAuditEvent({
+      badgeId: selectedBadge.id,
+      type: 'Case opened',
+      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && caseStatus === 'Open' ? 'High priority' : caseStatus}.`
+    });
     setCaseNote('');
     setCaseStatus('Open');
     setCaseAssignee('Unassigned');
     setCaseEvidence('');
+    setCaseDueDate('');
+    setCaseClosureReason('');
+    setAdminMessage(`Case ${caseId} opened for ${selectedBadge.id}.`);
   }
 
   function createCaseFromScan() {
@@ -336,32 +505,75 @@ function App() {
     }
     const badgeId = lastScanResult.badge?.id ?? lastScanResult.query;
     const risk = lastScanResult.risk;
+    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === badgeId && caseRecord.status !== 'Resolved');
+    if (duplicateOpenCase) {
+      setOfficerMessage(`Open case ${duplicateOpenCase.id} already exists. The scan has been kept in the audit trail.`);
+      return;
+    }
+    const caseId = `CASE-${4200 + cases.length}`;
     setCases((current) => [
       {
-        id: `CASE-${4200 + current.length}`,
+        id: caseId,
         badgeId,
         title: `Officer scan escalation - ${risk.level}`,
         status: risk.score >= 81 ? 'High priority' : 'Officer review',
         assignedTo: risk.score >= 81 ? 'Fraud Team A' : 'Duty review team',
+        dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        closureReason: '',
         notes: [
-          `Officer scan at ${lastScanResult.location} for vehicle ${lastScanResult.vehicle}. Verdict: ${risk.verdict}. Alerts: ${risk.events.join('; ')}.`
+          `Officer scan at ${lastScanResult.location} for vehicle ${lastScanResult.vehicle}. Verdict: ${risk.verdict}. Action: ${lastScanResult.evidence.action}. Contravention: ${lastScanResult.evidence.contravention}. Alerts: ${risk.events.join('; ')}.`
         ],
-        evidence: 'Officer scan log'
+        evidence: `Officer scan log ${lastScanResult.scanId}`,
+        evidenceItems: [
+          { type: 'Scan log', reference: lastScanResult.scanId, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt },
+          lastScanResult.evidence.vehiclePhoto && { type: 'Vehicle photo', reference: lastScanResult.evidence.vehiclePhoto, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt },
+          lastScanResult.evidence.badgePhoto && { type: 'Badge photo', reference: lastScanResult.evidence.badgePhoto, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt },
+          lastScanResult.evidence.officerNote && { type: 'Officer note', reference: lastScanResult.evidence.officerNote, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt }
+        ].filter(Boolean)
       },
       ...current
     ]);
-    setOfficerMessage(`Enforcement case opened for ${badgeId}.`);
+    appendAuditEvent({
+      badgeId,
+      type: 'Case opened',
+      actor: 'EO Current User',
+      detail: `Officer opened ${caseId} from scan ${lastScanResult.scanId}.`
+    });
+    setOfficerMessage(`Enforcement case ${caseId} opened for ${badgeId}.`);
   }
 
   function updateCase(caseId, caseUpdates) {
-    setCases((current) => current.map((caseRecord) => (caseRecord.id === caseId ? { ...caseRecord, ...caseUpdates } : caseRecord)));
+    const caseRecord = cases.find((record) => record.id === caseId);
+    setCases((current) => current.map((record) => (record.id === caseId ? { ...record, ...caseUpdates } : record)));
+    const auditedKeys = Object.keys(caseUpdates).filter((key) => ['status', 'dueDate', 'evidence', 'evidenceItems'].includes(key));
+    if (caseRecord && auditedKeys.length) {
+      appendAuditEvent({
+        badgeId: caseRecord.badgeId,
+        type: 'Case updated',
+        detail: `${caseId} updated: ${auditedKeys.join(', ')}.`
+      });
+    }
   }
 
   function appendCaseNote(caseId) {
     const note = caseNoteDrafts[caseId]?.trim();
     if (!note) return;
-    setCases((current) => current.map((caseRecord) => (caseRecord.id === caseId ? { ...caseRecord, notes: [...caseRecord.notes, note] } : caseRecord)));
+    const caseRecord = cases.find((record) => record.id === caseId);
+    setCases((current) => current.map((record) => (record.id === caseId ? { ...record, notes: [...record.notes, note] } : record)));
+    if (caseRecord) {
+      appendAuditEvent({
+        badgeId: caseRecord.badgeId,
+        type: 'Case note added',
+        detail: `${caseId}: ${note}`
+      });
+    }
     setCaseNoteDrafts((current) => ({ ...current, [caseId]: '' }));
+  }
+
+  function updateRiskRule(field, value) {
+    const numericValue = Number(value);
+    setRiskRules((current) => ({ ...current, [field]: numericValue }));
+    setAdminMessage(`Risk rule updated: ${field} is now ${numericValue}.`);
   }
 
   const filteredBadges = badges.filter((badge) => {
@@ -487,6 +699,10 @@ function App() {
           extendSession={extendSession}
           endSession={endSession}
           reportStolen={reportStolen}
+          requestReplacementBadge={requestReplacementBadge}
+          replacementForm={{ values: replacementForm, setValues: setReplacementForm }}
+          replacementRequests={replacementRequests.filter((request) => request.badgeId === selectedBadge.id)}
+          notifications={notifications.filter((notification) => notification.badgeId === selectedBadge.id)}
           risk={riskByBadge[selectedBadge.id]}
           sessionMessage={sessionMessage}
         />
@@ -501,6 +717,10 @@ function App() {
           extendSession={extendSession}
           endSession={endSession}
           reportStolen={reportStolen}
+          requestReplacementBadge={requestReplacementBadge}
+          replacementForm={{ values: replacementForm, setValues: setReplacementForm }}
+          replacementRequests={replacementRequests.filter((request) => request.badgeId === selectedBadge.id)}
+          notifications={notifications.filter((notification) => notification.badgeId === selectedBadge.id)}
           sessionMessage={sessionMessage}
         />
       )}
@@ -511,6 +731,7 @@ function App() {
           scanResult={lastScanResult}
           sessions={activeSessions}
           scanForm={{ query: scanQuery, location: scanLocation, vehicle: scanVehicle }}
+          scanEvidence={{ values: scanEvidence, setValues: setScanEvidence }}
           scanActions={{ setQuery: setScanQuery, setLocation: setScanLocation, setVehicle: setScanVehicle, runScan, createCaseFromScan }}
           officerMessage={officerMessage}
         />
@@ -533,15 +754,24 @@ function App() {
             assignee: caseAssignee,
             setAssignee: setCaseAssignee,
             evidence: caseEvidence,
-            setEvidence: setCaseEvidence
+            setEvidence: setCaseEvidence,
+            dueDate: caseDueDate,
+            setDueDate: setCaseDueDate,
+            closureReason: caseClosureReason,
+            setClosureReason: setCaseClosureReason
           }}
           caseNoteDrafts={{ values: caseNoteDrafts, setValues: setCaseNoteDrafts }}
+          auditEvents={auditEvents}
+          notifications={notifications}
+          replacementRequests={replacementRequests}
+          riskRules={riskRules}
           actions={{
             selectBadge: setSelectedBadgeId,
             addCase,
             updateCase,
             appendCaseNote,
-            reactivateBadge: reactivateBadgeAfterReview
+            reactivateBadge: reactivateBadgeAfterReview,
+            updateRiskRule
           }}
           adminMessage={adminMessage}
           suspiciousCases={suspiciousCases}

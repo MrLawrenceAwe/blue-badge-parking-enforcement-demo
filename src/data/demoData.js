@@ -138,8 +138,13 @@ export const initialCases = [
     title: 'Reported stolen badge scanned in central zone',
     status: 'High priority',
     assignedTo: 'Fraud Team A',
+    dueDate: '2026-05-16',
+    closureReason: '',
     notes: ['Holder reported theft at 09:40. Officer scan confirmed use at 15:58.'],
-    evidence: 'Photo, scan log, officer statement'
+    evidence: 'Photo, scan log, officer statement',
+    evidenceItems: [
+      { type: 'Scan log', reference: 'SC-90183', addedBy: 'EO Chen', addedAt: '2026-05-15T15:58:00+01:00' }
+    ]
   },
   {
     id: 'CASE-4181',
@@ -147,9 +152,28 @@ export const initialCases = [
     title: 'Repeated long stays under review',
     status: 'Officer review',
     assignedTo: 'Southwark Admin',
+    dueDate: '2026-05-18',
+    closureReason: '',
     notes: ['Three sessions over four hours this week.'],
-    evidence: 'Session history reference'
+    evidence: 'Session history reference',
+    evidenceItems: [
+      { type: 'Session history', reference: 'PS-23019', addedBy: 'System', addedAt: '2026-05-15T16:05:00+01:00' }
+    ]
   }
+];
+
+export const initialAuditEvents = [
+  { id: 'AUD-1001', badgeId: 'BB-WCC-104928', type: 'Session started', actor: 'Amelia Hart', time: timestampMinutesAgo(25), detail: 'Locked parking session PS-23018 started at Oxford Street W1C.' },
+  { id: 'AUD-1002', badgeId: 'BB-CAM-550912', type: 'Stolen scan', actor: 'EO Chen', time: '2026-05-15T15:58:00+01:00', detail: 'Reported stolen badge scanned at Euston Road NW1.' },
+  { id: 'AUD-1003', badgeId: 'BB-SWK-773019', type: 'Case opened', actor: 'Southwark Admin', time: '2026-05-15T16:05:00+01:00', detail: 'Repeated long-stay case opened for review.' }
+];
+
+export const initialNotifications = [
+  { id: 'NOT-1001', badgeId: 'BB-CAM-550912', recipient: 'grace.patel@example.test', channel: 'Email', time: '2026-05-15T16:00:00+01:00', message: 'Your badge was deactivated after being reported stolen.' }
+];
+
+export const initialReplacementRequests = [
+  { id: 'REP-1001', badgeId: 'BB-CAM-550912', status: 'Pending evidence review', requestedAt: '2026-05-15T16:02:00+01:00', reference: 'CRN-2026-5100', temporaryPermit: 'Pending' }
 ];
 
 export const demoUsers = [

@@ -5,7 +5,21 @@ import { StatusPill } from '../common/StatusPill';
 import { StolenReportForm } from '../common/StolenReportForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
-export function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions, startSession, extendSession, endSession, reportStolen, sessionMessage }) {
+export function CarerView({
+  badges,
+  selectedBadge,
+  setSelectedBadgeId,
+  sessions,
+  startSession,
+  extendSession,
+  endSession,
+  reportStolen,
+  requestReplacementBadge,
+  replacementForm,
+  replacementRequests,
+  notifications,
+  sessionMessage
+}) {
   const activeSession = sessions.find((session) => session.badgeId === selectedBadge.id && isSessionActive(session));
   return (
     <div className="page-grid">
@@ -30,6 +44,13 @@ export function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions,
         </div>
         <p className="plain-text">Carers can help manage delegated badge access, check the current badge state, and confirm the locked parking session details without changing arrival time after start.</p>
         {sessions.filter((session) => session.badgeId === selectedBadge.id).map((session) => <SessionCard key={session.id} session={session} />)}
+        <div className="timeline-list">
+          <h3>Notifications</h3>
+          {notifications.map((notification) => (
+            <small key={notification.id}>{notification.channel} at {new Date(notification.time).toLocaleString('en-GB')}: {notification.message}</small>
+          ))}
+          {!notifications.length && <small>No notifications for this badge in the demo.</small>}
+        </div>
       </section>
       <section className="panel">
         <div className="panel-heading">
@@ -39,6 +60,23 @@ export function CarerView({ badges, selectedBadge, setSelectedBadgeId, sessions,
         <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
         {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
         <StolenReportForm reportStolen={reportStolen} />
+        {selectedBadge.status === 'stolen' && (
+          <form
+            className="replacement-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              requestReplacementBadge(new FormData(event.currentTarget));
+            }}
+          >
+            <h3>Replacement request</h3>
+            <label>Crime, loss, or council reference<input name="reference" value={replacementForm.values.reference} onChange={(event) => replacementForm.setValues((current) => ({ ...current, reference: event.target.value }))} required /></label>
+            <label>Temporary permit<select name="temporaryPermit" value={replacementForm.values.temporaryPermit} onChange={(event) => replacementForm.setValues((current) => ({ ...current, temporaryPermit: event.target.value }))}><option>Requested</option><option>Not required</option><option>Pending</option></select></label>
+            <button className="secondary-button" type="submit">Request replacement</button>
+            {replacementRequests.map((request) => (
+              <small key={request.id}>{request.id}: {request.status} - {request.reference}</small>
+            ))}
+          </form>
+        )}
       </section>
     </div>
   );

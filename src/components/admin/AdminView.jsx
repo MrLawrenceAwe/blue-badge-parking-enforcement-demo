@@ -16,6 +16,10 @@ export function AdminView({
   selectedBadge,
   caseForm,
   caseNoteDrafts,
+  auditEvents,
+  notifications,
+  replacementRequests,
+  riskRules,
   actions,
   adminMessage,
   suspiciousCases,
@@ -69,6 +73,8 @@ export function AdminView({
           <div className="case-fields">
             <label>Status<select value={caseForm.status} onChange={(event) => caseForm.setStatus(event.target.value)}>{caseStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
             <label>Assigned to<input value={caseForm.assignee} onChange={(event) => caseForm.setAssignee(event.target.value)} aria-label="Assigned case officer or team" /></label>
+            <label>Due date<input type="date" value={caseForm.dueDate} onChange={(event) => caseForm.setDueDate(event.target.value)} aria-label="Case due date" /></label>
+            <label>Closure reason<input value={caseForm.closureReason} onChange={(event) => caseForm.setClosureReason(event.target.value)} placeholder="Required when resolving" aria-label="Closure reason" /></label>
           </div>
           <textarea value={caseForm.note} onChange={(event) => caseForm.setNote(event.target.value)} aria-label="Case note" placeholder="Add officer note, evidence reference, or review outcome" />
           <label>Evidence reference<input value={caseForm.evidence} onChange={(event) => caseForm.setEvidence(event.target.value)} placeholder="Photo, scan log, witness note, file reference" aria-label="Evidence reference" /></label>
@@ -83,17 +89,47 @@ export function AdminView({
                 <strong>{caseRecord.id}: {caseRecord.title}</strong>
                 <label>Status<select value={caseRecord.status} onChange={(event) => actions.updateCase(caseRecord.id, { status: event.target.value })}>{caseStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
                 <label>Assigned to<input value={caseRecord.assignedTo} onChange={(event) => actions.updateCase(caseRecord.id, { assignedTo: event.target.value })} aria-label={`Assignee for ${caseRecord.id}`} /></label>
+                <div className="case-fields">
+                  <label>Due date<input type="date" value={caseRecord.dueDate ?? ''} onChange={(event) => actions.updateCase(caseRecord.id, { dueDate: event.target.value })} aria-label={`Due date for ${caseRecord.id}`} /></label>
+                  <label>Closure reason<input value={caseRecord.closureReason ?? ''} onChange={(event) => actions.updateCase(caseRecord.id, { closureReason: event.target.value })} aria-label={`Closure reason for ${caseRecord.id}`} /></label>
+                </div>
                 <div className="case-notes">
                   <strong>Notes</strong>
                   {caseRecord.notes.map((note, index) => <small key={`${caseRecord.id}-note-${index}`}>{note}</small>)}
                 </div>
+                <div className="case-notes">
+                  <strong>Evidence metadata</strong>
+                  {(caseRecord.evidenceItems ?? []).map((item, index) => <small key={`${caseRecord.id}-evidence-${index}`}>{item.type}: {item.reference} - {item.addedBy}</small>)}
+                  {!(caseRecord.evidenceItems ?? []).length && <small>No structured evidence metadata yet.</small>}
+                </div>
                 <label>Add note<textarea value={caseNoteDrafts.values[caseRecord.id] ?? ''} onChange={(event) => caseNoteDrafts.setValues((current) => ({ ...current, [caseRecord.id]: event.target.value }))} aria-label={`Add note to ${caseRecord.id}`} placeholder="Officer update, holder contact, evidence summary" /></label>
                 <button className="secondary-button" type="button" onClick={() => actions.appendCaseNote(caseRecord.id)}><FileText aria-hidden="true" size={18} /> Add note</button>
                 <small>{caseRecord.evidence}</small>
-                <label>Upload evidence<input type="file" onChange={(event) => actions.updateCase(caseRecord.id, { evidence: event.target.files?.[0]?.name || caseRecord.evidence })} aria-label={`Upload evidence for ${caseRecord.id}`} /></label>
+                <label>Upload evidence<input type="file" onChange={(event) => {
+                  const fileName = event.target.files?.[0]?.name;
+                  if (!fileName) return;
+                  actions.updateCase(caseRecord.id, {
+                    evidence: fileName,
+                    evidenceItems: [
+                      ...(caseRecord.evidenceItems ?? []),
+                      { type: 'Uploaded file', reference: fileName, addedBy: 'Council Admin', addedAt: new Date().toISOString() }
+                    ]
+                  });
+                }} aria-label={`Upload evidence for ${caseRecord.id}`} /></label>
               </article>
             ))}
           </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel-heading"><h2>Council Risk Rules</h2><Gauge aria-hidden="true" /></div>
+          <div className="case-fields">
+            <label>High risk threshold<input type="number" min="1" max="100" value={riskRules.highRiskThreshold} onChange={(event) => actions.updateRiskRule('highRiskThreshold', event.target.value)} /></label>
+            <label>Review threshold<input type="number" min="1" max="100" value={riskRules.reviewThreshold} onChange={(event) => actions.updateRiskRule('reviewThreshold', event.target.value)} /></label>
+            <label>Monitor threshold<input type="number" min="1" max="100" value={riskRules.monitorThreshold} onChange={(event) => actions.updateRiskRule('monitorThreshold', event.target.value)} /></label>
+            <label>Close scan minutes<input type="number" min="5" max="240" value={riskRules.closeScanMinutes} onChange={(event) => actions.updateRiskRule('closeScanMinutes', event.target.value)} /></label>
+          </div>
+          <p className="plain-text">Risk scores recalculate immediately using the configured thresholds and the explanation shown to officers.</p>
         </div>
 
         <div className="panel">
@@ -138,6 +174,47 @@ export function AdminView({
               </button>
             ))}
             {!stolenOrSuspendedBadges.length && <p className="plain-text">No stolen or suspended badges in the current mock dataset.</p>}
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel-heading"><h2>Audit Timeline</h2><FileText aria-hidden="true" /></div>
+          <div className="timeline-list">
+            {auditEvents.map((event) => (
+              <article key={event.id} className="timeline-item">
+                <strong>{event.type}</strong>
+                <span>{event.badgeId} - {event.actor}</span>
+                <small>{formatTime(event.time)} - {event.detail}</small>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel-heading"><h2>Holder Notifications</h2><ShieldCheck aria-hidden="true" /></div>
+          <div className="timeline-list">
+            {notifications.map((notification) => (
+              <article key={notification.id} className="timeline-item">
+                <strong>{notification.recipient}</strong>
+                <span>{notification.badgeId} - {notification.channel}</span>
+                <small>{formatTime(notification.time)} - {notification.message}</small>
+              </article>
+            ))}
+            {!notifications.length && <p className="plain-text">No queued notifications.</p>}
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel-heading"><h2>Replacement Requests</h2><Siren aria-hidden="true" /></div>
+          <div className="timeline-list">
+            {replacementRequests.map((request) => (
+              <article key={request.id} className="timeline-item">
+                <strong>{request.id}: {request.status}</strong>
+                <span>{request.badgeId} - {request.reference}</span>
+                <small>{formatTime(request.requestedAt)} - temporary permit {request.temporaryPermit.toLowerCase()}</small>
+              </article>
+            ))}
+            {!replacementRequests.length && <p className="plain-text">No replacement requests.</p>}
           </div>
         </div>
       </section>
