@@ -7,13 +7,15 @@ export function SessionCard({ session }) {
   const sessionState = session.endedAt ? `Ended ${formatTime(session.endedAt)}` : 'Active session';
   return (
     <article className="session-card">
-      <div>
+      <div className="session-card-main">
         <strong>{session.vehicle}</strong>
-        <span><MapPin aria-hidden="true" size={16} /> {session.location}</span>
-        <small>GPS {session.gps}</small>
-        <small>{sessionState}</small>
+        <span className="session-location"><MapPin aria-hidden="true" size={16} /> {session.location}</span>
+        <div className="session-meta">
+          <small>GPS {session.gps}</small>
+          <small>{sessionState}</small>
+        </div>
       </div>
-      <div>
+      <div className="session-lock">
         <small>
           {integrityState === 'trusted'
             ? 'Arrival locked'
