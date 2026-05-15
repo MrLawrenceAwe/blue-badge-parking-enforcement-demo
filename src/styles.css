@@ -45,7 +45,7 @@ select:disabled {
 main {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 18px;
+  padding: 16px;
 }
 
 .app-header {
@@ -97,7 +97,7 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(1.85rem, 3.4vw, 3rem);
   line-height: 1.03;
 }
 
@@ -153,6 +153,10 @@ h2 {
   color: #fff;
 }
 
+.role-switcher button.active {
+  border-color: var(--blue-dark);
+}
+
 .secondary-button {
   background: #fff;
   color: var(--blue);
@@ -168,8 +172,8 @@ h2 {
 .summary-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: 9px;
+  margin-bottom: 16px;
 }
 
 .auth-strip {
@@ -177,10 +181,10 @@ h2 {
   border: 1px solid #9bbbd1;
   border-left: 6px solid var(--blue);
   border-radius: 8px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
+  padding: 12px;
+  margin-bottom: 14px;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   align-items: start;
 }
 
@@ -196,7 +200,7 @@ h2 {
 }
 
 .demo-note {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--muted);
 }
 
@@ -205,15 +209,15 @@ h2 {
 }
 
 .demo-account-drawer summary {
-  min-height: 48px;
+  min-height: 40px;
   border: 2px solid var(--blue);
   border-radius: 6px;
   background: #fff;
   color: var(--blue-dark);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 8px 12px;
   font-weight: 700;
 }
 
@@ -290,9 +294,9 @@ h2 {
   border: 1px solid var(--line);
   border-left: 6px solid var(--blue);
   border-radius: 6px;
-  padding: 14px;
+  padding: 12px 14px;
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .metric span {
@@ -317,7 +321,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   min-width: 0;
-  padding: 16px;
+  padding: 15px;
 }
 
 .panel-heading {
@@ -695,7 +699,7 @@ dd {
 .toolbar {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 16px;
 }
 
@@ -727,16 +731,38 @@ dd {
 
 table {
   border-collapse: collapse;
-  min-width: 620px;
+  min-width: 520px;
   width: 100%;
+  table-layout: fixed;
 }
 
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 12px;
+  padding: 11px 12px;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+  width: 27%;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: 19%;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 22%;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 32%;
 }
 
 th {
@@ -828,6 +854,18 @@ tr {
   td {
     border-bottom: 0;
     padding: 6px 0;
+    width: 100%;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1),
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3),
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 100%;
   }
 
   td::before {
@@ -850,9 +888,14 @@ textarea:focus {
   outline-offset: 2px;
 }
 
+.role-switcher button.active:focus-visible {
+  outline: 3px solid #9bbbd1;
+  outline-offset: 2px;
+}
+
 @media (min-width: 720px) {
   main {
-    padding: 26px;
+    padding: 22px 26px;
   }
 
   .app-header {
@@ -865,8 +908,23 @@ textarea:focus {
   }
 
   .auth-strip {
-    grid-template-columns: minmax(0, 0.7fr) minmax(0, 0.9fr) minmax(0, 1.4fr);
+    grid-template-columns: minmax(260px, 0.8fr) minmax(420px, 1.5fr);
+    grid-template-areas:
+      "copy form"
+      "drawer drawer";
     align-items: start;
+  }
+
+  .auth-strip-copy {
+    grid-area: copy;
+  }
+
+  .demo-account-drawer {
+    grid-area: drawer;
+  }
+
+  .auth-strip form {
+    grid-area: form;
   }
 
   .auth-strip form {
