@@ -78,14 +78,9 @@ main {
 .demo-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  padding: 4px 10px;
-  border: 1px solid #9bbbd1;
-  border-radius: 999px;
-  background: #d8e8f3;
-  color: var(--blue-dark);
-  font-size: 0.85rem;
-  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
 h1,
