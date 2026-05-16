@@ -17,7 +17,7 @@ export function BadgeActions({
   showTemporaryPermit = true
 }) {
   return (
-    <>
+    <div className="session-panel-stack">
       <SessionStartForm
         badge={badge}
         activeSession={activeSession}
@@ -37,6 +37,6 @@ export function BadgeActions({
         />
       )}
       {showNotifications && <BadgeNotifications notifications={notifications} />}
-    </>
+    </div>
   );
 }
