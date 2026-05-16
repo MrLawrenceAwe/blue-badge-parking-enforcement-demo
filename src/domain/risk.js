@@ -31,6 +31,13 @@ const RISK_BAND = {
   high: 'high'
 };
 
+const RISK_SEVERITY_CLASS = {
+  low: 'risk-low',
+  watch: 'risk-watch',
+  high: 'risk-high',
+  critical: 'risk-critical'
+};
+
 const RISK_TRIGGER_DEFINITIONS = {
   unknownBadge: {
     label: 'Unknown badge or invalid verification token',
@@ -100,33 +107,22 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       score: 100,
       riskBand: RISK_BAND.high,
       triggers: [buildRiskTrigger('unknownBadge', rules)],
-      riskToneClass: 'risk-high',
+      severityClass: RISK_SEVERITY_CLASS.high,
       verificationStatus: VERIFICATION_STATUS.invalid,
       explanation: ['No matching badge record or trusted QR code was found.']
     });
   }
 
-  if (badge.status === 'stolen') triggeredRules.push(buildRiskTrigger('stolenBadge', rules));
-  if (badge.status === 'expired') triggeredRules.push(buildRiskTrigger('expiredBadge', rules));
-  if (badge.status === 'suspended') triggeredRules.push(buildRiskTrigger('suspendedBadge', rules));
-  if (badge.status === 'under review') triggeredRules.push(buildRiskTrigger('underReview', rules));
-  if (scanContext.vehicle && vehicleSearchKey(scanContext.vehicle) !== vehicleSearchKey(badge.vehicle)) {
-    triggeredRules.push(buildRiskTrigger('unregisteredVehicle', rules));
-  }
-
+  triggeredRules.push(...getBadgeStatusTriggers(badge, rules));
+  const vehicleTrigger = getVehicleMismatchTrigger(badge, scanContext, rules);
+  if (vehicleTrigger) triggeredRules.push(vehicleTrigger);
   const badgeScans = scans.filter((scan) => scan.badgeId === badge.id);
   const failedScans = badgeScans.filter((scan) => scan.scanOutcome !== 'valid').length + (scanContext.includeCurrentFailure ? 1 : 0);
   if (failedScans >= 2) triggeredRules.push(buildRiskTrigger('multipleFailedScans', rules));
 
-  const recentDistantScanDetected = badgeScans.some((scan) => {
-    const withinImpossibleTravelWindow = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.impossibleTravelWindowMins : true;
-    const scanGps = scan.gps ?? gpsForKnownLocation(scan.location);
-    return withinImpossibleTravelWindow && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.impossibleTravelMinDistanceKm;
-  });
-  if (recentDistantScanDetected) triggeredRules.push(buildRiskTrigger('impossibleTravel', rules));
+  if (hasRecentDistantScan(badgeScans, scanContext, rules)) triggeredRules.push(buildRiskTrigger('impossibleTravel', rules));
 
-  const activeSessionTime = scanContext.time ? new Date(scanContext.time) : new Date();
-  const activeSessions = sessions.filter((session) => session.badgeId === badge.id && isSessionActive(session, activeSessionTime));
+  const activeSessions = getActiveSessionsForBadge(badge, sessions, scanContext.time);
   if (activeSessions.some((session) => session.durationMins > rules.longStayMinutes)) {
     triggeredRules.push(buildRiskTrigger('longStay', rules));
   }
@@ -144,7 +140,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
     score = Math.max(score, 85);
-    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, riskToneClass: 'risk-critical', verificationStatus: VERIFICATION_STATUS.deactivated, explanation });
+    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, severityClass: RISK_SEVERITY_CLASS.critical, verificationStatus: VERIFICATION_STATUS.deactivated, explanation });
   }
 
   if (badge.status === 'expired') {
@@ -153,14 +149,14 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       score,
       riskBand: score >= rules.highRiskThreshold ? RISK_BAND.high : RISK_BAND.review,
       triggers: triggeredRules,
-      riskToneClass: 'risk-high',
+      severityClass: RISK_SEVERITY_CLASS.high,
       verificationStatus: VERIFICATION_STATUS.invalid,
       explanation
     });
   }
 
   if (score >= rules.highRiskThreshold) {
-    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, riskToneClass: 'risk-high', verificationStatus: VERIFICATION_STATUS.invalid, explanation });
+    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, severityClass: RISK_SEVERITY_CLASS.high, verificationStatus: VERIFICATION_STATUS.invalid, explanation });
   }
 
   if (score >= rules.monitorThreshold || badge.status === 'under review') {
@@ -168,7 +164,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       score,
       riskBand: score >= rules.reviewThreshold ? RISK_BAND.review : RISK_BAND.monitor,
       triggers: triggeredRules,
-      riskToneClass: 'risk-watch',
+      severityClass: RISK_SEVERITY_CLASS.watch,
       verificationStatus: VERIFICATION_STATUS.suspicious,
       explanation
     });
@@ -178,7 +174,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
     score,
     riskBand: RISK_BAND.normal,
     triggers: triggeredRules,
-    riskToneClass: 'risk-low',
+    severityClass: RISK_SEVERITY_CLASS.low,
     verificationStatus: VERIFICATION_STATUS.valid,
     explanation: ['No configured risk rules were triggered.']
   });
@@ -189,7 +185,7 @@ export function riskFromPermissionError(message) {
     score: 100,
     riskBand: RISK_BAND.high,
     triggers: [{ type: 'permissionError', label: message, score: 100 }],
-    riskToneClass: 'risk-high',
+    severityClass: RISK_SEVERITY_CLASS.high,
     verificationStatus: VERIFICATION_STATUS.invalid
   });
 }
@@ -210,12 +206,39 @@ function buildRiskTrigger(triggerType, rules) {
   };
 }
 
-function buildRiskAssessment({ score, riskBand, triggers, riskToneClass, verificationStatus, explanation = [] }) {
+function getBadgeStatusTriggers(badge, rules) {
+  return [
+    badge.status === 'stolen' && buildRiskTrigger('stolenBadge', rules),
+    badge.status === 'expired' && buildRiskTrigger('expiredBadge', rules),
+    badge.status === 'suspended' && buildRiskTrigger('suspendedBadge', rules),
+    badge.status === 'under review' && buildRiskTrigger('underReview', rules)
+  ].filter(Boolean);
+}
+
+function getVehicleMismatchTrigger(badge, scanContext, rules) {
+  if (!scanContext.vehicle || vehicleSearchKey(scanContext.vehicle) === vehicleSearchKey(badge.vehicle)) return null;
+  return buildRiskTrigger('unregisteredVehicle', rules);
+}
+
+function hasRecentDistantScan(badgeScans, scanContext, rules) {
+  return badgeScans.some((scan) => {
+    const withinImpossibleTravelWindow = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.impossibleTravelWindowMins : true;
+    const scanGps = scan.gps ?? gpsForKnownLocation(scan.location);
+    return withinImpossibleTravelWindow && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.impossibleTravelMinDistanceKm;
+  });
+}
+
+function getActiveSessionsForBadge(badge, sessions, activeAt) {
+  const activeSessionTime = activeAt ? new Date(activeAt) : new Date();
+  return sessions.filter((session) => session.badgeId === badge.id && isSessionActive(session, activeSessionTime));
+}
+
+function buildRiskAssessment({ score, riskBand, triggers, severityClass, verificationStatus, explanation = [] }) {
   return {
     score,
     riskBand,
     triggers,
-    riskToneClass,
+    severityClass,
     verificationStatus,
     scanOutcome: scanOutcomeForVerification({ verificationStatus }),
     explanation

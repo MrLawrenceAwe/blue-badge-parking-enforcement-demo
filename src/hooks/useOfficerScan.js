@@ -11,7 +11,7 @@ import { verifyBadgeToken } from '../domain/badgeTokens';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
 
-const initialScanEvidence = {
+const initialScanEvidenceDraft = {
   contravention: 'No action',
   action: 'No action',
   officerNote: '',
@@ -36,7 +36,7 @@ export function useOfficerScan({
   const [scanInput, setScanInput] = useState('BB-WCC-104928');
   const [scanLocation, setScanLocation] = useState('Oxford Street W1C');
   const [scanVehicle, setScanVehicle] = useState('LS24 HRT');
-  const [scanEvidenceDraft, setScanEvidenceDraft] = useState(initialScanEvidence);
+  const [scanEvidenceDraft, setScanEvidenceDraft] = useState(initialScanEvidenceDraft);
   const [lastScanResult, setLastScanResult] = useState(null);
   const [officerNotice, setOfficerNotice] = useState('');
   const nextScanNumber = useRef(nextNumberFromRecords(initialScans, 'SC-', 90199));
@@ -46,7 +46,7 @@ export function useOfficerScan({
     resetScanResult();
   }, [authUser.email]);
 
-  const previewRisk = lastScanResult?.risk ?? evaluateBadgeRisk(selectedBadge, sessions, scans, {
+  const displayedRisk = lastScanResult?.risk ?? evaluateBadgeRisk(selectedBadge, sessions, scans, {
     vehicle: normaliseVehicle(scanVehicle),
     location: scanLocation,
     time: timestampNow()
@@ -204,7 +204,7 @@ export function useOfficerScan({
     scanEvidenceDraft,
     updateScanEvidenceDraft,
     lastScanResult,
-    previewRisk,
+    displayedRisk,
     officerNotice,
     resetScanResult,
     recordBadgeScan,

@@ -10,15 +10,13 @@ import {
   initialNotifications,
   initialReplacementRequests
 } from '../data/demoCases';
-import { evaluateBadgeRisk } from '../domain/risk';
 import { createSignedSessionRecord } from '../domain/sessionProofs';
-import { isCaseOpen } from '../domain/cases';
-import { isSessionActive } from '../domain/sessions';
 import { defaultRiskRules } from '../domain/risk';
+import { buildRiskByBadge, selectActiveSessions, selectOpenCases } from '../domain/enforcementSelectors';
 import { formatRecordId } from '../domain/ids';
 import { timestampNow } from '../utils/date';
 
-export function useEnforcementStore(currentActor = 'System') {
+export function useDemoEnforcementStore(currentActor = 'System') {
   const [badges, setBadges] = useState(initialBadges);
   const [sessions, setSessions] = useState(() => initialSessions.map((session) => ({ ...session, locked: true })));
   const [scans, setScans] = useState(initialScans);
@@ -46,10 +44,10 @@ export function useEnforcementStore(currentActor = 'System') {
     };
   }, []);
 
-  const activeSessions = sessions.filter((session) => isSessionActive(session));
-  const openCases = cases.filter(isCaseOpen);
+  const activeSessions = selectActiveSessions(sessions);
+  const openCases = selectOpenCases(cases);
   const riskByBadge = useMemo(() => {
-    return Object.fromEntries(badges.map((badge) => [badge.id, evaluateBadgeRisk(badge, sessions, scans, {}, riskRules)]));
+    return buildRiskByBadge({ badges, sessions, scans, riskRules });
   }, [badges, sessions, scans, riskRules]);
 
   function appendAuditEvent({ badgeId, type, actor = currentActor, detail }) {

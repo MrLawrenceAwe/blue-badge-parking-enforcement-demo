@@ -16,7 +16,7 @@ export function AdminOverviewTab({
   return (
     <>
       <div className="app-panel risk-panel">
-        <div className="app-panel-heading"><h2>Risk scores</h2><Gauge aria-hidden="true" /></div>
+        <div className="app-panel-heading"><h2>Badge risk register</h2><Gauge aria-hidden="true" /></div>
         <div className="table-wrap">
           <table>
             <thead><tr><th>Badge</th><th>Vehicle</th><th>Status</th><th>Risk</th></tr></thead>

@@ -94,3 +94,19 @@
   padding: 7px 12px;
   font-size: 0.95rem;
 }
+
+tr:focus,
+button:focus-visible,
+summary:focus-visible,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 4px solid #ffdd00;
+  outline-offset: 2px;
+}
+
+.role-switcher button.active:focus-visible,
+.tab-list button.active:focus-visible {
+  outline: 3px solid #9bbbd1;
+  outline-offset: 2px;
+}

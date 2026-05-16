@@ -6,12 +6,12 @@ export function CaseManagementTab({
   allBadges,
   selectedBadge,
   selectedBadgeCases,
-  newCaseDraft,
-  updateNewCaseDraft,
+  caseForm,
+  updateCaseForm,
   noteDraftByCaseId,
   setNoteDraftByCaseId,
   adminMessage,
-  caseCommands
+  caseActions
 }) {
   return (
     <div className="app-panel case-management-panel full-span">
@@ -19,9 +19,9 @@ export function CaseManagementTab({
       <CaseDraftForm
         allBadges={allBadges}
         selectedBadge={selectedBadge}
-        newCaseDraft={newCaseDraft}
-        updateNewCaseDraft={updateNewCaseDraft}
-        caseCommands={caseCommands}
+        caseForm={caseForm}
+        updateCaseForm={updateCaseForm}
+        caseActions={caseActions}
       />
       {adminMessage && <p className="form-message" role="status">{adminMessage}</p>}
       <div className="record-list constrained-list">
@@ -32,7 +32,7 @@ export function CaseManagementTab({
             caseRecord={caseRecord}
             noteDraft={noteDraftByCaseId[caseRecord.id]}
             setNoteDraftByCaseId={setNoteDraftByCaseId}
-            caseCommands={caseCommands}
+            caseActions={caseActions}
           />
         ))}
       </div>

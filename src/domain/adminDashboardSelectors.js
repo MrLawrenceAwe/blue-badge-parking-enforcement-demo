@@ -2,7 +2,7 @@ import { isCaseOpen } from './cases';
 import { isSessionActive } from './sessions';
 import { riskBandLabels } from './risk';
 
-export function filterAdminBadges({ badges, sessions, scans, filters, riskByBadge }) {
+export function selectFilteredAdminBadges({ badges, sessions, scans, filters, riskByBadge }) {
   return badges.filter((badge) => {
     const risk = riskByBadge[badge.id];
     const relatedSessions = sessions.filter((session) => session.badgeId === badge.id);
@@ -28,8 +28,8 @@ export function filterAdminBadges({ badges, sessions, scans, filters, riskByBadg
   });
 }
 
-export function buildAdminRecordView({ badges, sessions, scans, cases, filters, riskByBadge, selectedBadgeId }) {
-  const filteredBadges = filterAdminBadges({ badges, sessions, scans, filters, riskByBadge });
+export function buildAdminDashboard({ badges, sessions, scans, cases, filters, riskByBadge, selectedBadgeId }) {
+  const filteredBadges = selectFilteredAdminBadges({ badges, sessions, scans, filters, riskByBadge });
   const filteredBadgeIds = new Set(filteredBadges.map((badge) => badge.id));
   const knownBadgeIds = new Set(badges.map((badge) => badge.id));
   const filteredCases = cases.filter((caseRecord) => filteredBadgeIds.has(caseRecord.badgeId) || !knownBadgeIds.has(caseRecord.badgeId));
