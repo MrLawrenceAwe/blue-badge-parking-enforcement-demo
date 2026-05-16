@@ -6,7 +6,7 @@ export function StolenReportForm({ reportStolen }) {
 
   if (!isOpen) {
     return (
-      <button className="danger-button" onClick={() => setIsOpen(true)}>
+      <button className="danger-button stolen-report-trigger" onClick={() => setIsOpen(true)}>
         <Siren aria-hidden="true" size={21} />
         Report stolen
       </button>
