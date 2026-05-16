@@ -1,11 +1,11 @@
-import { initialSessions } from '../data/demoRecords';
+import { seedSessions } from '../data/demoActivity';
 import { bytesToBase64Url } from './base64Url';
 
 const textEncoder = new TextEncoder();
 const demoSessionProofs = new Map();
 
 let nextSessionNumber = Math.max(
-  ...initialSessions.map((session) => Number(session.id.replace('PS-', ''))).filter(Number.isFinite)
+  ...seedSessions.map((session) => Number(session.id.replace('PS-', ''))).filter(Number.isFinite)
 ) + 1;
 let demoSessionKeysPromise;
 

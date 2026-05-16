@@ -10,16 +10,16 @@ const adminTabs = ['Overview', 'Cases', 'Risk rules', 'Audit'];
 export function AdminView({
   filteredBadges,
   allBadges,
-  visibleActiveSessions,
-  visibleScans,
+  filteredActiveSessions,
+  filteredScans,
   selectedBadgeCases,
   riskByBadge,
   filters,
   selectedBadge,
-  draftCase,
-  updateDraftCase,
-  caseNoteDraftsById,
-  setCaseNoteDraftsById,
+  newCaseDraft,
+  updateNewCaseDraft,
+  noteDraftByCaseId,
+  setNoteDraftByCaseId,
   auditEvents,
   notifications,
   replacementRequests,
@@ -27,7 +27,7 @@ export function AdminView({
   adminActions,
   adminMessage,
   reviewQueueCases,
-  deactivatedBadges
+  restrictedBadges
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
@@ -56,10 +56,10 @@ export function AdminView({
         {activeTab === 'Overview' && (
           <AdminOverviewTab
             filteredBadges={filteredBadges}
-            visibleActiveSessions={visibleActiveSessions}
-            visibleScans={visibleScans}
+            filteredActiveSessions={filteredActiveSessions}
+            filteredScans={filteredScans}
             reviewQueueCases={reviewQueueCases}
-            deactivatedBadges={deactivatedBadges}
+            restrictedBadges={restrictedBadges}
             riskByBadge={riskByBadge}
             selectBadge={adminActions.selectBadge}
           />
@@ -70,10 +70,10 @@ export function AdminView({
             allBadges={allBadges}
             selectedBadge={selectedBadge}
             selectedBadgeCases={selectedBadgeCases}
-            draftCase={draftCase}
-            updateDraftCase={updateDraftCase}
-            caseNoteDraftsById={caseNoteDraftsById}
-            setCaseNoteDraftsById={setCaseNoteDraftsById}
+            newCaseDraft={newCaseDraft}
+            updateNewCaseDraft={updateNewCaseDraft}
+            noteDraftByCaseId={noteDraftByCaseId}
+            setNoteDraftByCaseId={setNoteDraftByCaseId}
             adminMessage={adminMessage}
             caseActions={adminActions}
           />

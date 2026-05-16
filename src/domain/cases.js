@@ -52,7 +52,7 @@ export function createOfficerScanCase({ id, badgeId, scanResult, addedAt }) {
     dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     closureReason: '',
     notes: [
-      `Officer scan at ${scanResult.location} for vehicle ${scanResult.vehicle}. Verdict: ${risk.verdict}. Action: ${scanResult.evidence.action}. Contravention: ${scanResult.evidence.contravention}. Alerts: ${risk.events.map((event) => event.label).join('; ')}.`
+      `Officer scan at ${scanResult.location} for vehicle ${scanResult.vehicle}. Verdict: ${risk.verdict}. Action: ${scanResult.evidence.action}. Contravention: ${scanResult.evidence.contravention}. Alerts: ${risk.triggers.map((trigger) => trigger.label).join('; ')}.`
     ],
     evidence: `Officer scan log ${scanResult.scanId}`,
     evidenceItems: [

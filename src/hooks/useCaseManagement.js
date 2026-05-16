@@ -29,7 +29,7 @@ export function useCaseManagement({
   appendAuditEvent,
   queueNotification
 }) {
-  const [draftCase, setDraftCase] = useState({
+  const [newCaseDraft, setNewCaseDraft] = useState({
     note: '',
     status: 'Open',
     assignee: 'Unassigned',
@@ -37,7 +37,7 @@ export function useCaseManagement({
     dueDate: '',
     closureReason: ''
   });
-  const [caseNoteDraftsById, setCaseNoteDraftsById] = useState({});
+  const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
   const [adminFilters, setAdminFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
   const nextCaseNumber = useRef(nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
@@ -48,12 +48,12 @@ export function useCaseManagement({
     nextCaseNumber.current = Math.max(nextCaseNumber.current, nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
   }, [cases]);
 
-  function updateDraftCase(field, value) {
-    setDraftCase((current) => ({ ...current, [field]: value }));
+  function updateNewCaseDraft(field, value) {
+    setNewCaseDraft((current) => ({ ...current, [field]: value }));
   }
 
-  function resetDraftCase() {
-    setDraftCase({
+  function resetNewCaseDraft() {
+    setNewCaseDraft({
       note: '',
       status: 'Open',
       assignee: 'Unassigned',
@@ -63,7 +63,7 @@ export function useCaseManagement({
     });
   }
 
-  function addCase() {
+  function createCaseForSelectedBadge() {
     const risk = riskByBadge[selectedBadge.id];
     const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === selectedBadge.id && isCaseOpen(caseRecord));
     if (duplicateOpenCase) {
@@ -82,7 +82,7 @@ export function useCaseManagement({
         id: caseId,
         badge: selectedBadge,
         risk,
-        form: draftCase,
+        form: newCaseDraft,
         addedBy: authUser.name,
         addedAt: timestampNow()
       }),
@@ -92,9 +92,9 @@ export function useCaseManagement({
       badgeId: selectedBadge.id,
       type: 'Case opened',
       actor: authUser.name,
-      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && draftCase.status === 'Open' ? 'High priority' : draftCase.status}.`
+      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && newCaseDraft.status === 'Open' ? 'High priority' : newCaseDraft.status}.`
     });
-    resetDraftCase();
+    resetNewCaseDraft();
     setAdminNotice(`Case ${caseId} opened for ${selectedBadge.id}.`);
   }
 
@@ -103,7 +103,7 @@ export function useCaseManagement({
       setAdminNotice('Only a council admin can reactivate a badge after review.');
       return;
     }
-    const reviewNote = draftCase.note.trim();
+    const reviewNote = newCaseDraft.note.trim();
     if (!['stolen', 'suspended'].includes(selectedBadge.status)) {
       setAdminNotice('Only stolen or suspended badges can be reactivated from the review workflow.');
       return;
@@ -133,7 +133,7 @@ export function useCaseManagement({
       message: `Badge ${selectedBadge.id} has been reactivated after council review.`
     });
     setAdminNotice(`Badge ${selectedBadge.id} reactivated after admin review.`);
-    updateDraftCase('note', '');
+    updateNewCaseDraft('note', '');
   }
 
   function updateCase(caseId, caseUpdates) {
@@ -154,7 +154,7 @@ export function useCaseManagement({
   }
 
   function appendCaseNote(caseId) {
-    const note = caseNoteDraftsById[caseId]?.trim();
+    const note = noteDraftByCaseId[caseId]?.trim();
     if (!note) return;
     const caseRecord = cases.find((record) => record.id === caseId);
     setCases((current) => current.map((record) => (record.id === caseId ? { ...record, notes: [...record.notes, note] } : record)));
@@ -166,7 +166,7 @@ export function useCaseManagement({
         detail: `${caseId}: ${note}`
       });
     }
-    setCaseNoteDraftsById((current) => ({ ...current, [caseId]: '' }));
+    setNoteDraftByCaseId((current) => ({ ...current, [caseId]: '' }));
   }
 
   function updateRiskRule(field, value) {
@@ -182,14 +182,14 @@ export function useCaseManagement({
   }
 
   return {
-    draftCase,
-    updateDraftCase,
-    caseNoteDraftsById,
-    setCaseNoteDraftsById,
+    newCaseDraft,
+    updateNewCaseDraft,
+    noteDraftByCaseId,
+    setNoteDraftByCaseId,
     adminFilters,
     setAdminFilters,
     adminNotice,
-    addCase,
+    createCaseForSelectedBadge,
     reactivateBadgeAfterReview,
     updateCase,
     appendCaseNote,

@@ -1,11 +1,8 @@
-import { AdminView } from './components/admin/AdminView';
 import { AppHeader } from './components/app/AppHeader';
 import { AuthStrip } from './components/app/AuthStrip';
+import { AdminRoleView, CarerRoleView, HolderRoleView, OfficerRoleView } from './components/app/RoleViews';
 import { SummaryStrip } from './components/app/SummaryStrip';
-import { CarerView } from './components/carer/CarerView';
-import { HolderView } from './components/holder/HolderView';
-import { OfficerView } from './components/officer/OfficerView';
-import { demoAccountOrder, demoUsers } from './data/demoRecords';
+import { demoAccountOrder, demoUsers } from './data/demoUsers';
 import { buildAdminDashboardData } from './domain/adminFilters';
 import { useBadgeSelfServiceActions } from './hooks/useBadgeSelfServiceActions';
 import { useCaseManagement } from './hooks/useCaseManagement';
@@ -61,14 +58,7 @@ export function App() {
     queueNotification: records.queueNotification
   });
 
-  const {
-    filteredBadges,
-    visibleActiveSessions,
-    visibleScans,
-    selectedBadgeCases,
-    reviewQueueCases,
-    deactivatedBadges
-  } = buildAdminDashboardData({
+  const dashboardData = buildAdminDashboardData({
     badges: records.badges,
     sessions: records.sessions,
     scans: records.scans,
@@ -89,7 +79,7 @@ export function App() {
   };
   const adminActions = {
     selectBadge: auth.setSelectedBadgeId,
-    addCase: caseManagement.addCase,
+    createCaseForSelectedBadge: caseManagement.createCaseForSelectedBadge,
     updateCase: caseManagement.updateCase,
     appendCaseNote: caseManagement.appendCaseNote,
     reactivateBadge: caseManagement.reactivateBadgeAfterReview,
@@ -123,83 +113,39 @@ export function App() {
       />
 
       {auth.role === 'holder' && (
-        <HolderView
-          badge={auth.selectedBadge}
-          badges={auth.roleBadges}
-          setSelectedBadgeId={auth.setSelectedBadgeId}
-          sessions={records.sessions}
-          startSession={selfServiceActions.startSession}
-          extendSession={selfServiceActions.extendSession}
-          endSession={selfServiceActions.endSession}
-          reportStolen={selfServiceActions.reportStolen}
-          requestReplacementBadge={selfServiceActions.requestReplacementBadge}
+        <HolderRoleView
+          auth={auth}
+          records={records}
+          selfServiceActions={selfServiceActions}
           replacementForm={replacementForm}
-          replacementRequests={selectedBadgeReplacementRequests}
-          notifications={selectedBadgeNotifications}
-          risk={records.riskByBadge[auth.selectedBadge.id]}
-          sessionMessage={selfServiceActions.selfServiceNotice}
+          selectedBadgeReplacementRequests={selectedBadgeReplacementRequests}
+          selectedBadgeNotifications={selectedBadgeNotifications}
         />
       )}
 
       {auth.role === 'carer' && (
-        <CarerView
-          badges={auth.roleBadges}
-          selectedBadge={auth.selectedBadge}
-          setSelectedBadgeId={auth.setSelectedBadgeId}
-          sessions={records.sessions}
-          startSession={selfServiceActions.startSession}
-          extendSession={selfServiceActions.extendSession}
-          endSession={selfServiceActions.endSession}
-          reportStolen={selfServiceActions.reportStolen}
-          requestReplacementBadge={selfServiceActions.requestReplacementBadge}
+        <CarerRoleView
+          auth={auth}
+          records={records}
+          selfServiceActions={selfServiceActions}
           replacementForm={replacementForm}
-          replacementRequests={selectedBadgeReplacementRequests}
-          notifications={selectedBadgeNotifications}
-          sessionMessage={selfServiceActions.selfServiceNotice}
+          selectedBadgeReplacementRequests={selectedBadgeReplacementRequests}
+          selectedBadgeNotifications={selectedBadgeNotifications}
         />
       )}
 
       {auth.role === 'officer' && (
-        <OfficerView
-          badge={scanActions.lastScanResult ? scanActions.lastScanResult.badge : auth.selectedBadge}
-          risk={scanActions.currentOfficerRisk}
-          scanResult={scanActions.lastScanResult}
-          sessions={records.activeSessions}
-          scanForm={{ input: scanActions.scanInputValue, location: scanActions.scanLocation, vehicle: scanActions.scanVehicle }}
-          scanEvidence={{ values: scanActions.scanEvidenceDraft, setValues: scanActions.updateScanEvidenceDraft }}
-          scanActions={{
-            setInput: scanActions.setScanInputValue,
-            setLocation: scanActions.setScanLocation,
-            setVehicle: scanActions.setScanVehicle,
-            runScan: scanActions.runScan,
-            createCaseFromScan: scanActions.createCaseFromScan
-          }}
-          officerMessage={scanActions.officerNotice}
-        />
+        <OfficerRoleView auth={auth} records={records} scanActions={scanActions} />
       )}
 
       {auth.role === 'admin' && (
-        <AdminView
-          filteredBadges={filteredBadges}
-          allBadges={records.badges}
-          visibleActiveSessions={visibleActiveSessions}
-          visibleScans={visibleScans}
-          selectedBadgeCases={selectedBadgeCases}
-          riskByBadge={records.riskByBadge}
-          filters={adminFilters}
-          selectedBadge={auth.selectedBadge}
-          draftCase={caseManagement.draftCase}
-          updateDraftCase={caseManagement.updateDraftCase}
-          caseNoteDraftsById={caseManagement.caseNoteDraftsById}
-          setCaseNoteDraftsById={caseManagement.setCaseNoteDraftsById}
-          auditEvents={records.auditEvents}
-          notifications={records.notifications}
-          replacementRequests={records.replacementRequests}
-          riskRules={records.riskRules}
+        <AdminRoleView
+          auth={auth}
+          records={records}
+          caseManagement={caseManagement}
+          adminFilters={adminFilters}
           adminActions={adminActions}
-          adminMessage={caseManagement.adminNotice}
-          reviewQueueCases={reviewQueueCases}
-          deactivatedBadges={deactivatedBadges}
+          dashboardData={dashboardData}
         />
       )}
     </main>
