@@ -13,17 +13,24 @@ export function AuthStrip({
   setLoginEmail,
   setLoginPassword,
   selectDemoUser,
-  signIn
+  signIn,
+  resetDemoState,
 }) {
   return (
     <section className="auth-strip" aria-label="Demo sign in">
       <div className="auth-strip-copy">
         <strong>Signed in as {authUser.name}</strong>
-        <span>{authUser.email} · {authUser.role}</span>
+        <span>
+          {authUser.email} · {authUser.role}
+        </span>
       </div>
       <details className="auth-controls">
         <summary>Switch account</summary>
-        <details className="demo-account-drawer" open={demoDrawerOpen} onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}>
+        <details
+          className="demo-account-drawer"
+          open={demoDrawerOpen}
+          onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}
+        >
           <summary>Demo accounts</summary>
           <div className="demo-account-list" aria-label="Quick demo accounts">
             {demoAccountOrder.map((demoRole) => {
@@ -50,11 +57,38 @@ export function AuthStrip({
             signIn(new FormData(event.currentTarget));
           }}
         >
-          <label>Email<input name="email" type="email" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} aria-label="Email address" /></label>
-          <label>Password<input name="password" type="password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} aria-label="Password" /></label>
-          <button className="secondary-button" type="submit"><ShieldCheck aria-hidden="true" size={20} /> Sign in</button>
+          <label>
+            Email
+            <input
+              name="email"
+              type="email"
+              value={loginEmail}
+              onChange={(event) => setLoginEmail(event.target.value)}
+              aria-label="Email address"
+            />
+          </label>
+          <label>
+            Password
+            <input
+              name="password"
+              type="password"
+              value={loginPassword}
+              onChange={(event) => setLoginPassword(event.target.value)}
+              aria-label="Password"
+            />
+          </label>
+          <button className="secondary-button" type="submit">
+            <ShieldCheck aria-hidden="true" size={20} /> Sign in
+          </button>
         </form>
-        {loginError && <p className="login-error" role="alert">{loginError}</p>}
+        <button className="secondary-button reset-demo-button" type="button" onClick={resetDemoState}>
+          Reset demo data
+        </button>
+        {loginError && (
+          <p className="login-error" role="alert">
+            {loginError}
+          </p>
+        )}
       </details>
     </section>
   );

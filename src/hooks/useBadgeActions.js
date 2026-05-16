@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { canStartSessionForBadge, normaliseVehicle, statusLabel } from '../domain/badges';
 import { createStolenBadgeCase } from '../domain/cases';
 import { gpsForKnownLocation } from '../domain/locations';
+import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { createSignedSessionRecord, createSessionId } from '../domain/sessionProofs';
 import { buildSessionPayload, isSessionActive } from '../domain/sessions';
 import { formatRecordId } from '../domain/ids';
@@ -17,13 +18,18 @@ export function useBadgeActions({
   setCases,
   setReplacementRequests,
   appendAuditEvent,
-  queueNotification
+  queueNotification,
 }) {
   const [badgeNotice, setBadgeNotice] = useState('');
   const [replacementDraft, setReplacementDraft] = useState({ reference: '', temporaryPermit: 'Requested' });
 
   function canManageSelectedBadge() {
-    return ['holder', 'carer'].includes(authUser.role) && authUser.role === role && authUser.badgeIds.includes(selectedBadge.id);
+    return hasPermission({
+      authUser,
+      activeRole: role,
+      permission: PERMISSIONS.manageOwnBadge,
+      badgeId: selectedBadge.id,
+    });
   }
 
   async function startSession(formData) {
@@ -32,7 +38,9 @@ export function useBadgeActions({
       return false;
     }
     if (!canStartSessionForBadge(selectedBadge.status)) {
-      setBadgeNotice(`Sessions cannot be started while this badge is ${statusLabel[selectedBadge.status].toLowerCase()}.`);
+      setBadgeNotice(
+        `Sessions cannot be started while this badge is ${statusLabel[selectedBadge.status].toLowerCase()}.`,
+      );
       return false;
     }
     if (sessions.some((session) => session.badgeId === selectedBadge.id && isSessionActive(session))) {
@@ -49,22 +57,24 @@ export function useBadgeActions({
         location,
         gps: gpsForKnownLocation(location),
         startedAt: timestampNow(),
-        durationMins: Number(formData.get('duration'))
-      })
+        durationMins: Number(formData.get('duration')),
+      }),
     });
     setSessions((current) => [session, ...current]);
     appendAuditEvent({
       badgeId: selectedBadge.id,
       type: 'Session started',
       actor: authUser.name,
-      detail: `Locked session ${session.id} started at ${location} for ${session.durationMins} minutes.`
+      detail: `Locked session ${session.id} started at ${location} for ${session.durationMins} minutes.`,
     });
     setBadgeNotice('Session started and locked. Arrival details are signed for enforcement audit.');
     return true;
   }
 
   async function extendSession(sessionId, extraMins) {
-    if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role) {
+    if (
+      !hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.manageOwnBadge, badgeId: selectedBadge.id })
+    ) {
       setBadgeNotice('Only the holder or delegated carer can extend a parking session in the demo.');
       return;
     }
@@ -75,22 +85,28 @@ export function useBadgeActions({
     }
     const updatedSession = await createSignedSessionRecord({
       ...session,
-      durationMins: Math.min(session.durationMins + extraMins, 240)
+      durationMins: Math.min(session.durationMins + extraMins, 240),
     });
-    setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? updatedSession : sessionRecord)));
+    setSessions((current) =>
+      current.map((sessionRecord) => (sessionRecord.id === sessionId ? updatedSession : sessionRecord)),
+    );
     appendAuditEvent({
       badgeId: session.badgeId,
       type: 'Session extended',
       actor: authUser.name,
-      detail: `Session ${sessionId} extended to ${updatedSession.durationMins} minutes.`
+      detail: `Session ${sessionId} extended to ${updatedSession.durationMins} minutes.`,
     });
-    setBadgeNotice(updatedSession.durationMins === session.durationMins
-      ? 'This session is already at the 4 hour maximum.'
-      : 'Session extended and re-signed.');
+    setBadgeNotice(
+      updatedSession.durationMins === session.durationMins
+        ? 'This session is already at the 4 hour maximum.'
+        : 'Session extended and re-signed.',
+    );
   }
 
-  function endSession(sessionId) {
-    if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role) {
+  async function endSession(sessionId) {
+    if (
+      !hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.manageOwnBadge, badgeId: selectedBadge.id })
+    ) {
       setBadgeNotice('Only the holder or delegated carer can end a parking session in the demo.');
       return;
     }
@@ -99,12 +115,15 @@ export function useBadgeActions({
       setBadgeNotice('This session is not available to the signed-in user.');
       return;
     }
-    setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? { ...sessionRecord, endedAt: timestampNow() } : sessionRecord)));
+    const endedSession = await createSignedSessionRecord({ ...session, endedAt: timestampNow() });
+    setSessions((current) =>
+      current.map((sessionRecord) => (sessionRecord.id === sessionId ? endedSession : sessionRecord)),
+    );
     appendAuditEvent({
       badgeId: session.badgeId,
       type: 'Session ended',
       actor: authUser.name,
-      detail: `Session ${sessionId} ended by ${authUser.name}.`
+      detail: `Session ${sessionId} ended by ${authUser.name}.`,
     });
     setBadgeNotice('Session ended. The signed arrival record remains available for audit.');
   }
@@ -125,8 +144,12 @@ export function useBadgeActions({
       setBadgeNotice('Confirm the deactivation and provide incident details before reporting the badge stolen.');
       return false;
     }
-    setBadgeNotice('Badge reported stolen. New sessions are blocked and officer scans will show a high-risk deactivated status.');
-    setBadges((current) => current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)));
+    setBadgeNotice(
+      'Badge reported stolen. New sessions are blocked and officer scans will show a high-risk deactivated status.',
+    );
+    setBadges((current) =>
+      current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)),
+    );
     setCases((current) => [
       createStolenBadgeCase({
         id: formatRecordId('CASE-', 4200 + current.length),
@@ -135,20 +158,20 @@ export function useBadgeActions({
         contact,
         addedBy: authUser.name,
         addedAt: timestampNow(),
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       }),
-      ...current
+      ...current,
     ]);
     appendAuditEvent({
       badgeId: selectedBadge.id,
       type: 'Badge deactivated',
       actor: authUser.name,
-      detail: `Holder/carer stolen report confirmed. Contact: ${contact}.`
+      detail: `Holder/carer stolen report confirmed. Contact: ${contact}.`,
     });
     queueNotification({
       badgeId: selectedBadge.id,
       recipient: selectedBadge.email,
-      message: 'Your badge has been deactivated after a stolen badge report. A risk review case has been opened.'
+      message: 'Your badge has been deactivated after a stolen badge report. A risk review case has been opened.',
     });
     return true;
   }
@@ -175,20 +198,20 @@ export function useBadgeActions({
         status: 'Pending evidence review',
         requestedAt: timestampNow(),
         reference,
-        temporaryPermit
+        temporaryPermit,
       },
-      ...current
+      ...current,
     ]);
     appendAuditEvent({
       badgeId: selectedBadge.id,
       type: 'Replacement requested',
       actor: authUser.name,
-      detail: `Replacement requested with reference ${reference}; temporary permit ${temporaryPermit.toLowerCase()}.`
+      detail: `Replacement requested with reference ${reference}; temporary permit ${temporaryPermit.toLowerCase()}.`,
     });
     queueNotification({
       badgeId: selectedBadge.id,
       recipient: selectedBadge.email,
-      message: `Replacement request received. Reference: ${reference}.`
+      message: `Replacement request received. Reference: ${reference}.`,
     });
     setReplacementDraft({ reference: '', temporaryPermit: 'Requested' });
     setBadgeNotice('Replacement request recorded and notification queued.');
@@ -203,6 +226,6 @@ export function useBadgeActions({
     extendSession,
     endSession,
     reportStolen,
-    requestReplacementBadge
+    requestReplacementBadge,
   };
 }
