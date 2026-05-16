@@ -13,16 +13,16 @@ async function getBadgeVerificationPublicKey() {
       badgeVerificationPublicKey,
       {
         name: 'ECDSA',
-        namedCurve: 'P-256'
+        namedCurve: 'P-256',
       },
       false,
-      ['verify']
+      ['verify'],
     );
   }
   return badgePublicKeyPromise;
 }
 
-export async function verifyBadgeToken(token) {
+export async function verifyBadgeToken(token, validationContext = {}) {
   const [payloadPart, signaturePart] = token.split('.');
   if (!payloadPart || !signaturePart) return null;
   try {
@@ -31,13 +31,30 @@ export async function verifyBadgeToken(token) {
       { name: 'ECDSA', hash: 'SHA-256' },
       publicKey,
       base64UrlToBytes(signaturePart),
-      textEncoder.encode(payloadPart)
+      textEncoder.encode(payloadPart),
     );
     if (!verified) return null;
-    return JSON.parse(textDecoder.decode(base64UrlToBytes(payloadPart)));
+    const payload = JSON.parse(textDecoder.decode(base64UrlToBytes(payloadPart)));
+    return validateBadgeTokenPayload(payload, validationContext) ? payload : null;
   } catch {
     return null;
   }
+}
+
+export function validateBadgeTokenPayload(
+  payload,
+  { badge, now = new Date(), expectedIssuer = 'blue-badge-demo', expectedAudience = 'enforcement-scan' } = {},
+) {
+  if (!payload || typeof payload.badgeId !== 'string') return false;
+  if (badge) {
+    if (payload.badgeId !== badge.id) return false;
+    if (payload.council && payload.council !== badge.council) return false;
+  }
+  if (payload.iss && payload.iss !== expectedIssuer) return false;
+  if (payload.aud && payload.aud !== expectedAudience) return false;
+  if (payload.nbf && Number(payload.nbf) * 1000 > now.getTime()) return false;
+  if (payload.exp && Number(payload.exp) * 1000 <= now.getTime()) return false;
+  return true;
 }
 
 export function issuedVerificationTokenForBadge(badgeId) {

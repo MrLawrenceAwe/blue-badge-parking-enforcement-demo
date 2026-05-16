@@ -5,9 +5,15 @@ import { createOfficerScanCase, isCaseOpen } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { formatRecordId, nextNumberFromRecords } from '../domain/ids';
 import { gpsForKnownLocation } from '../domain/locations';
-import { VERIFICATION_STATUS, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForVerification } from '../domain/risk';
+import {
+  VERIFICATION_STATUS,
+  evaluateBadgeRisk,
+  riskFromPermissionError,
+  scanOutcomeForVerification,
+} from '../domain/risk';
 import { parseScanInput } from '../domain/scanInput';
 import { verifyBadgeToken } from '../domain/badgeTokens';
+import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
 
@@ -16,7 +22,7 @@ const initialScanEvidenceDraft = {
   action: 'No action',
   officerNote: '',
   vehiclePhotoRef: '',
-  badgePhotoRef: ''
+  badgePhotoRef: '',
 };
 
 export function useOfficerScan({
@@ -31,7 +37,7 @@ export function useOfficerScan({
   setCases,
   setSelectedBadgeId,
   riskRules,
-  appendAuditEvent
+  appendAuditEvent,
 }) {
   const [scanInput, setScanInput] = useState('BB-WCC-104928');
   const [scanLocation, setScanLocation] = useState('Oxford Street W1C');
@@ -46,11 +52,19 @@ export function useOfficerScan({
     resetScanResult();
   }, [authUser.email]);
 
-  const displayedRisk = lastScanResult?.risk ?? evaluateBadgeRisk(selectedBadge, sessions, scans, {
-    vehicle: normaliseVehicle(scanVehicle),
-    location: scanLocation,
-    time: timestampNow()
-  }, riskRules);
+  const displayedRisk =
+    lastScanResult?.risk ??
+    evaluateBadgeRisk(
+      selectedBadge,
+      sessions,
+      scans,
+      {
+        vehicle: normaliseVehicle(scanVehicle),
+        location: scanLocation,
+        time: timestampNow(),
+      },
+      riskRules,
+    );
 
   function resetScanResult() {
     setLastScanResult(null);
@@ -59,21 +73,22 @@ export function useOfficerScan({
 
   function updateScanEvidenceDraft(evidenceDraftUpdater) {
     setScanEvidenceDraft((currentEvidence) => {
-      const nextEvidence = typeof evidenceDraftUpdater === 'function' ? evidenceDraftUpdater(currentEvidence) : evidenceDraftUpdater;
+      const nextEvidence =
+        typeof evidenceDraftUpdater === 'function' ? evidenceDraftUpdater(currentEvidence) : evidenceDraftUpdater;
       setLastScanResult((currentResult) => {
         if (!currentResult) return currentResult;
         setScans((currentScans) =>
           currentScans.map((scan) =>
             scan.id === currentResult.scanId
               ? {
-                ...scan,
-                contravention: nextEvidence.contravention,
-                action: nextEvidence.action,
-                officerNote: nextEvidence.officerNote,
-                evidenceItems: scanEvidenceItems(nextEvidence, scan.time, authUser.name)
-              }
-              : scan
-          )
+                  ...scan,
+                  contravention: nextEvidence.contravention,
+                  action: nextEvidence.action,
+                  officerNote: nextEvidence.officerNote,
+                  evidenceItems: scanEvidenceItems(nextEvidence, scan.time, authUser.name),
+                }
+              : scan,
+          ),
         );
         return { ...currentResult, evidence: nextEvidence };
       });
@@ -82,14 +97,14 @@ export function useOfficerScan({
   }
 
   async function recordBadgeScan() {
-    if (authUser.role !== 'officer' || role !== 'officer') {
+    if (!hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.verifyBadge })) {
       setLastScanResult({
         badge: null,
         risk: riskFromPermissionError('Only an enforcement officer can run badge verification'),
         input: scanInput,
         vehicle: normaliseVehicle(scanVehicle),
         location: scanLocation,
-        scannedAt: timestampNow()
+        scannedAt: timestampNow(),
       });
       return;
     }
@@ -100,19 +115,36 @@ export function useOfficerScan({
     const scanContext = buildOfficerScanContext({
       vehicle: observedVehicle,
       location: scanLocation,
-      scannedAt
+      scannedAt,
     });
-    const verifiedQrPayload = parsedScanInput.kind === 'qr-token' ? await verifyBadgeToken(parsedScanInput.value) : null;
-    const badge = resolveScannedBadge(parsedScanInput, verifiedQrPayload);
+    const verifiedQrPayload =
+      parsedScanInput.kind === 'qr-token' ? await verifyBadgeToken(parsedScanInput.value) : null;
+    const candidateBadge = resolveScannedBadge(parsedScanInput, verifiedQrPayload);
+    const badge =
+      parsedScanInput.kind === 'qr-token'
+        ? await verifyBadgeBackedToken(parsedScanInput.value, candidateBadge, scannedAt)
+        : candidateBadge;
     const preFailureVerdict = badge
-      ? evaluateBadgeRisk(badge, sessions, scans, {
-        ...scanContext
-      }, riskRules).verificationStatus
+      ? evaluateBadgeRisk(
+          badge,
+          sessions,
+          scans,
+          {
+            ...scanContext,
+          },
+          riskRules,
+        ).verificationStatus
       : VERIFICATION_STATUS.invalid;
-    const risk = evaluateBadgeRisk(badge, sessions, scans, {
-      ...scanContext,
-      includeCurrentFailure: preFailureVerdict !== VERIFICATION_STATUS.valid
-    }, riskRules);
+    const risk = evaluateBadgeRisk(
+      badge,
+      sessions,
+      scans,
+      {
+        ...scanContext,
+        includeCurrentFailure: preFailureVerdict !== VERIFICATION_STATUS.valid,
+      },
+      riskRules,
+    );
 
     const scanId = formatRecordId('SC-', nextScanNumber.current);
     nextScanNumber.current += 1;
@@ -124,9 +156,9 @@ export function useOfficerScan({
         scannedAt,
         risk,
         evidence: scanEvidenceDraft,
-        officerName: authUser.name
+        officerName: authUser.name,
       }),
-      ...current
+      ...current,
     ]);
     setLastScanResult({
       badge,
@@ -136,27 +168,29 @@ export function useOfficerScan({
       location: scanLocation,
       scannedAt,
       scanId,
-      evidence: scanEvidenceDraft
+      evidence: scanEvidenceDraft,
     });
     appendAuditEvent({
       badgeId: badge?.id ?? parsedScanInput.value,
       type: 'Officer scan',
       actor: authUser.name,
-      detail: `${scanOutcomeForVerification(risk)} scan at ${scanLocation}. Action: ${scanEvidenceDraft.action}.`
+      detail: `${scanOutcomeForVerification(risk)} scan at ${scanLocation}. Action: ${scanEvidenceDraft.action}.`,
     });
     if (badge) setSelectedBadgeId(badge.id);
     setOfficerNotice('');
   }
 
   function resolveScannedBadge(parsedScanInput, verifiedQrPayload) {
-    if (parsedScanInput.kind === 'badge-id') return badges.find((badge) => badge.id.toUpperCase() === parsedScanInput.value);
+    if (parsedScanInput.kind === 'badge-id')
+      return badges.find((badge) => badge.id.toUpperCase() === parsedScanInput.value);
     if (parsedScanInput.kind === 'qr-token') return badges.find((badge) => badge.id === verifiedQrPayload?.badgeId);
-    if (parsedScanInput.kind === 'vehicle') return badges.find((badge) => vehicleSearchKey(badge.vehicle) === vehicleSearchKey(parsedScanInput.value));
+    if (parsedScanInput.kind === 'vehicle')
+      return badges.find((badge) => vehicleSearchKey(badge.vehicle) === vehicleSearchKey(parsedScanInput.value));
     return null;
   }
 
   function createCaseFromScan() {
-    if (authUser.role !== 'officer' || role !== 'officer') {
+    if (!hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.verifyBadge })) {
       setOfficerNotice('Only an enforcement officer can open an enforcement case from a scan.');
       return;
     }
@@ -172,7 +206,9 @@ export function useOfficerScan({
     }
     const caseId = reserveCaseIdForBadge(badgeId);
     if (!caseId) {
-      setOfficerNotice(`An open case is already being created for ${badgeId}. The scan has been kept in the audit trail.`);
+      setOfficerNotice(
+        `An open case is already being created for ${badgeId}. The scan has been kept in the audit trail.`,
+      );
       return;
     }
     setCases((current) => [
@@ -181,17 +217,23 @@ export function useOfficerScan({
         badgeId,
         scanResult: lastScanResult,
         addedAt: lastScanResult.scannedAt,
-        addedBy: authUser.name
+        addedBy: authUser.name,
       }),
-      ...current
+      ...current,
     ]);
     appendAuditEvent({
       badgeId,
       type: 'Case opened',
       actor: authUser.name,
-      detail: `Officer opened ${caseId} from scan ${lastScanResult.scanId}.`
+      detail: `Officer opened ${caseId} from scan ${lastScanResult.scanId}.`,
     });
     setOfficerNotice(`Enforcement case ${caseId} opened for ${badgeId}.`);
+  }
+
+  async function verifyBadgeBackedToken(token, badge, scannedAt) {
+    if (!badge) return null;
+    const payload = await verifyBadgeToken(token, { badge, now: new Date(scannedAt) });
+    return payload ? badge : null;
   }
 
   return {
@@ -208,7 +250,7 @@ export function useOfficerScan({
     officerNotice,
     resetScanResult,
     recordBadgeScan,
-    createCaseFromScan
+    createCaseFromScan,
   };
 }
 
@@ -218,7 +260,7 @@ function buildOfficerScanContext({ vehicle, location, scannedAt }) {
     location,
     gps: gpsForKnownLocation(location),
     time: scannedAt,
-    device: location.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07'
+    device: location.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07',
   };
 }
 
@@ -236,6 +278,6 @@ function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, risk, evi
     contravention: evidence.contravention,
     action: evidence.action,
     officerNote: evidence.officerNote,
-    evidenceItems: scanEvidenceItems(evidence, scannedAt, officerName)
+    evidenceItems: scanEvidenceItems(evidence, scannedAt, officerName),
   };
 }

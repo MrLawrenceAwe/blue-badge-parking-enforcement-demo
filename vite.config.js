@@ -6,5 +6,8 @@ const base = repositoryName ? `/${repositoryName}/` : '/';
 
 export default defineConfig({
   plugins: [react()],
-  base
+  base,
+  test: {
+    exclude: ['node_modules/**', 'dist/**', 'tests/e2e/**'],
+  },
 });

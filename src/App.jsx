@@ -14,7 +14,7 @@ export function App() {
   const enforcementStore = useDemoEnforcementStore();
   const auth = useDemoAuth({
     demoUsers,
-    badges: enforcementStore.badges
+    badges: enforcementStore.badges,
   });
 
   const badgeActions = useBadgeActions({
@@ -27,7 +27,7 @@ export function App() {
     setCases: enforcementStore.setCases,
     setReplacementRequests: enforcementStore.setReplacementRequests,
     appendAuditEvent: enforcementStore.appendAuditEvent,
-    queueNotification: enforcementStore.queueNotification
+    queueNotification: enforcementStore.queueNotification,
   });
 
   const officerScan = useOfficerScan({
@@ -42,7 +42,7 @@ export function App() {
     setCases: enforcementStore.setCases,
     setSelectedBadgeId: auth.setSelectedBadgeId,
     riskRules: enforcementStore.riskRules,
-    appendAuditEvent: enforcementStore.appendAuditEvent
+    appendAuditEvent: enforcementStore.appendAuditEvent,
   });
 
   const adminCases = useAdminCases({
@@ -54,15 +54,21 @@ export function App() {
     setBadges: enforcementStore.setBadges,
     riskByBadge: enforcementStore.riskByBadge,
     appendAuditEvent: enforcementStore.appendAuditEvent,
-    queueNotification: enforcementStore.queueNotification
+    queueNotification: enforcementStore.queueNotification,
   });
   const riskRuleActions = useRiskRules({
-    setRiskRules: enforcementStore.setRiskRules
+    setRiskRules: enforcementStore.setRiskRules,
   });
 
   return (
     <main>
-      <AppHeader role={auth.role} availableRoles={auth.availableRoles} demoUsers={demoUsers} setRole={auth.setRole} selectDemoUser={auth.demoAccountDrawer.selectDemoUser} />
+      <AppHeader
+        role={auth.role}
+        availableRoles={auth.availableRoles}
+        demoUsers={demoUsers}
+        setRole={auth.setRole}
+        selectDemoUser={auth.demoAccountDrawer.selectDemoUser}
+      />
 
       <AuthStrip
         authUser={auth.authUser}
@@ -77,6 +83,7 @@ export function App() {
         setLoginPassword={auth.login.setPassword}
         selectDemoUser={auth.demoAccountDrawer.selectDemoUser}
         signIn={auth.login.signIn}
+        resetDemoState={enforcementStore.resetDemoState}
       />
 
       <SummaryStrip
