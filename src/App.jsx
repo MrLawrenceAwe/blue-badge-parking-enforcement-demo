@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CarerView } from './components/carer/CarerView';
 import { AdminView } from './components/admin/AdminView';
 import { AppHeader } from './components/app/AppHeader';
@@ -32,6 +32,31 @@ import { verifyBadgeToken } from './domain/badgeTokens';
 import { createSessionId, createSignedSessionRecord } from './domain/sessionProofs';
 import { buildSessionPayload, isSessionActive } from './domain/sessions';
 import { timestampNow } from './utils/date';
+
+const riskRuleLimits = {
+  highRiskThreshold: { min: 1, max: 100 },
+  reviewThreshold: { min: 1, max: 100 },
+  monitorThreshold: { min: 1, max: 100 },
+  closeScanMinutes: { min: 5, max: 240 }
+};
+
+function nextNumericId(records, prefix, fallback) {
+  const highestExistingId = Math.max(
+    fallback,
+    ...records
+      .map((record) => Number(String(record.id).replace(prefix, '')))
+      .filter(Number.isFinite)
+  );
+  return highestExistingId + 1;
+}
+
+function buildScanEvidenceItems(evidence, addedAt) {
+  return [
+    evidence.vehiclePhotoRef && { type: 'Vehicle photo', reference: evidence.vehiclePhotoRef, addedBy: 'EO Current User', addedAt },
+    evidence.badgePhotoRef && { type: 'Badge photo', reference: evidence.badgePhotoRef, addedBy: 'EO Current User', addedAt },
+    evidence.officerNote && { type: 'Officer note', reference: evidence.officerNote, addedBy: 'EO Current User', addedAt }
+  ].filter(Boolean);
+}
 
 export function App() {
   const [role, setRole] = useState(demoUsers[0].role);
@@ -72,6 +97,7 @@ export function App() {
   const [adminMessage, setAdminMessage] = useState('');
   const [officerMessage, setOfficerMessage] = useState('');
   const [demoDrawerOpen, setDemoDrawerOpen] = useState(false);
+  const nextScanNumber = useRef(nextNumericId(initialScans, 'SC-', 90199));
 
   useEffect(() => {
     let cancelled = false;
@@ -142,6 +168,30 @@ export function App() {
       },
       ...current
     ]);
+  }
+
+  function updateScanEvidence(updater) {
+    setScanEvidence((currentEvidence) => {
+      const nextEvidence = typeof updater === 'function' ? updater(currentEvidence) : updater;
+      setLastScanResult((currentResult) => {
+        if (!currentResult) return currentResult;
+        return { ...currentResult, evidence: nextEvidence };
+      });
+      setScans((currentScans) =>
+        currentScans.map((scan) =>
+          scan.id === lastScanResult?.scanId
+            ? {
+              ...scan,
+              contravention: nextEvidence.contravention,
+              action: nextEvidence.action,
+              officerNote: nextEvidence.officerNote,
+              evidenceItems: buildScanEvidenceItems(nextEvidence, scan.time)
+            }
+            : scan
+        )
+      );
+      return nextEvidence;
+    });
   }
 
   function queueNotification({ badgeId, recipient, channel = 'Email', message }) {
@@ -397,7 +447,8 @@ export function App() {
       includeCurrentFailure: predictedOutcome !== 'valid'
     }, riskRules);
 
-    const scanId = `SC-${90200 + scans.length}`;
+    const scanId = `SC-${nextScanNumber.current}`;
+    nextScanNumber.current += 1;
     setScans((current) => [
       {
         id: scanId,
@@ -412,11 +463,7 @@ export function App() {
         contravention: scanEvidence.contravention,
         action: scanEvidence.action,
         officerNote: scanEvidence.officerNote,
-        evidenceItems: [
-          scanEvidence.vehiclePhotoRef && { type: 'Vehicle photo', reference: scanEvidence.vehiclePhotoRef, addedBy: 'EO Current User', addedAt: scannedAt },
-          scanEvidence.badgePhotoRef && { type: 'Badge photo', reference: scanEvidence.badgePhotoRef, addedBy: 'EO Current User', addedAt: scannedAt },
-          scanEvidence.officerNote && { type: 'Officer note', reference: scanEvidence.officerNote, addedBy: 'EO Current User', addedAt: scannedAt }
-        ].filter(Boolean)
+        evidenceItems: buildScanEvidenceItems(scanEvidence, scannedAt)
       },
       ...current
     ]);
@@ -563,9 +610,15 @@ export function App() {
   }
 
   function updateRiskRule(field, value) {
+    const limits = riskRuleLimits[field];
     const numericValue = Number(value);
-    setRiskRules((current) => ({ ...current, [field]: numericValue }));
-    setAdminMessage(`Risk rule updated: ${field} is now ${numericValue}.`);
+    if (!limits || !Number.isFinite(numericValue)) {
+      setAdminMessage('Enter a valid number before updating this risk rule.');
+      return;
+    }
+    const clampedValue = Math.min(limits.max, Math.max(limits.min, numericValue));
+    setRiskRules((current) => ({ ...current, [field]: clampedValue }));
+    setAdminMessage(`Risk rule updated: ${field} is now ${clampedValue}.`);
   }
 
   const filteredBadges = badges.filter((badge) => {
@@ -674,7 +727,7 @@ export function App() {
           scanResult={lastScanResult}
           sessions={activeSessions}
           scanForm={{ query: scanQuery, location: scanLocation, vehicle: scanVehicle }}
-          scanEvidence={{ values: scanEvidence, setValues: setScanEvidence }}
+          scanEvidence={{ values: scanEvidence, setValues: updateScanEvidence }}
           scanActions={{ setQuery: setScanQuery, setLocation: setScanLocation, setVehicle: setScanVehicle, runScan, createCaseFromScan }}
           officerMessage={officerMessage}
         />
