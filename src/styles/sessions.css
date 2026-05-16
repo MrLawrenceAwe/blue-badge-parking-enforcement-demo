@@ -15,9 +15,14 @@
   border-left: 4px solid var(--red);
   border-radius: 6px;
   padding: 12px;
+  margin-top: 12px;
   background: #fff7f8;
   display: grid;
   gap: 10px;
+}
+
+.stolen-report-trigger {
+  margin-top: 12px;
 }
 
 .replacement-request-form {
@@ -44,10 +49,6 @@
 
 .stolen-report-form .danger-button {
   width: fit-content;
-}
-
-.badge-panel > .danger-button {
-  margin-top: 12px;
 }
 
 .session-actions .danger-button {
