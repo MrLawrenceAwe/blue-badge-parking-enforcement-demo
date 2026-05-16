@@ -138,6 +138,13 @@ h2 {
   background: #f7fbff;
 }
 
+.role-switcher button.active:hover,
+.tab-list button.active:hover {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue-dark);
+}
+
 .small-button {
   min-height: 40px;
   padding: 8px 12px;
