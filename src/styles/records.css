@@ -10,7 +10,7 @@
 
 .badge-record-button.selected {
   border-color: var(--blue);
-  outline: 2px solid #cce1f2;
+  outline: 2px solid var(--selection-ring);
 }
 
 .badge-record-button small,
@@ -47,7 +47,7 @@
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  background: #f4f8fb;
+  background: var(--surface-subtle);
 }
 
 .case-scope span {
@@ -98,6 +98,6 @@
   align-items: center;
   gap: 8px;
   border-left: 5px solid var(--amber);
-  background: #fff8e8;
+  background: var(--surface-warning-strong);
   padding: 10px;
 }

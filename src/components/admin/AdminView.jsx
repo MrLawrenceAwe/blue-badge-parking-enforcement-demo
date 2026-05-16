@@ -82,7 +82,12 @@ export function AdminView({
           ))}
         </div>
         {activeSectionId !== 'riskRules' && (
-          <AdminFilters filterForm={filterForm} filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
+          <AdminFilters
+            filterForm={filterForm}
+            filtersOpen={filtersOpen}
+            resultCount={adminDashboard.filteredBadges.length}
+            setFiltersOpen={setFiltersOpen}
+          />
         )}
       </div>
 

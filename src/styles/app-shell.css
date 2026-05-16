@@ -53,6 +53,36 @@ h1 {
   font-size: 0.93rem;
 }
 
+.role-switcher-wrap {
+  display: grid;
+  gap: 5px;
+  justify-items: end;
+}
+
+.header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  align-items: end;
+  gap: 10px;
+}
+
+.switcher-caption {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.theme-switcher {
+  display: grid;
+  gap: 5px;
+  min-width: 132px;
+}
+
+.theme-switcher select {
+  min-height: 40px;
+}
+
 h2 {
   font-size: 1.2rem;
   margin-bottom: 0;
@@ -70,8 +100,8 @@ h2 {
   background: transparent;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  padding: 7px 0;
-  margin-bottom: 9px;
+  padding: 6px 0;
+  margin-bottom: 8px;
   display: grid;
   gap: 8px;
   align-items: center;
@@ -89,8 +119,11 @@ h2 {
 }
 
 .auth-strip-copy {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 2px;
+  flex-wrap: wrap;
 }
 
 .demo-note {
@@ -113,9 +146,9 @@ h2 {
 .auth-controls summary,
 .demo-account-drawer summary {
   min-height: 40px;
-  border: 1px solid #b7c8d4;
+  border: 1px solid var(--interactive-border-muted);
   border-radius: 5px;
-  background: #fff;
+  background: var(--surface);
   color: var(--blue-dark);
   cursor: pointer;
   display: inline-flex;
@@ -162,9 +195,9 @@ h2 {
 
 .demo-account-button {
   min-height: 72px;
-  border: 1px solid #9bbbd1;
+  border: 1px solid var(--interactive-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   padding: 12px;
   text-align: left;
@@ -189,7 +222,7 @@ h2 {
 .demo-account-button.active {
   border-color: var(--blue);
   box-shadow: inset 0 0 0 2px var(--blue);
-  background: #f7fbff;
+  background: var(--surface-tint);
 }
 
 .auth-controls form {
@@ -217,7 +250,7 @@ h2 {
 
 .form-message {
   border-left: 5px solid var(--blue);
-  background: #e8f2fa;
+  background: var(--surface-accent);
   color: var(--ink);
   margin: 12px 0 0;
   padding: 10px;
@@ -226,7 +259,7 @@ h2 {
 
 .metric {
   background: var(--soft-surface);
-  border: 1px solid #d8e2e8;
+  border: 1px solid var(--panel-border);
   border-radius: 5px;
   padding: 9px 10px;
   display: grid;

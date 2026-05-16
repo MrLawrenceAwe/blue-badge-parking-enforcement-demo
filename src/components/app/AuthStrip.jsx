@@ -23,12 +23,10 @@ export function AuthStrip({
         <span>
           {authUser.email} · {authUser.role}
         </span>
-        <p className="demo-security-note">
-          Demo only: authentication, role checks, audit writes, and storage run in this browser.
-        </p>
+        <p className="demo-security-note">Demo data is stored in this browser.</p>
       </div>
       <details className="auth-controls">
-        <summary>Account sign in</summary>
+        <summary>Account details</summary>
         <details
           className="demo-account-drawer"
           open={demoDrawerOpen}

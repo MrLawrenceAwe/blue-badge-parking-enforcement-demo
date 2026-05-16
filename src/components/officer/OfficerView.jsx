@@ -15,6 +15,9 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
   const hasScanResult = Boolean(scanResult);
   const canOpenCaseFromScan = scanResult && risk.verificationStatus !== VERIFICATION_STATUS.valid;
   const isValid = risk.verificationStatus === VERIFICATION_STATUS.valid;
+  const evidenceReady =
+    !canOpenCaseFromScan ||
+    (scanEvidenceForm.values.contravention !== 'No action' && scanEvidenceForm.values.action !== 'No action');
   return (
     <div className="officer-layout">
       <section className="app-panel scan-panel">
@@ -52,7 +55,12 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
             )}
           </div>
           {canOpenCaseFromScan && (
-            <button className="secondary-button result-action" onClick={scanCommands.createCaseFromScan}>
+            <button
+              className="secondary-button result-action"
+              onClick={scanCommands.createCaseFromScan}
+              disabled={!evidenceReady}
+              title={evidenceReady ? 'Open enforcement case' : 'Choose a contravention and enforcement action first'}
+            >
               <FileText aria-hidden="true" size={20} />
               Open case
             </button>

@@ -2,7 +2,7 @@
 .account-status,
 .verification-result {
   border-radius: 8px;
-  color: #fff;
+  color: var(--on-dark);
   padding: 14px;
   display: grid;
   gap: 5px;
@@ -35,7 +35,7 @@
 
 .verification-pending {
   background: var(--surface);
-  border: 1px solid #9bbbd1;
+  border: 1px solid var(--interactive-border);
   color: var(--ink);
   gap: 8px;
   min-height: 0;
@@ -93,13 +93,29 @@
   gap: 4px;
 }
 
+.verification-result .result-action {
+  width: fit-content;
+  background: var(--surface);
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.verification-result .result-action:hover {
+  background: var(--soft-surface);
+}
+
+.verification-result .result-action:disabled {
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  color: var(--ink);
+}
+
 .risk-low {
   background: var(--green);
 }
 
 .risk-watch {
   background: var(--amber);
-  color: #101820;
+  color: var(--black);
 }
 
 .risk-high {
@@ -122,17 +138,17 @@
 
 .status-valid {
   color: var(--green);
-  background: #e8f5ee;
+  background: var(--surface-positive);
 }
 
 .status-expired,
 .status-under-review {
-  color: #7a4b00;
-  background: #fff4d6;
+  color: var(--warning-ink);
+  background: var(--surface-warning);
 }
 
 .status-suspended,
 .status-stolen {
   color: var(--red);
-  background: #fde8eb;
+  background: var(--surface-danger);
 }

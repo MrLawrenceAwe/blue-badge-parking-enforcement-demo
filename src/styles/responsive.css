@@ -24,6 +24,14 @@
     gap: 6px;
   }
 
+  .role-switcher-wrap {
+    justify-items: stretch;
+  }
+
+  .switcher-caption {
+    text-align: left;
+  }
+
   .role-switcher button {
     min-width: 0;
     gap: 4px;
@@ -189,7 +197,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border: 1px solid var(--line);
     border-radius: 6px;
-    background: #fbfcfd;
+    background: var(--surface-raised);
     padding: 9px 11px;
   }
 
