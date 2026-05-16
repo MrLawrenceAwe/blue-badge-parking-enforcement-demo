@@ -147,13 +147,6 @@ h2 {
   transform: translateY(-1px);
 }
 
-.role-switcher button.active:hover,
-.tab-list button.active:hover {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue-dark);
-}
-
 .primary-button:disabled {
   background: #b8c9d7;
   border-color: #b8c9d7;
