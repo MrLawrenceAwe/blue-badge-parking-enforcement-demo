@@ -13,26 +13,13 @@ const adminSections = [
 ];
 
 export function AdminView({
-  filteredBadges,
-  allBadges,
-  filteredActiveSessions,
-  filteredScans,
-  selectedBadgeCases,
-  riskByBadge,
+  records,
   filters,
   selectedBadge,
-  newCaseDraft,
-  updateNewCaseDraft,
-  noteDraftByCaseId,
-  setNoteDraftByCaseId,
-  auditEvents,
-  notifications,
-  replacementRequests,
+  caseDraft,
+  caseActions,
   riskRules,
-  adminActions,
-  adminMessage,
-  reviewQueueCases,
-  restrictedBadges
+  adminMessage
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('overview');
@@ -60,37 +47,37 @@ export function AdminView({
       <section className="dashboard-grid">
         {activeSectionId === 'overview' && (
           <AdminOverviewTab
-            filteredBadges={filteredBadges}
-            filteredActiveSessions={filteredActiveSessions}
-            filteredScans={filteredScans}
-            reviewQueueCases={reviewQueueCases}
-            restrictedBadges={restrictedBadges}
-            riskByBadge={riskByBadge}
-            selectBadge={adminActions.selectBadge}
+            filteredBadges={records.filteredBadges}
+            filteredActiveSessions={records.filteredActiveSessions}
+            filteredScans={records.filteredScans}
+            reviewQueueCases={records.reviewQueueCases}
+            restrictedBadges={records.restrictedBadges}
+            riskByBadge={records.riskByBadge}
+            selectBadge={caseActions.selectBadge}
           />
         )}
 
         {activeSectionId === 'cases' && (
           <CaseManagementTab
-            allBadges={allBadges}
+            allBadges={records.allBadges}
             selectedBadge={selectedBadge}
-            selectedBadgeCases={selectedBadgeCases}
-            newCaseDraft={newCaseDraft}
-            updateNewCaseDraft={updateNewCaseDraft}
-            noteDraftByCaseId={noteDraftByCaseId}
-            setNoteDraftByCaseId={setNoteDraftByCaseId}
+            selectedBadgeCases={records.selectedBadgeCases}
+            newCaseDraft={caseDraft.values}
+            updateNewCaseDraft={caseDraft.update}
+            noteDraftByCaseId={caseDraft.noteDraftByCaseId}
+            setNoteDraftByCaseId={caseDraft.setNoteDraftByCaseId}
             adminMessage={adminMessage}
-            caseActions={adminActions}
+            caseActions={caseActions}
           />
         )}
 
-        {activeSectionId === 'riskRules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={adminActions.updateRiskRule} />}
+        {activeSectionId === 'riskRules' && <RiskRulesTab riskRules={riskRules.values} updateRiskRule={riskRules.update} riskRuleNotice={riskRules.notice} />}
 
         {activeSectionId === 'audit' && (
           <AuditTab
-            auditEvents={auditEvents}
-            notifications={notifications}
-            replacementRequests={replacementRequests}
+            auditEvents={records.auditEvents}
+            notifications={records.notifications}
+            replacementRequests={records.replacementRequests}
           />
         )}
       </section>

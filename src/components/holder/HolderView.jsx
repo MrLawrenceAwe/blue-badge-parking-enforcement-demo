@@ -60,7 +60,7 @@ export function HolderView({
             aria-label={`Signed verification QR code for ${badge.id}`}
           />
         </div>
-        <div className={`account-status ${risk.toneClass}`}>
+        <div className={`account-status ${risk.severityClass}`}>
           <ShieldCheck aria-hidden="true" />
           <strong>{accountMessage}</strong>
         </div>

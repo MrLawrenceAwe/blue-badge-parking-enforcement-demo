@@ -40,7 +40,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
       </section>
 
       <div className="officer-decision-stack">
-        <section className={`verification-result ${risk.toneClass}${isValid ? ' compact-verification-result' : ''}`} aria-live="polite">
+        <section className={`verification-result ${risk.severityClass}${isValid ? ' compact-verification-result' : ''}`} aria-live="polite">
           <div>
             <p>Result</p>
             <h2>{verificationVerdictLabels[risk.verdict]}</h2>
@@ -67,7 +67,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           </div>
           {isUnknown ? (
             <dl className="detail-list detail-list-grid">
-              <div><dt>Scan input</dt><dd>{scanResult?.query ?? scanForm.input}</dd></div>
+              <div><dt>Scan input</dt><dd>{scanResult?.input ?? scanForm.input}</dd></div>
               <div><dt>Observed vehicle</dt><dd>{scanResult?.vehicle ?? scanForm.vehicle}</dd></div>
               <div><dt>Location</dt><dd>{scanResult?.location ?? scanForm.location}</dd></div>
               <div><dt>Status</dt><dd>Unknown badge or unregistered vehicle</dd></div>

@@ -15,7 +15,7 @@ export function AppHeader({ role, currentDemoRoles, demoUsers, setRole, selectDe
           <p className="eyebrow">Digital Blue Badge</p>
           <span className="demo-pill">Prototype</span>
         </div>
-        <h1>Parking enforcement</h1>
+        <h1>Blue Badge enforcement</h1>
         <p className="hero-note">Badge checks, sessions, and cases.</p>
       </div>
       <div className="role-switcher" aria-label="Choose role">

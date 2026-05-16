@@ -1,4 +1,4 @@
-export const seedBadges = [
+export const initialBadges = [
   {
     id: 'BB-WCC-104928',
     holder: 'Amelia Hart',

@@ -25,7 +25,7 @@ export function CarerView({
     <div className="page-grid">
       <section className="app-panel">
         <div className="app-panel-heading">
-          <h2>Delegated access</h2>
+          <h2>Managed badges</h2>
           <UsersRound aria-hidden="true" />
         </div>
         <div className="record-list">
@@ -39,7 +39,7 @@ export function CarerView({
       </section>
       <section className="app-panel">
         <div className="app-panel-heading">
-          <h2>Activity</h2>
+          <h2>Badge activity</h2>
           <FileText aria-hidden="true" />
         </div>
         <p className="muted-text">Delegated sessions and notices.</p>

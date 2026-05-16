@@ -1,14 +1,18 @@
 import { AppHeader } from './components/app/AppHeader';
 import { AuthStrip } from './components/app/AuthStrip';
-import { AdminScreen, CarerScreen, HolderScreen, OfficerScreen } from './components/app/RoleScreens';
 import { SummaryStrip } from './components/app/SummaryStrip';
+import { AdminView } from './components/admin/AdminView';
+import { CarerView } from './components/carer/CarerView';
+import { HolderView } from './components/holder/HolderView';
+import { OfficerView } from './components/officer/OfficerView';
 import { demoAccountOrder, demoUsers } from './data/demoUsers';
 import { buildAdminRecordView } from './domain/adminFilters';
-import { useHolderBadgeActions } from './hooks/useHolderBadgeActions';
-import { useCaseManagement } from './hooks/useCaseManagement';
+import { useBadgeActions } from './hooks/useBadgeActions';
+import { useAdminCases } from './hooks/useAdminCases';
 import { useDemoAuth } from './hooks/useDemoAuth';
 import { useDemoRecords } from './hooks/useDemoRecords';
 import { useOfficerScan } from './hooks/useOfficerScan';
+import { useRiskRules } from './hooks/useRiskRules';
 
 export function App() {
   const records = useDemoRecords();
@@ -17,7 +21,7 @@ export function App() {
     badges: records.badges
   });
 
-  const holderActions = useHolderBadgeActions({
+  const badgeActions = useBadgeActions({
     authUser: auth.authUser,
     role: auth.role,
     selectedBadge: auth.selectedBadge,
@@ -45,7 +49,7 @@ export function App() {
     appendAuditEvent: records.appendAuditEvent
   });
 
-  const caseManagement = useCaseManagement({
+  const adminCases = useAdminCases({
     authUser: auth.authUser,
     role: auth.role,
     selectedBadge: auth.selectedBadge,
@@ -53,9 +57,11 @@ export function App() {
     setCases: records.setCases,
     setBadges: records.setBadges,
     riskByBadge: records.riskByBadge,
-    setRiskRules: records.setRiskRules,
     appendAuditEvent: records.appendAuditEvent,
     queueNotification: records.queueNotification
+  });
+  const riskRuleActions = useRiskRules({
+    setRiskRules: records.setRiskRules
   });
 
   const adminRecordView = buildAdminRecordView({
@@ -63,7 +69,7 @@ export function App() {
     sessions: records.sessions,
     scans: records.scans,
     cases: records.cases,
-    filters: caseManagement.adminFilters,
+    filters: adminCases.adminFilters,
     riskByBadge: records.riskByBadge,
     selectedBadgeId: auth.selectedBadge.id
   });
@@ -72,22 +78,20 @@ export function App() {
     notifications: records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id)
   };
   const replacementForm = {
-    values: holderActions.replacementDraft,
-    setValues: holderActions.setReplacementDraft
+    values: badgeActions.replacementDraft,
+    setValues: badgeActions.setReplacementDraft
   };
   const adminFilters = {
-    values: caseManagement.adminFilters,
-    setValues: caseManagement.setAdminFilters
+    values: adminCases.adminFilters,
+    setValues: adminCases.setAdminFilters
   };
   const adminActions = {
     selectBadge: auth.setSelectedBadgeId,
-    createCaseForSelectedBadge: caseManagement.createCaseForSelectedBadge,
-    updateCase: caseManagement.updateCase,
-    appendCaseNote: caseManagement.appendCaseNote,
-    reactivateBadge: caseManagement.reactivateBadgeAfterReview,
-    updateRiskRule: caseManagement.updateRiskRule
+    createCaseForSelectedBadge: adminCases.createCaseForSelectedBadge,
+    updateCase: adminCases.updateCase,
+    appendCaseNote: adminCases.appendCaseNote,
+    reactivateBadge: adminCases.reactivateBadgeAfterReview
   };
-
   return (
     <main>
       <AppHeader role={auth.role} currentDemoRoles={auth.currentDemoRoles} demoUsers={demoUsers} setRole={auth.setRole} selectDemoUser={auth.demoAccountDrawer.selectDemoUser} />
@@ -115,37 +119,91 @@ export function App() {
       />
 
       {auth.role === 'holder' && (
-        <HolderScreen
-          auth={auth}
-          records={records}
-          holderActions={holderActions}
+        <HolderView
+          badge={auth.selectedBadge}
+          badges={auth.roleBadges}
+          setSelectedBadgeId={auth.setSelectedBadgeId}
+          sessions={records.sessions}
+          startSession={badgeActions.startSession}
+          extendSession={badgeActions.extendSession}
+          endSession={badgeActions.endSession}
+          reportStolen={badgeActions.reportStolen}
+          requestReplacementBadge={badgeActions.requestReplacementBadge}
           replacementForm={replacementForm}
-          selectedBadgeActivity={selectedBadgeActivity}
+          replacementRequests={selectedBadgeActivity.replacementRequests}
+          notifications={selectedBadgeActivity.notifications}
+          risk={records.riskByBadge[auth.selectedBadge.id]}
+          sessionMessage={badgeActions.badgeNotice}
         />
       )}
 
       {auth.role === 'carer' && (
-        <CarerScreen
-          auth={auth}
-          records={records}
-          holderActions={holderActions}
+        <CarerView
+          badges={auth.roleBadges}
+          selectedBadge={auth.selectedBadge}
+          setSelectedBadgeId={auth.setSelectedBadgeId}
+          sessions={records.sessions}
+          startSession={badgeActions.startSession}
+          extendSession={badgeActions.extendSession}
+          endSession={badgeActions.endSession}
+          reportStolen={badgeActions.reportStolen}
+          requestReplacementBadge={badgeActions.requestReplacementBadge}
           replacementForm={replacementForm}
-          selectedBadgeActivity={selectedBadgeActivity}
+          replacementRequests={selectedBadgeActivity.replacementRequests}
+          notifications={selectedBadgeActivity.notifications}
+          sessionMessage={badgeActions.badgeNotice}
         />
       )}
 
       {auth.role === 'officer' && (
-        <OfficerScreen auth={auth} records={records} scanActions={scanActions} />
+        <OfficerView
+          badge={scanActions.lastScanResult ? scanActions.lastScanResult.badge : auth.selectedBadge}
+          risk={scanActions.previewRisk}
+          scanResult={scanActions.lastScanResult}
+          sessions={records.activeSessions}
+          scanForm={{ input: scanActions.scanInput, location: scanActions.scanLocation, vehicle: scanActions.scanVehicle }}
+          scanEvidence={{ values: scanActions.scanEvidenceDraft, setValues: scanActions.updateScanEvidenceDraft }}
+          scanActions={{
+            setInput: scanActions.setScanInput,
+            setLocation: scanActions.setScanLocation,
+            setVehicle: scanActions.setScanVehicle,
+            verifyBadge: scanActions.recordBadgeScan,
+            createCaseFromScan: scanActions.createCaseFromScan
+          }}
+          officerMessage={scanActions.officerNotice}
+        />
       )}
 
       {auth.role === 'admin' && (
-        <AdminScreen
-          auth={auth}
-          records={records}
-          caseManagement={caseManagement}
-          adminFilters={adminFilters}
-          adminActions={adminActions}
-          adminRecordView={adminRecordView}
+        <AdminView
+          records={{
+            allBadges: records.badges,
+            filteredBadges: adminRecordView.filteredBadges,
+            filteredActiveSessions: adminRecordView.filteredActiveSessions,
+            filteredScans: adminRecordView.filteredScans,
+            selectedBadgeCases: adminRecordView.selectedBadgeCases,
+            reviewQueueCases: adminRecordView.reviewQueueCases,
+            restrictedBadges: adminRecordView.restrictedBadges,
+            auditEvents: records.auditEvents,
+            notifications: records.notifications,
+            replacementRequests: records.replacementRequests,
+            riskByBadge: records.riskByBadge
+          }}
+          filters={adminFilters}
+          selectedBadge={auth.selectedBadge}
+          caseDraft={{
+            values: adminCases.newCaseDraft,
+            update: adminCases.updateNewCaseDraft,
+            noteDraftByCaseId: adminCases.noteDraftByCaseId,
+            setNoteDraftByCaseId: adminCases.setNoteDraftByCaseId
+          }}
+          caseActions={adminActions}
+          riskRules={{
+            values: records.riskRules,
+            update: riskRuleActions.updateRiskRule,
+            notice: riskRuleActions.riskRuleNotice
+          }}
+          adminMessage={adminCases.adminNotice}
         />
       )}
     </main>

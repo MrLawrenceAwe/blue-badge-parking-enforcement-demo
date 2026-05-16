@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  seedAuditEvents,
-  seedScans,
-  seedSessions
+  initialAuditEvents,
+  initialScans,
+  initialSessions
 } from '../data/demoActivity';
-import { seedBadges } from '../data/demoBadges';
+import { initialBadges } from '../data/demoBadges';
 import {
-  seedCases,
-  seedNotifications,
-  seedReplacementRequests
+  initialCases,
+  initialNotifications,
+  initialReplacementRequests
 } from '../data/demoCases';
 import { evaluateBadgeRisk } from '../domain/risk';
 import { createDemoAttestedSession } from '../domain/sessionProofs';
@@ -19,18 +19,18 @@ import { formatRecordId } from '../domain/ids';
 import { timestampNow } from '../utils/date';
 
 export function useDemoRecords(currentActor = 'System') {
-  const [badges, setBadges] = useState(seedBadges);
-  const [sessions, setSessions] = useState(() => seedSessions.map((session) => ({ ...session, locked: true })));
-  const [scans, setScans] = useState(seedScans);
-  const [cases, setCases] = useState(seedCases);
-  const [auditEvents, setAuditEvents] = useState(seedAuditEvents);
-  const [notifications, setNotifications] = useState(seedNotifications);
-  const [replacementRequests, setReplacementRequests] = useState(seedReplacementRequests);
+  const [badges, setBadges] = useState(initialBadges);
+  const [sessions, setSessions] = useState(() => initialSessions.map((session) => ({ ...session, locked: true })));
+  const [scans, setScans] = useState(initialScans);
+  const [cases, setCases] = useState(initialCases);
+  const [auditEvents, setAuditEvents] = useState(initialAuditEvents);
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const [replacementRequests, setReplacementRequests] = useState(initialReplacementRequests);
   const [riskRules, setRiskRules] = useState(defaultRiskRules);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(seedSessions.map((session) => createDemoAttestedSession({ ...session, locked: true }))).then((signedSessions) => {
+    Promise.all(initialSessions.map((session) => createDemoAttestedSession({ ...session, locked: true }))).then((signedSessions) => {
       if (cancelled) return;
       setSessions((current) => {
         const signedById = new Map(signedSessions.map((session) => [session.id, session]));
