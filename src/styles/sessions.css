@@ -46,8 +46,12 @@
   width: fit-content;
 }
 
+.badge-panel > .danger-button {
+  margin-top: 12px;
+}
+
 .session-actions .danger-button {
-  min-width: 140px;
+  min-width: 0;
 }
 
 .result-action {
