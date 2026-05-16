@@ -114,6 +114,10 @@ export function useBadgeAccountActions({
       setAccountNotice('Only the holder or delegated carer for this badge can report it stolen in the demo.');
       return false;
     }
+    if (selectedBadge.status === 'stolen') {
+      setAccountNotice('This badge has already been reported stolen. Use the replacement request workflow or contact the council with new evidence.');
+      return false;
+    }
     const details = formData?.get('details')?.toString().trim();
     const contact = formData?.get('contact')?.toString().trim();
     const confirmed = formData?.get('confirmed') === 'yes';
