@@ -41,7 +41,7 @@ export function createAdminCase({ id, badge, risk, form, addedBy, addedAt }) {
   };
 }
 
-export function createOfficerScanCase({ id, badgeId, scanResult, addedAt }) {
+export function createOfficerScanCase({ id, badgeId, scanResult, addedAt, addedBy }) {
   const { risk } = scanResult;
   return {
     id,
@@ -56,10 +56,10 @@ export function createOfficerScanCase({ id, badgeId, scanResult, addedAt }) {
     ],
     evidence: `Officer scan log ${scanResult.scanId}`,
     evidenceItems: [
-      { type: 'Scan log', reference: scanResult.scanId, addedBy: 'EO Current User', addedAt },
-      scanResult.evidence.vehiclePhotoRef && { type: 'Vehicle photo', reference: scanResult.evidence.vehiclePhotoRef, addedBy: 'EO Current User', addedAt },
-      scanResult.evidence.badgePhotoRef && { type: 'Badge photo', reference: scanResult.evidence.badgePhotoRef, addedBy: 'EO Current User', addedAt },
-      scanResult.evidence.officerNote && { type: 'Officer note', reference: scanResult.evidence.officerNote, addedBy: 'EO Current User', addedAt }
+      { type: 'Scan log', reference: scanResult.scanId, addedBy, addedAt },
+      scanResult.evidence.vehiclePhotoRef && { type: 'Vehicle photo', reference: scanResult.evidence.vehiclePhotoRef, addedBy, addedAt },
+      scanResult.evidence.badgePhotoRef && { type: 'Badge photo', reference: scanResult.evidence.badgePhotoRef, addedBy, addedAt },
+      scanResult.evidence.officerNote && { type: 'Officer note', reference: scanResult.evidence.officerNote, addedBy, addedAt }
     ].filter(Boolean)
   };
 }

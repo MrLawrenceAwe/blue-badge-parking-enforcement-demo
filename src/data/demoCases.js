@@ -1,4 +1,4 @@
-export const seedCases = [
+export const initialCases = [
   {
     id: 'CASE-4180',
     badgeId: 'BB-CAM-550912',
@@ -29,10 +29,10 @@ export const seedCases = [
   }
 ];
 
-export const seedNotifications = [
+export const initialNotifications = [
   { id: 'NOT-1001', badgeId: 'BB-CAM-550912', recipient: 'grace.patel@example.test', channel: 'Email', time: '2026-05-15T16:00:00+01:00', message: 'Your badge was deactivated after being reported stolen.' }
 ];
 
-export const seedReplacementRequests = [
+export const initialReplacementRequests = [
   { id: 'REP-1001', badgeId: 'BB-CAM-550912', status: 'Pending evidence review', requestedAt: '2026-05-15T16:02:00+01:00', reference: 'CRN-2026-5100', temporaryPermit: 'Pending' }
 ];

@@ -3,21 +3,16 @@ import { createAdminCase, isCaseOpen } from '../domain/cases';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
 
-const riskRuleLimits = {
-  highRiskThreshold: { min: 1, max: 100 },
-  reviewThreshold: { min: 1, max: 100 },
-  monitorThreshold: { min: 1, max: 100 },
-  impossibleTravelWindowMins: { min: 5, max: 240 }
+const initialCaseDraft = {
+  note: '',
+  status: 'Open',
+  assignee: 'Unassigned',
+  evidence: '',
+  dueDate: '',
+  closureReason: ''
 };
 
-const riskRuleLabels = {
-  highRiskThreshold: 'high risk threshold',
-  reviewThreshold: 'review threshold',
-  monitorThreshold: 'monitor threshold',
-  impossibleTravelWindowMins: 'impossible travel window'
-};
-
-export function useCaseManagement({
+export function useAdminCases({
   authUser,
   role,
   selectedBadge,
@@ -25,18 +20,10 @@ export function useCaseManagement({
   setCases,
   setBadges,
   riskByBadge,
-  setRiskRules,
   appendAuditEvent,
   queueNotification
 }) {
-  const [newCaseDraft, setNewCaseDraft] = useState({
-    note: '',
-    status: 'Open',
-    assignee: 'Unassigned',
-    evidence: '',
-    dueDate: '',
-    closureReason: ''
-  });
+  const [newCaseDraft, setNewCaseDraft] = useState(initialCaseDraft);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
   const [adminFilters, setAdminFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
@@ -47,14 +34,7 @@ export function useCaseManagement({
   }
 
   function resetNewCaseDraft() {
-    setNewCaseDraft({
-      note: '',
-      status: 'Open',
-      assignee: 'Unassigned',
-      evidence: '',
-      dueDate: '',
-      closureReason: ''
-    });
+    setNewCaseDraft(initialCaseDraft);
   }
 
   function createCaseForSelectedBadge() {
@@ -161,18 +141,6 @@ export function useCaseManagement({
     setNoteDraftByCaseId((current) => ({ ...current, [caseId]: '' }));
   }
 
-  function updateRiskRule(field, value) {
-    const limits = riskRuleLimits[field];
-    const numericValue = Number(value);
-    if (!limits || !Number.isFinite(numericValue)) {
-      setAdminNotice('Enter a valid number before updating this risk rule.');
-      return;
-    }
-    const clampedValue = Math.min(limits.max, Math.max(limits.min, numericValue));
-    setRiskRules((current) => ({ ...current, [field]: clampedValue }));
-    setAdminNotice(`Risk rule updated: ${riskRuleLabels[field]} is now ${clampedValue}.`);
-  }
-
   return {
     newCaseDraft,
     updateNewCaseDraft,
@@ -184,7 +152,6 @@ export function useCaseManagement({
     createCaseForSelectedBadge,
     reactivateBadgeAfterReview,
     updateCase,
-    appendCaseNote,
-    updateRiskRule
+    appendCaseNote
   };
 }

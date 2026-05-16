@@ -1,6 +1,6 @@
 import { timestampMinutesAgo } from '../utils/date';
 
-export const seedSessions = [
+export const initialSessions = [
   {
     id: 'PS-23018',
     badgeId: 'BB-WCC-104928',
@@ -33,7 +33,7 @@ export const seedSessions = [
   }
 ];
 
-export const seedScans = [
+export const initialScans = [
   {
     id: 'SC-90182',
     badgeId: 'BB-WCC-104928',
@@ -80,7 +80,7 @@ export const seedScans = [
   }
 ];
 
-export const seedAuditEvents = [
+export const initialAuditEvents = [
   { id: 'AUD-1001', badgeId: 'BB-WCC-104928', type: 'Session started', actor: 'Amelia Hart', time: timestampMinutesAgo(25), detail: 'Locked parking session PS-23018 started at Oxford Street W1C.' },
   { id: 'AUD-1002', badgeId: 'BB-CAM-550912', type: 'Stolen scan', actor: 'EO Chen', time: '2026-05-15T15:58:00+01:00', detail: 'Reported stolen badge scanned at Euston Road NW1.' },
   { id: 'AUD-1003', badgeId: 'BB-SWK-773019', type: 'Case opened', actor: 'Southwark Admin', time: '2026-05-15T16:05:00+01:00', detail: 'Repeated long-stay case opened for review.' }
