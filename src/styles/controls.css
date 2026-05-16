@@ -1,0 +1,96 @@
+.role-switcher,
+.button-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.role-switcher button,
+.tab-list button,
+.primary-button,
+.secondary-button,
+.danger-button {
+  min-height: 44px;
+  border-radius: 5px;
+  border: 1px solid #9bbbd1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 13px;
+  font-weight: 650;
+}
+
+.role-switcher button {
+  min-width: 104px;
+  background: var(--surface);
+  color: var(--blue-dark);
+  border-color: #9bbbd1;
+}
+
+.tab-list button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--blue-dark);
+}
+
+.role-switcher button:disabled {
+  border-color: #aeb9c0;
+  color: #6f7b84;
+  background: #e6ecef;
+  cursor: not-allowed;
+}
+
+.role-switcher button.active,
+.tab-list button.active,
+.primary-button {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+.role-switcher button.active,
+.tab-list button.active {
+  border-color: var(--blue-dark);
+}
+
+.secondary-button {
+  border-color: #b7c8d4;
+  background: transparent;
+  color: var(--blue);
+}
+
+.secondary-button:hover,
+.role-switcher button:hover,
+.tab-list button:hover,
+.admin-filters summary:hover {
+  background: #f7fbff;
+}
+
+.role-switcher button.active:hover,
+.tab-list button.active:hover {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue-dark);
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+.danger-button {
+  min-height: 40px;
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+  padding: 7px 12px;
+  font-size: 0.95rem;
+}

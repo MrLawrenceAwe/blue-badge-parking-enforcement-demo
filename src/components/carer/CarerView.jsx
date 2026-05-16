@@ -2,10 +2,8 @@ import { Clock3, FileText, UsersRound } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { SessionCard } from '../sessions/SessionCard';
 import { StatusPill } from '../common/StatusPill';
-import { StolenReportForm } from '../common/StolenReportForm';
 import { BadgeNotifications } from '../badges/BadgeNotifications';
-import { ReplacementRequestForm } from '../replacements/ReplacementRequestForm';
-import { SessionStartForm } from '../sessions/SessionStartForm';
+import { BadgeSelfServicePanel } from '../badges/BadgeSelfServicePanel';
 
 export function CarerView({
   badges,
@@ -50,22 +48,27 @@ export function CarerView({
       </section>
       <section className="app-panel">
         <div className="app-panel-heading">
-          <h2>Session</h2>
+          <h2>Parking session</h2>
           <Clock3 aria-hidden="true" />
         </div>
         <div className="session-panel-stack">
-          <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
-          {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
-          <StolenReportForm reportStolen={reportStolen} />
-        </div>
-        {selectedBadge.status === 'stolen' && (
-          <ReplacementRequestForm
+          <BadgeSelfServicePanel
+            badge={selectedBadge}
+            activeSession={activeSession}
+            sessionMessage={sessionMessage}
+            startSession={startSession}
+            extendSession={extendSession}
+            endSession={endSession}
+            reportStolen={reportStolen}
+            requestReplacementBadge={requestReplacementBadge}
             replacementForm={replacementForm}
             replacementRequests={replacementRequests}
-            requestReplacementBadge={requestReplacementBadge}
+            notifications={notifications}
+            showActiveSession={false}
+            showNotifications={false}
             showTemporaryPermit={false}
           />
-        )}
+        </div>
       </section>
     </div>
   );

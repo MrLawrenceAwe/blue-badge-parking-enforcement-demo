@@ -7,7 +7,7 @@ import { HolderView } from './components/holder/HolderView';
 import { OfficerView } from './components/officer/OfficerView';
 import { demoAccountOrder, demoUsers } from './data/demoRecords';
 import { buildAdminDashboardData } from './domain/adminFilters';
-import { useBadgeAccountActions } from './hooks/useBadgeAccountActions';
+import { useBadgeSelfServiceActions } from './hooks/useBadgeSelfServiceActions';
 import { useCaseManagement } from './hooks/useCaseManagement';
 import { useDemoAuth } from './hooks/useDemoAuth';
 import { useDemoRecords } from './hooks/useDemoRecords';
@@ -20,7 +20,7 @@ export function App() {
     badges: records.badges
   });
 
-  const accountActions = useBadgeAccountActions({
+  const selfServiceActions = useBadgeSelfServiceActions({
     authUser: auth.authUser,
     role: auth.role,
     selectedBadge: auth.selectedBadge,
@@ -77,6 +77,24 @@ export function App() {
     riskByBadge: records.riskByBadge,
     selectedBadgeId: auth.selectedBadge.id
   });
+  const selectedBadgeReplacementRequests = records.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id);
+  const selectedBadgeNotifications = records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id);
+  const replacementForm = {
+    values: selfServiceActions.replacementDraft,
+    setValues: selfServiceActions.setReplacementDraft
+  };
+  const adminFilters = {
+    values: caseManagement.adminFilters,
+    setValues: caseManagement.setAdminFilters
+  };
+  const adminActions = {
+    selectBadge: auth.setSelectedBadgeId,
+    addCase: caseManagement.addCase,
+    updateCase: caseManagement.updateCase,
+    appendCaseNote: caseManagement.appendCaseNote,
+    reactivateBadge: caseManagement.reactivateBadgeAfterReview,
+    updateRiskRule: caseManagement.updateRiskRule
+  };
 
   return (
     <main>
@@ -110,48 +128,47 @@ export function App() {
           badges={auth.roleBadges}
           setSelectedBadgeId={auth.setSelectedBadgeId}
           sessions={records.sessions}
-          startSession={accountActions.startSession}
-          extendSession={accountActions.extendSession}
-          endSession={accountActions.endSession}
-          reportStolen={accountActions.reportStolen}
-          requestReplacementBadge={accountActions.requestReplacementBadge}
-          replacementForm={{ values: accountActions.replacementDraft, setValues: accountActions.setReplacementDraft }}
-          replacementRequests={records.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id)}
-          notifications={records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id)}
+          startSession={selfServiceActions.startSession}
+          extendSession={selfServiceActions.extendSession}
+          endSession={selfServiceActions.endSession}
+          reportStolen={selfServiceActions.reportStolen}
+          requestReplacementBadge={selfServiceActions.requestReplacementBadge}
+          replacementForm={replacementForm}
+          replacementRequests={selectedBadgeReplacementRequests}
+          notifications={selectedBadgeNotifications}
           risk={records.riskByBadge[auth.selectedBadge.id]}
-          sessionMessage={accountActions.accountNotice}
+          sessionMessage={selfServiceActions.selfServiceNotice}
         />
       )}
 
       {auth.role === 'carer' && (
         <CarerView
           badges={auth.roleBadges}
-          filters={{ values: caseManagement.adminFilters, setValues: caseManagement.setAdminFilters }}
           selectedBadge={auth.selectedBadge}
           setSelectedBadgeId={auth.setSelectedBadgeId}
           sessions={records.sessions}
-          startSession={accountActions.startSession}
-          extendSession={accountActions.extendSession}
-          endSession={accountActions.endSession}
-          reportStolen={accountActions.reportStolen}
-          requestReplacementBadge={accountActions.requestReplacementBadge}
-          replacementForm={{ values: accountActions.replacementDraft, setValues: accountActions.setReplacementDraft }}
-          replacementRequests={records.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id)}
-          notifications={records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id)}
-          sessionMessage={accountActions.accountNotice}
+          startSession={selfServiceActions.startSession}
+          extendSession={selfServiceActions.extendSession}
+          endSession={selfServiceActions.endSession}
+          reportStolen={selfServiceActions.reportStolen}
+          requestReplacementBadge={selfServiceActions.requestReplacementBadge}
+          replacementForm={replacementForm}
+          replacementRequests={selectedBadgeReplacementRequests}
+          notifications={selectedBadgeNotifications}
+          sessionMessage={selfServiceActions.selfServiceNotice}
         />
       )}
 
       {auth.role === 'officer' && (
         <OfficerView
           badge={scanActions.lastScanResult ? scanActions.lastScanResult.badge : auth.selectedBadge}
-          risk={scanActions.officerRisk}
+          risk={scanActions.currentOfficerRisk}
           scanResult={scanActions.lastScanResult}
           sessions={records.activeSessions}
-          scanForm={{ query: scanActions.scanLookup, location: scanActions.scanLocation, vehicle: scanActions.scanVehicle }}
+          scanForm={{ input: scanActions.scanInputValue, location: scanActions.scanLocation, vehicle: scanActions.scanVehicle }}
           scanEvidence={{ values: scanActions.scanEvidenceDraft, setValues: scanActions.updateScanEvidenceDraft }}
           scanActions={{
-            setQuery: scanActions.setScanLookup,
+            setInput: scanActions.setScanInputValue,
             setLocation: scanActions.setScanLocation,
             setVehicle: scanActions.setScanVehicle,
             runScan: scanActions.runScan,
@@ -169,7 +186,7 @@ export function App() {
           visibleScans={visibleScans}
           selectedBadgeCases={selectedBadgeCases}
           riskByBadge={records.riskByBadge}
-          filters={{ values: caseManagement.adminFilters, setValues: caseManagement.setAdminFilters }}
+          filters={adminFilters}
           selectedBadge={auth.selectedBadge}
           draftCase={caseManagement.draftCase}
           updateDraftCase={caseManagement.updateDraftCase}
@@ -179,14 +196,7 @@ export function App() {
           notifications={records.notifications}
           replacementRequests={records.replacementRequests}
           riskRules={records.riskRules}
-          adminActions={{
-            selectBadge: auth.setSelectedBadgeId,
-            addCase: caseManagement.addCase,
-            updateCase: caseManagement.updateCase,
-            appendCaseNote: caseManagement.appendCaseNote,
-            reactivateBadge: caseManagement.reactivateBadgeAfterReview,
-            updateRiskRule: caseManagement.updateRiskRule
-          }}
+          adminActions={adminActions}
           adminMessage={caseManagement.adminNotice}
           reviewQueueCases={reviewQueueCases}
           deactivatedBadges={deactivatedBadges}

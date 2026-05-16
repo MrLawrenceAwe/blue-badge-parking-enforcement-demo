@@ -2,14 +2,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Clock3, ShieldCheck } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { verificationTokenForBadge } from '../../domain/badgeTokens';
-import { RISK_VERDICT } from '../../domain/risk';
+import { VERIFICATION_VERDICT } from '../../domain/risk';
 import { formatDate } from '../../utils/date';
-import { SessionCard } from '../sessions/SessionCard';
 import { StatusPill } from '../common/StatusPill';
-import { StolenReportForm } from '../common/StolenReportForm';
-import { BadgeNotifications } from '../badges/BadgeNotifications';
-import { ReplacementRequestForm } from '../replacements/ReplacementRequestForm';
-import { SessionStartForm } from '../sessions/SessionStartForm';
+import { BadgeSelfServicePanel } from '../badges/BadgeSelfServicePanel';
 
 export function HolderView({
   badge,
@@ -29,9 +25,9 @@ export function HolderView({
 }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   const verificationToken = verificationTokenForBadge(badge.id);
-  const accountMessage = risk.verdict === RISK_VERDICT.valid
+  const accountMessage = risk.verdict === VERIFICATION_VERDICT.valid
     ? 'Badge ready for verification'
-    : risk.verdict === RISK_VERDICT.suspicious
+    : risk.verdict === VERIFICATION_VERDICT.suspicious
       ? 'Council review in progress'
       : 'Action required before use';
   return (
@@ -64,29 +60,30 @@ export function HolderView({
             aria-label={`Signed verification QR code for ${badge.id}`}
           />
         </div>
-        <div className={`account-status ${risk.severity}`}>
+        <div className={`account-status ${risk.toneClass}`}>
           <ShieldCheck aria-hidden="true" />
           <strong>{accountMessage}</strong>
         </div>
-        <StolenReportForm reportStolen={reportStolen} />
-        {badge.status === 'stolen' && (
-          <ReplacementRequestForm
-            replacementForm={replacementForm}
-            replacementRequests={replacementRequests}
-            requestReplacementBadge={requestReplacementBadge}
-          />
-        )}
       </section>
 
       <section className="app-panel">
         <div className="app-panel-heading">
-          <h2>Session clock</h2>
+          <h2>Parking session</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
-        {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
-        {activeSession && <SessionCard session={activeSession} />}
-        <BadgeNotifications notifications={notifications} />
+        <BadgeSelfServicePanel
+          badge={badge}
+          activeSession={activeSession}
+          sessionMessage={sessionMessage}
+          startSession={startSession}
+          extendSession={extendSession}
+          endSession={endSession}
+          reportStolen={reportStolen}
+          requestReplacementBadge={requestReplacementBadge}
+          replacementForm={replacementForm}
+          replacementRequests={replacementRequests}
+          notifications={notifications}
+        />
       </section>
     </div>
   );
