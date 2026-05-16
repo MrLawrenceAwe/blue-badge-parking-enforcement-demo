@@ -41,9 +41,7 @@ export function AdminView({
             </button>
           ))}
         </div>
-        {(activeSectionId === 'overview' || activeSectionId === 'cases') && (
-          <AdminFilters filters={filters} filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
-        )}
+        <AdminFilters filters={filters} filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
       </div>
 
       <section className="dashboard-grid">

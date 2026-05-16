@@ -15,33 +15,6 @@ export function AdminOverviewTab({
 }) {
   return (
     <>
-      <div className="app-panel suspicious-cases-panel operations-panel">
-        <div className="app-panel-heading"><h2>Priority queue</h2><ShieldAlert aria-hidden="true" /></div>
-        <div className="record-list constrained-list">
-          {reviewQueueCases.map((caseRecord) => (
-            <article key={caseRecord.id} className="case-card priority-card">
-              <strong>{caseRecord.id}</strong>
-              <span>{caseRecord.badgeId} - {caseRecord.status}</span>
-              <small>{caseRecord.assignedTo}</small>
-            </article>
-          ))}
-          {!reviewQueueCases.length && <p className="muted-text">No review cases match the current filters.</p>}
-        </div>
-      </div>
-
-      <div className="app-panel badge-status-panel">
-        <div className="app-panel-heading"><h2>Restricted badges</h2><Siren aria-hidden="true" /></div>
-        <div className="record-list constrained-list">
-          {restrictedBadges.map((badge) => (
-            <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectBadge(badge.id)}>
-              <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
-              <StatusPill status={badge.status} />
-            </button>
-          ))}
-          {!restrictedBadges.length && <p className="muted-text">No restricted badges match the filters.</p>}
-        </div>
-      </div>
-
       <div className="app-panel risk-panel">
         <div className="app-panel-heading"><h2>Risk scores</h2><Gauge aria-hidden="true" /></div>
         <div className="table-wrap">
@@ -88,6 +61,33 @@ export function AdminOverviewTab({
               <small>{scan.officer} - {formatTime(scan.time)} - {scan.outcome}</small>
             </article>
           ))}
+        </div>
+      </div>
+
+      <div className="app-panel suspicious-cases-panel">
+        <div className="app-panel-heading"><h2>Cases needing review</h2><ShieldAlert aria-hidden="true" /></div>
+        <div className="record-list constrained-list">
+          {reviewQueueCases.map((caseRecord) => (
+            <article key={caseRecord.id} className="case-card">
+              <strong>{caseRecord.id}</strong>
+              <span>{caseRecord.badgeId} - {caseRecord.status}</span>
+              <small>{caseRecord.assignedTo}</small>
+            </article>
+          ))}
+          {!reviewQueueCases.length && <p className="muted-text">No review cases match the current filters.</p>}
+        </div>
+      </div>
+
+      <div className="app-panel badge-status-panel">
+        <div className="app-panel-heading"><h2>Restricted badges</h2><Siren aria-hidden="true" /></div>
+        <div className="record-list constrained-list">
+          {restrictedBadges.map((badge) => (
+            <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectBadge(badge.id)}>
+              <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
+              <StatusPill status={badge.status} />
+            </button>
+          ))}
+          {!restrictedBadges.length && <p className="muted-text">No restricted badges match the filters.</p>}
         </div>
       </div>
     </>
