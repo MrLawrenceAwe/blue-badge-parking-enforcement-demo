@@ -140,7 +140,6 @@ h2 {
 }
 
 .danger-button {
-  width: 100%;
   border-color: var(--red);
   background: var(--red);
   color: #fff;
