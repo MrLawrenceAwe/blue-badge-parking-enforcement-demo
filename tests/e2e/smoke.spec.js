@@ -26,7 +26,12 @@ test('core demo workflows render and navigate without accessibility violations',
   await expectNoA11yViolations(page);
 
   await page.getByRole('button', { name: /Admin/i }).click();
-  await page.getByRole('tab', { name: /Cases/i }).click();
+  await page.getByRole('button', { name: 'BB-CAM-550912 Grace Patel', exact: true }).click();
+  await expect(page.getByRole('tab', { name: /Cases/i })).toBeFocused();
+  await expect(page.getByText(/Cases for Grace Patel/i)).toBeVisible();
+  await page.getByRole('tab', { name: /Overview/i }).click();
+  await page.getByRole('tab', { name: /Overview/i }).press('ArrowRight');
+  await expect(page.getByRole('tab', { name: /Cases/i })).toBeFocused();
   await expect(page.getByRole('heading', { name: /Case management/i })).toBeVisible();
   await expectNoA11yViolations(page);
 });
