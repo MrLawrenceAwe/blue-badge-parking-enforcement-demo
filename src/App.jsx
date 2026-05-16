@@ -169,6 +169,7 @@ export function App() {
           visibleScans={visibleScans}
           selectedBadgeCases={selectedBadgeCases}
           riskByBadge={records.riskByBadge}
+          filters={{ values: caseManagement.adminFilters, setValues: caseManagement.setAdminFilters }}
           selectedBadge={auth.selectedBadge}
           draftCase={caseManagement.draftCase}
           updateDraftCase={caseManagement.updateDraftCase}
