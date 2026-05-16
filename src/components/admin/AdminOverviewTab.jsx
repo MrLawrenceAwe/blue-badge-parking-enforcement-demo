@@ -1,5 +1,5 @@
 import { Clock3, Gauge, QrCode, ShieldAlert, Siren } from 'lucide-react';
-import { riskLevelLabel } from '../../domain/risk';
+import { riskLevelLabels } from '../../domain/risk';
 import { formatTime } from '../../utils/date';
 import { SessionCard } from '../common/SessionCard';
 import { StatusPill } from '../common/StatusPill';
@@ -9,14 +9,14 @@ export function AdminOverviewTab({
   visibleActiveSessions,
   visibleScans,
   suspiciousCases,
-  stolenOrSuspendedBadges,
+  restrictedBadges,
   riskByBadge,
   selectBadge
 }) {
   return (
     <>
-      <div className="panel risk-panel">
-        <div className="panel-heading"><h2>Fraud risk scores</h2><Gauge aria-hidden="true" /></div>
+      <div className="app-panel risk-panel">
+        <div className="app-panel-heading"><h2>Risk scores</h2><Gauge aria-hidden="true" /></div>
         <div className="table-wrap">
           <table>
             <thead><tr><th>Badge</th><th>Vehicle</th><th>Status</th><th>Risk</th></tr></thead>
@@ -38,7 +38,7 @@ export function AdminOverviewTab({
                   <td data-label="Badge">{badge.id}<br /><small>{badge.holder}</small></td>
                   <td data-label="Vehicle">{badge.vehicle}</td>
                   <td data-label="Status"><StatusPill status={badge.status} /></td>
-                  <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskLevelLabel[riskByBadge[badge.id].level]}</small></td>
+                  <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskLevelLabels[riskByBadge[badge.id].level]}</small></td>
                 </tr>
               ))}
             </tbody>
@@ -46,14 +46,14 @@ export function AdminOverviewTab({
         </div>
       </div>
 
-      <div className="panel active-sessions-panel">
-        <div className="panel-heading"><h2>Active sessions</h2><Clock3 aria-hidden="true" /></div>
-        <div className="list compact">{visibleActiveSessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
+      <div className="app-panel active-sessions-panel">
+        <div className="app-panel-heading"><h2>Active sessions</h2><Clock3 aria-hidden="true" /></div>
+        <div className="record-list constrained-list">{visibleActiveSessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
       </div>
 
-      <div className="panel recent-scans-panel">
-        <div className="panel-heading"><h2>Recent scans</h2><QrCode aria-hidden="true" /></div>
-        <div className="list compact">
+      <div className="app-panel recent-scans-panel">
+        <div className="app-panel-heading"><h2>Recent scans</h2><QrCode aria-hidden="true" /></div>
+        <div className="record-list constrained-list">
           {visibleScans.map((scan) => (
             <article key={scan.id} className="scan-card">
               <strong>{scan.badgeId}</strong>
@@ -64,9 +64,9 @@ export function AdminOverviewTab({
         </div>
       </div>
 
-      <div className="panel suspicious-cases-panel">
-        <div className="panel-heading"><h2>Suspicious cases</h2><ShieldAlert aria-hidden="true" /></div>
-        <div className="list compact">
+      <div className="app-panel suspicious-cases-panel">
+        <div className="app-panel-heading"><h2>Cases needing review</h2><ShieldAlert aria-hidden="true" /></div>
+        <div className="record-list constrained-list">
           {suspiciousCases.map((caseRecord) => (
             <article key={caseRecord.id} className="case-card">
               <strong>{caseRecord.id}</strong>
@@ -74,20 +74,20 @@ export function AdminOverviewTab({
               <small>{caseRecord.assignedTo}</small>
             </article>
           ))}
-          {!suspiciousCases.length && <p className="plain-text">No suspicious cases match the current filters.</p>}
+          {!suspiciousCases.length && <p className="muted-text">No review cases match the current filters.</p>}
         </div>
       </div>
 
-      <div className="panel badge-status-panel">
-        <div className="panel-heading"><h2>Stolen or suspended badges</h2><Siren aria-hidden="true" /></div>
-        <div className="list compact">
-          {stolenOrSuspendedBadges.map((badge) => (
+      <div className="app-panel badge-status-panel">
+        <div className="app-panel-heading"><h2>Restricted badges</h2><Siren aria-hidden="true" /></div>
+        <div className="record-list constrained-list">
+          {restrictedBadges.map((badge) => (
             <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectBadge(badge.id)}>
               <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
               <StatusPill status={badge.status} />
             </button>
           ))}
-          {!stolenOrSuspendedBadges.length && <p className="plain-text">No stolen or suspended badges match the filters.</p>}
+          {!restrictedBadges.length && <p className="muted-text">No restricted badges match the filters.</p>}
         </div>
       </div>
     </>

@@ -2,6 +2,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Clock3, ShieldCheck } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { verificationTokenForBadge } from '../../domain/badgeTokens';
+import { RISK_VERDICT } from '../../domain/risk';
 import { formatDate } from '../../utils/date';
 import { SessionCard } from '../common/SessionCard';
 import { StatusPill } from '../common/StatusPill';
@@ -28,15 +29,15 @@ export function HolderView({
 }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   const verificationToken = verificationTokenForBadge(badge.id);
-  const accountMessage = risk.verdict === 'valid'
+  const accountMessage = risk.verdict === RISK_VERDICT.valid
     ? 'Badge ready for verification'
-    : risk.verdict === 'suspicious'
+    : risk.verdict === RISK_VERDICT.suspicious
       ? 'Council review in progress'
       : 'Action required before use';
   return (
     <div className="page-grid">
-      <section className="panel badge-panel">
-        <div className="panel-heading">
+      <section className="app-panel badge-panel">
+        <div className="app-panel-heading">
           <h2>Digital badge</h2>
           <StatusPill status={badge.status} />
         </div>
@@ -77,8 +78,8 @@ export function HolderView({
         )}
       </section>
 
-      <section className="panel">
-        <div className="panel-heading">
+      <section className="app-panel">
+        <div className="app-panel-heading">
           <h2>Session clock</h2>
           <Clock3 aria-hidden="true" />
         </div>
