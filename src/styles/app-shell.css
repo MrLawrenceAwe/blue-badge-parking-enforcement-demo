@@ -1,13 +1,13 @@
 .app-header {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 9px;
-  padding: 8px 0 7px;
+  gap: 14px;
+  padding: 14px 0 12px;
 }
 
 .title-block {
   display: grid;
-  gap: 5px;
+  gap: 7px;
 }
 
 .title-row {
@@ -20,9 +20,10 @@
 .eyebrow {
   margin: 0;
   color: var(--blue-dark);
-  font-weight: 650;
-  font-size: 0.82rem;
-  letter-spacing: 0;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .demo-pill {
@@ -30,7 +31,7 @@
   align-items: center;
   color: var(--muted);
   font-size: 0.86rem;
-  font-weight: 550;
+  font-weight: 700;
 }
 
 h1,
@@ -42,39 +43,42 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(1.45rem, 2vw, 1.9rem);
-  line-height: 1.12;
+  font-size: clamp(1.75rem, 3vw, 2.65rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
 }
 
 .hero-note {
   margin: 0;
   max-width: 65ch;
   color: var(--muted);
-  font-size: 0.93rem;
+  font-size: 1rem;
 }
 
 h2 {
-  font-size: 1.2rem;
+  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
   margin-bottom: 0;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .summary-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-  margin-bottom: 9px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .auth-strip {
-  background: transparent;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 7px 0;
-  margin-bottom: 9px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(210, 222, 230, 0.85);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
   display: grid;
   gap: 8px;
   align-items: center;
+  box-shadow: 0 8px 24px rgba(18, 33, 45, 0.04);
 }
 
 .auth-strip span {
@@ -102,7 +106,7 @@ h2 {
 .demo-account-drawer summary {
   min-height: 40px;
   border: 1px solid #b7c8d4;
-  border-radius: 5px;
+  border-radius: 10px;
   background: #fff;
   color: var(--blue-dark);
   cursor: pointer;
@@ -194,25 +198,31 @@ h2 {
 }
 
 .metric {
-  background: var(--soft-surface);
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid #d8e2e8;
-  border-radius: 5px;
-  padding: 9px 10px;
+  border-radius: 13px;
+  padding: 12px 14px;
   display: grid;
   grid-template-columns: auto 1fr;
-  column-gap: 8px;
+  column-gap: 10px;
   row-gap: 0;
   align-items: center;
+  box-shadow: 0 6px 20px rgba(18, 33, 45, 0.04);
+}
+
+.metric svg {
+  color: var(--blue-dark);
 }
 
 .metric span {
   color: var(--muted);
-  font-weight: 450;
-  font-size: 0.9rem;
+  font-weight: 650;
+  font-size: 0.86rem;
 }
 
 .metric strong {
   grid-column: 2;
-  font-size: 1.34rem;
+  font-size: 1.55rem;
   line-height: 1;
+  letter-spacing: -0.04em;
 }

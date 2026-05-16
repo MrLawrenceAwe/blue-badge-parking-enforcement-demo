@@ -53,12 +53,15 @@ export function HolderView({
               <div><dt>Vehicle</dt><dd>{badge.vehicle}</dd></div>
             </dl>
           </div>
-          <QRCodeSVG
-            value={`bluebadge://verify/${verificationToken}`}
-            size={132}
-            level="H"
-            aria-label={`Signed verification QR code for ${badge.id}`}
-          />
+          <div className="badge-qr">
+            <span>Verification QR</span>
+            <QRCodeSVG
+              value={`bluebadge://verify/${verificationToken}`}
+              size={118}
+              level="H"
+              aria-label={`Signed verification QR code for ${badge.id}`}
+            />
+          </div>
         </div>
         <div className={`account-status ${risk.severityClass}`}>
           <ShieldCheck aria-hidden="true" />

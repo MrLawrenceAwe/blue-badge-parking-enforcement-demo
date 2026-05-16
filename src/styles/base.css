@@ -1,18 +1,21 @@
 :root {
   color-scheme: light;
-  --ink: #101820;
-  --muted: #4d5a63;
-  --line: #c8d3da;
+  --ink: #12212d;
+  --muted: #52616c;
+  --line: #d2dee6;
   --surface: #ffffff;
-  --page: #eef3f6;
-  --soft-surface: #f7fafc;
+  --page: #eef4f7;
+  --soft-surface: #f8fbfd;
   --blue: #005ea8;
   --blue-dark: #003b70;
+  --blue-soft: #e9f3fb;
   --green: #00703c;
   --amber: #b76e00;
   --red: #b10e1e;
   --black: #111111;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --shadow-card: 0 14px 34px rgba(18, 33, 45, 0.07);
+  --shadow-tight: 0 6px 16px rgba(18, 33, 45, 0.08);
+  font-family: Aptos, "Aptos Display", "Segoe UI", system-ui, sans-serif;
 }
 
 * {
@@ -21,8 +24,12 @@
 
 body {
   margin: 0;
-  background: var(--page);
+  background:
+    radial-gradient(circle at 12% -10%, rgba(0, 94, 168, 0.13), transparent 32rem),
+    linear-gradient(180deg, #f8fbfd 0%, var(--page) 34rem);
   color: var(--ink);
+  font-size: 16px;
+  line-height: 1.45;
 }
 
 button,
@@ -46,5 +53,5 @@ select:disabled {
 main {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 12px;
+  padding: 14px;
 }

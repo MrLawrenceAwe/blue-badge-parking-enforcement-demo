@@ -1,6 +1,6 @@
 .session-form {
   display: grid;
-  gap: 4px;
+  gap: 8px;
 }
 
 .session-panel-stack {
@@ -11,15 +11,15 @@
 .session-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .stolen-report-form {
   border: 1px solid #f0a8b0;
   border-left: 4px solid var(--red);
-  border-radius: 6px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 14px;
   background: #fff7f8;
   display: grid;
   gap: 10px;
@@ -28,9 +28,9 @@
 .replacement-request-form {
   border: 1px solid #9bbbd1;
   border-left: 4px solid var(--blue);
-  border-radius: 6px;
-  padding: 12px;
-  margin-top: 12px;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
   background: #f7fbff;
   display: grid;
   gap: 10px;
@@ -81,15 +81,15 @@
 .badge-record-button,
 .timeline-item {
   border: 1px solid #dce5ea;
-  border-radius: 5px;
-  padding: 9px 10px;
+  border-radius: 12px;
+  padding: 12px 13px;
   background: #fbfdfe;
 }
 
 .session-card {
   display: grid;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 9px;
+  margin-top: 10px;
 }
 
 .session-card-main,

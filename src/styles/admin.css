@@ -1,7 +1,7 @@
 .filter-toolbar {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 0;
 }
 
@@ -9,9 +9,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 9px;
+  margin-bottom: 16px;
 }
 
 .admin-controls .tab-list {
@@ -32,7 +32,7 @@
   width: fit-content;
   min-height: 40px;
   border: 1px solid #b7c8d4;
-  border-radius: 5px;
+  border-radius: 11px;
   background: var(--surface);
   padding: 8px 12px;
   display: flex;
@@ -46,10 +46,11 @@
 .admin-filters[open] {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 14px;
   flex-basis: 100%;
-  padding: 10px 12px;
+  padding: 14px;
   order: 2;
+  box-shadow: var(--shadow-card);
 }
 
 .filter-count {
@@ -72,19 +73,24 @@
   grid-column: 1 / -1;
 }
 
+.operations-panel,
+.badge-status-panel {
+  align-self: start;
+}
+
 .admin-layout .app-panel {
-  box-shadow: none;
+  box-shadow: var(--shadow-card);
 }
 
 .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
-  background: transparent;
-  border-color: transparent;
-  padding: 8px 0 0;
+  background: var(--surface);
+  border-color: #d8e2e8;
+  padding: 16px;
 }
 
 .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) .app-panel-heading {
   border-bottom: 1px solid var(--line);
-  padding-bottom: 7px;
+  padding-bottom: 10px;
 }
 
 .admin-filters[open] summary {
@@ -113,7 +119,7 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 9px 12px;
+  padding: 11px 12px;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -142,10 +148,20 @@ td:nth-child(4) {
 th {
   background: #edf3f7;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 tr {
   cursor: pointer;
+}
+
+tbody tr:hover {
+  background: #f7fbff;
+}
+
+.priority-card {
+  border-color: #f0c2c8;
+  background: #fff9fa;
 }
