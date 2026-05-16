@@ -7,7 +7,7 @@ import { RiskAlerts } from '../risk/RiskAlerts';
 import { SessionCard } from '../sessions/SessionCard';
 
 const contraventionOptions = ['No action', 'Badge mismatch', 'Expired badge', 'Reported stolen badge', 'Suspected misuse', 'No active session'];
-const actionOptions = ['No action', 'Warning issued', 'PCN recommended', 'Case review required', 'Badge seized'];
+const actionOptions = ['No action', 'Warning issued', 'Penalty charge notice recommended', 'Case review required', 'Badge seized'];
 
 export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanEvidence, scanActions, officerMessage }) {
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
@@ -21,10 +21,10 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           <h2>Verify badge</h2>
           <QrCode aria-hidden="true" />
         </div>
-        <label>Badge ID, QR token, or vehicle<input value={scanForm.input} onChange={(event) => scanActions.setInput(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
+        <label>Badge ID, QR code, or vehicle registration<input value={scanForm.input} onChange={(event) => scanActions.setInput(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
         <label>Observed vehicle<input value={scanForm.vehicle} onChange={(event) => scanActions.setVehicle(event.target.value)} aria-label="Observed vehicle registration" /></label>
         <label>Scan location<input value={scanForm.location} onChange={(event) => scanActions.setLocation(event.target.value)} aria-label="Scan location" /></label>
-        <button className="primary-button" onClick={scanActions.runScan}><Search aria-hidden="true" size={21} /> Verify</button>
+        <button className="primary-button" onClick={scanActions.verifyBadge}><Search aria-hidden="true" size={21} /> Verify</button>
         {scanResult && (
           <div className="evidence-section">
             <h3>Scan evidence</h3>

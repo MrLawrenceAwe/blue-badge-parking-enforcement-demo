@@ -6,10 +6,10 @@ import { StatusPill } from '../common/StatusPill';
 
 export function AdminOverviewTab({
   filteredBadges,
-  visibleActiveSessions,
-  visibleScans,
+  filteredActiveSessions,
+  filteredScans,
   reviewQueueCases,
-  deactivatedBadges,
+  restrictedBadges,
   riskByBadge,
   selectBadge
 }) {
@@ -48,13 +48,13 @@ export function AdminOverviewTab({
 
       <div className="app-panel active-sessions-panel">
         <div className="app-panel-heading"><h2>Active sessions</h2><Clock3 aria-hidden="true" /></div>
-        <div className="record-list constrained-list">{visibleActiveSessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
+        <div className="record-list constrained-list">{filteredActiveSessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
       </div>
 
       <div className="app-panel recent-scans-panel">
         <div className="app-panel-heading"><h2>Recent scans</h2><QrCode aria-hidden="true" /></div>
         <div className="record-list constrained-list">
-          {visibleScans.map((scan) => (
+          {filteredScans.map((scan) => (
             <article key={scan.id} className="scan-card">
               <strong>{scan.badgeId}</strong>
               <span>{scan.vehicle} - {scan.location}</span>
@@ -81,13 +81,13 @@ export function AdminOverviewTab({
       <div className="app-panel badge-status-panel">
         <div className="app-panel-heading"><h2>Restricted badges</h2><Siren aria-hidden="true" /></div>
         <div className="record-list constrained-list">
-          {deactivatedBadges.map((badge) => (
+          {restrictedBadges.map((badge) => (
             <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectBadge(badge.id)}>
               <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
               <StatusPill status={badge.status} />
             </button>
           ))}
-          {!deactivatedBadges.length && <p className="muted-text">No deactivated badges match the filters.</p>}
+          {!restrictedBadges.length && <p className="muted-text">No restricted badges match the filters.</p>}
         </div>
       </div>
     </>

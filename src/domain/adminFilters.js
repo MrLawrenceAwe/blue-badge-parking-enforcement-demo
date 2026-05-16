@@ -36,13 +36,13 @@ export function buildAdminDashboardData({ badges, sessions, scans, cases, filter
 
   return {
     filteredBadges,
-    visibleActiveSessions: sessions.filter((session) => isSessionActive(session) && filteredBadgeIds.has(session.badgeId)),
-    visibleScans: scans.filter((scan) => filteredBadgeIds.has(scan.badgeId)),
+    filteredActiveSessions: sessions.filter((session) => isSessionActive(session) && filteredBadgeIds.has(session.badgeId)),
+    filteredScans: scans.filter((scan) => filteredBadgeIds.has(scan.badgeId)),
     selectedBadgeCases: filteredCases.filter((caseRecord) => caseRecord.badgeId === selectedBadgeId),
     reviewQueueCases: filteredCases.filter((caseRecord) => {
       const risk = riskByBadge[caseRecord.badgeId];
       return isCaseOpen(caseRecord) && (risk?.score >= 31 || ['Officer review', 'High priority', 'Evidence requested'].includes(caseRecord.status));
     }),
-    deactivatedBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status))
+    restrictedBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status))
   };
 }
