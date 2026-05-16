@@ -1,6 +1,6 @@
 .session-form {
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .session-panel-stack {
@@ -80,16 +80,16 @@
 .case-card,
 .badge-record-button,
 .timeline-item {
-  border: 1px solid rgba(151, 169, 181, 0.34);
-  border-radius: 12px;
-  padding: 12px 13px;
-  background: rgba(251, 253, 254, 0.92);
+  border: 1px solid #dce5ea;
+  border-radius: 5px;
+  padding: 9px 10px;
+  background: #fbfdfe;
 }
 
 .session-card {
   display: grid;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .session-card-main,

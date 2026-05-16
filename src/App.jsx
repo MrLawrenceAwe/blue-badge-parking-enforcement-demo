@@ -79,7 +79,7 @@ export function App() {
   });
 
   return (
-    <main className={`app-shell role-${auth.role}`}>
+    <main>
       <AppHeader role={auth.role} currentDemoRoles={auth.currentDemoRoles} demoUsers={demoUsers} setRole={auth.setRole} selectDemoUser={auth.demoAccountDrawer.selectDemoUser} />
 
       <AuthStrip

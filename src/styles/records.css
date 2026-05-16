@@ -10,8 +10,7 @@
 
 .badge-record-button.selected {
   border-color: var(--blue);
-  outline: 3px solid #cce1f2;
-  background: #f1f8fd;
+  outline: 2px solid #cce1f2;
 }
 
 .badge-record-button small,
@@ -39,7 +38,7 @@
 
 .record-list {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
 .case-scope {
