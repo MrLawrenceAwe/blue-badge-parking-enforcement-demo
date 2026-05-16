@@ -5,7 +5,7 @@ import { createOfficerScanCase, isCaseOpen } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { formatRecordId, nextNumberFromRecords } from '../domain/ids';
 import { demoGpsForLocation } from '../domain/locations';
-import { RISK_VERDICT, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForRisk } from '../domain/risk';
+import { VERIFICATION_VERDICT, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForVerification } from '../domain/risk';
 import { parseScanInput } from '../domain/scanInput';
 import { verifyBadgeToken } from '../domain/badgeTokens';
 import { timestampNow } from '../utils/date';
@@ -32,7 +32,7 @@ export function useOfficerScan({
   riskRules,
   appendAuditEvent
 }) {
-  const [scanLookup, setScanLookup] = useState('BB-WCC-104928');
+  const [scanInputValue, setScanInputValue] = useState('BB-WCC-104928');
   const [scanLocation, setScanLocation] = useState('Oxford Street W1C');
   const [scanVehicle, setScanVehicle] = useState('LS24 HRT');
   const [scanEvidenceDraft, setScanEvidenceDraft] = useState(initialScanEvidence);
@@ -44,7 +44,7 @@ export function useOfficerScan({
     resetScanResult();
   }, [authUser.email]);
 
-  const officerRisk = lastScanResult?.risk ?? evaluateBadgeRisk(selectedBadge, sessions, scans, {
+  const currentOfficerRisk = lastScanResult?.risk ?? evaluateBadgeRisk(selectedBadge, sessions, scans, {
     vehicle: normaliseVehicle(scanVehicle),
     location: scanLocation,
     time: timestampNow()
@@ -84,7 +84,7 @@ export function useOfficerScan({
       setLastScanResult({
         badge: null,
         risk: riskFromPermissionError('Only an enforcement officer can run badge verification'),
-        query: scanLookup,
+        query: scanInputValue,
         vehicle: normaliseVehicle(scanVehicle),
         location: scanLocation,
         scannedAt: timestampNow()
@@ -92,55 +92,43 @@ export function useOfficerScan({
       return;
     }
 
-    const scanInput = parseScanInput(scanLookup);
+    const parsedScanInput = parseScanInput(scanInputValue);
     const observedVehicle = normaliseVehicle(scanVehicle);
     const scannedAt = timestampNow();
-    const device = scanLocation.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07';
-    const observedGps = demoGpsForLocation(scanLocation);
-    const verifiedQrPayload = scanInput.kind === 'qr-token' ? await verifyBadgeToken(scanInput.value) : null;
-    const badge = findScannedBadge(scanInput, verifiedQrPayload);
-    const predictedOutcome = badge
-      ? evaluateBadgeRisk(badge, sessions, scans, {
-        vehicle: observedVehicle,
-        location: scanLocation,
-        gps: observedGps,
-        time: scannedAt,
-        device
-      }, riskRules).verdict
-      : RISK_VERDICT.invalid;
-    const risk = evaluateBadgeRisk(badge, sessions, scans, {
+    const scanContext = buildOfficerScanContext({
       vehicle: observedVehicle,
       location: scanLocation,
-      gps: observedGps,
-      time: scannedAt,
-      device,
-      includeCurrentFailure: predictedOutcome !== RISK_VERDICT.valid
+      scannedAt
+    });
+    const verifiedQrPayload = parsedScanInput.kind === 'qr-token' ? await verifyBadgeToken(parsedScanInput.value) : null;
+    const badge = resolveScannedBadge(parsedScanInput, verifiedQrPayload);
+    const predictedOutcome = badge
+      ? evaluateBadgeRisk(badge, sessions, scans, {
+        ...scanContext
+      }, riskRules).verdict
+      : VERIFICATION_VERDICT.invalid;
+    const risk = evaluateBadgeRisk(badge, sessions, scans, {
+      ...scanContext,
+      includeCurrentFailure: predictedOutcome !== VERIFICATION_VERDICT.valid
     }, riskRules);
 
     const scanId = formatRecordId('SC-', nextScanNumber.current);
     nextScanNumber.current += 1;
     setScans((current) => [
-      {
+      buildOfficerScanRecord({
         id: scanId,
-        badgeId: badge?.id ?? scanInput.value,
-        vehicle: observedVehicle,
-        location: scanLocation,
-        gps: observedGps,
-        officer: 'EO Current User',
-        time: scannedAt,
-        device,
-        outcome: scanOutcomeForRisk(risk),
-        contravention: scanEvidenceDraft.contravention,
-        action: scanEvidenceDraft.action,
-        officerNote: scanEvidenceDraft.officerNote,
-        evidenceItems: scanEvidenceItems(scanEvidenceDraft, scannedAt)
-      },
+        badgeId: badge?.id ?? parsedScanInput.value,
+        scanContext,
+        scannedAt,
+        risk,
+        evidence: scanEvidenceDraft
+      }),
       ...current
     ]);
     setLastScanResult({
       badge,
       risk,
-      query: verifiedQrPayload?.badgeId ?? scanInput.value,
+      query: verifiedQrPayload?.badgeId ?? parsedScanInput.value,
       vehicle: observedVehicle,
       location: scanLocation,
       scannedAt,
@@ -148,19 +136,19 @@ export function useOfficerScan({
       evidence: scanEvidenceDraft
     });
     appendAuditEvent({
-      badgeId: badge?.id ?? scanInput.value,
+      badgeId: badge?.id ?? parsedScanInput.value,
       type: 'Officer scan',
       actor: 'EO Current User',
-      detail: `${scanOutcomeForRisk(risk)} scan at ${scanLocation}. Action: ${scanEvidenceDraft.action}.`
+      detail: `${scanOutcomeForVerification(risk)} scan at ${scanLocation}. Action: ${scanEvidenceDraft.action}.`
     });
     if (badge) setSelectedBadgeId(badge.id);
     setOfficerNotice('');
   }
 
-  function findScannedBadge(scanInput, verifiedQrPayload) {
-    if (scanInput.kind === 'badge-id') return badges.find((badge) => badge.id.toUpperCase() === scanInput.value);
-    if (scanInput.kind === 'qr-token') return badges.find((badge) => badge.id === verifiedQrPayload?.badgeId);
-    if (scanInput.kind === 'vehicle') return badges.find((badge) => vehicleSearchKey(badge.vehicle) === vehicleSearchKey(scanInput.value));
+  function resolveScannedBadge(parsedScanInput, verifiedQrPayload) {
+    if (parsedScanInput.kind === 'badge-id') return badges.find((badge) => badge.id.toUpperCase() === parsedScanInput.value);
+    if (parsedScanInput.kind === 'qr-token') return badges.find((badge) => badge.id === verifiedQrPayload?.badgeId);
+    if (parsedScanInput.kind === 'vehicle') return badges.find((badge) => vehicleSearchKey(badge.vehicle) === vehicleSearchKey(parsedScanInput.value));
     return null;
   }
 
@@ -199,8 +187,8 @@ export function useOfficerScan({
   }
 
   return {
-    scanLookup,
-    setScanLookup,
+    scanInputValue,
+    setScanInputValue,
     scanLocation,
     setScanLocation,
     scanVehicle,
@@ -208,10 +196,38 @@ export function useOfficerScan({
     scanEvidenceDraft,
     updateScanEvidenceDraft,
     lastScanResult,
-    officerRisk,
+    currentOfficerRisk,
     officerNotice,
     resetScanResult,
     runScan,
     createCaseFromScan
+  };
+}
+
+function buildOfficerScanContext({ vehicle, location, scannedAt }) {
+  return {
+    vehicle,
+    location,
+    gps: demoGpsForLocation(location),
+    time: scannedAt,
+    device: location.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07'
+  };
+}
+
+function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, risk, evidence }) {
+  return {
+    id,
+    badgeId,
+    vehicle: scanContext.vehicle,
+    location: scanContext.location,
+    gps: scanContext.gps,
+    officer: 'EO Current User',
+    time: scannedAt,
+    device: scanContext.device,
+    outcome: scanOutcomeForVerification(risk),
+    contravention: evidence.contravention,
+    action: evidence.action,
+    officerNote: evidence.officerNote,
+    evidenceItems: scanEvidenceItems(evidence, scannedAt)
   };
 }

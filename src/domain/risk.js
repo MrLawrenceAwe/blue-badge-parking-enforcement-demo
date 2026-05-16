@@ -2,7 +2,7 @@ import { normaliseVehicle, vehicleSearchKey } from './badges';
 import { distanceInKm, demoGpsForLocation } from './locations';
 import { minutesBetween } from '../utils/date';
 
-export const RISK_VERDICT = {
+export const VERIFICATION_VERDICT = {
   valid: 'valid',
   suspicious: 'suspicious',
   deactivated: 'deactivated',
@@ -16,11 +16,11 @@ export const riskLevelLabels = {
   high: 'High priority alert'
 };
 
-export const riskVerdictLabels = {
-  [RISK_VERDICT.valid]: 'Valid',
-  [RISK_VERDICT.suspicious]: 'Suspicious',
-  [RISK_VERDICT.deactivated]: 'Stolen / deactivated',
-  [RISK_VERDICT.invalid]: 'Invalid'
+export const verificationVerdictLabels = {
+  [VERIFICATION_VERDICT.valid]: 'Valid',
+  [VERIFICATION_VERDICT.suspicious]: 'Suspicious',
+  [VERIFICATION_VERDICT.deactivated]: 'Stolen / deactivated',
+  [VERIFICATION_VERDICT.invalid]: 'Invalid'
 };
 
 const RISK_LEVEL = {
@@ -71,10 +71,6 @@ const RISK_EVENTS = {
     label: 'New device plus unusual location',
     weight: 'newDeviceUnusualLocation'
   },
-  noActiveRisk: {
-    label: 'No active risk events',
-    weight: 'default'
-  }
 };
 
 export const defaultRiskRules = {
@@ -103,8 +99,8 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       score: 100,
       level: RISK_LEVEL.high,
       events: [riskEvent('unknownBadge', rules)],
-      severity: 'risk-high',
-      verdict: RISK_VERDICT.invalid,
+      toneClass: 'risk-high',
+      verdict: VERIFICATION_VERDICT.invalid,
       explanation: ['No matching badge record or trusted QR token was found.']
     });
   }
@@ -146,7 +142,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
     score = Math.max(score, 85);
-    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-critical', verdict: RISK_VERDICT.deactivated, explanation });
+    return riskResult({ score, level: RISK_LEVEL.high, events, toneClass: 'risk-critical', verdict: VERIFICATION_VERDICT.deactivated, explanation });
   }
 
   if (badge.status === 'expired') {
@@ -155,14 +151,14 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       score,
       level: score >= rules.highRiskThreshold ? RISK_LEVEL.high : RISK_LEVEL.review,
       events,
-      severity: 'risk-high',
-      verdict: RISK_VERDICT.invalid,
+      toneClass: 'risk-high',
+      verdict: VERIFICATION_VERDICT.invalid,
       explanation
     });
   }
 
   if (score >= rules.highRiskThreshold) {
-    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-high', verdict: RISK_VERDICT.invalid, explanation });
+    return riskResult({ score, level: RISK_LEVEL.high, events, toneClass: 'risk-high', verdict: VERIFICATION_VERDICT.invalid, explanation });
   }
 
   if (score >= rules.monitorThreshold || badge.status === 'under review') {
@@ -170,8 +166,8 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       score,
       level: score >= rules.reviewThreshold ? RISK_LEVEL.review : RISK_LEVEL.monitor,
       events,
-      severity: 'risk-watch',
-      verdict: RISK_VERDICT.suspicious,
+      toneClass: 'risk-watch',
+      verdict: VERIFICATION_VERDICT.suspicious,
       explanation
     });
   }
@@ -179,9 +175,9 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
   return riskResult({
     score,
     level: RISK_LEVEL.normal,
-    events: events.length ? events : [riskEvent('noActiveRisk', rules)],
-    severity: 'risk-low',
-    verdict: RISK_VERDICT.valid,
+    events,
+    toneClass: 'risk-low',
+    verdict: VERIFICATION_VERDICT.valid,
     explanation: ['No configured risk rules were triggered.']
   });
 }
@@ -191,15 +187,15 @@ export function riskFromPermissionError(message) {
     score: 100,
     level: RISK_LEVEL.high,
     events: [{ type: 'permissionError', label: message, score: 100 }],
-    severity: 'risk-high',
-    verdict: RISK_VERDICT.invalid
+    toneClass: 'risk-high',
+    verdict: VERIFICATION_VERDICT.invalid
   });
 }
 
-export function scanOutcomeForRisk(risk) {
-  if (risk.verdict === RISK_VERDICT.valid) return 'valid';
-  if (risk.verdict === RISK_VERDICT.suspicious) return 'review';
-  if (risk.verdict === RISK_VERDICT.deactivated) return 'deactivated';
+export function scanOutcomeForVerification(risk) {
+  if (risk.verdict === VERIFICATION_VERDICT.valid) return 'valid';
+  if (risk.verdict === VERIFICATION_VERDICT.suspicious) return 'review';
+  if (risk.verdict === VERIFICATION_VERDICT.deactivated) return 'deactivated';
   return 'invalid';
 }
 

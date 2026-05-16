@@ -1,6 +1,6 @@
 import { Car, FileText, QrCode, Search } from 'lucide-react';
 import { statusLabel } from '../../domain/badges';
-import { RISK_VERDICT, riskVerdictLabels } from '../../domain/risk';
+import { VERIFICATION_VERDICT, verificationVerdictLabels } from '../../domain/risk';
 import { isSessionActive } from '../../domain/sessions';
 import { formatDate } from '../../utils/date';
 import { RiskAlerts } from '../risk/RiskAlerts';
@@ -12,8 +12,8 @@ const actionOptions = ['No action', 'Warning issued', 'PCN recommended', 'Case r
 export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanEvidence, scanActions, officerMessage }) {
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
-  const canEscalate = scanResult && risk.verdict !== RISK_VERDICT.valid;
-  const isValid = risk.verdict === RISK_VERDICT.valid;
+  const canEscalate = scanResult && risk.verdict !== VERIFICATION_VERDICT.valid;
+  const isValid = risk.verdict === VERIFICATION_VERDICT.valid;
   return (
     <div className="officer-layout">
       <section className="app-panel scan-panel">
@@ -21,13 +21,13 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           <h2>Verify badge</h2>
           <QrCode aria-hidden="true" />
         </div>
-        <label>Lookup<input value={scanForm.query} onChange={(event) => scanActions.setQuery(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
+        <label>Badge ID, QR token, or vehicle<input value={scanForm.input} onChange={(event) => scanActions.setInput(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
         <label>Observed vehicle<input value={scanForm.vehicle} onChange={(event) => scanActions.setVehicle(event.target.value)} aria-label="Observed vehicle registration" /></label>
         <label>Scan location<input value={scanForm.location} onChange={(event) => scanActions.setLocation(event.target.value)} aria-label="Scan location" /></label>
         <button className="primary-button" onClick={scanActions.runScan}><Search aria-hidden="true" size={21} /> Verify</button>
         {scanResult && (
           <div className="evidence-section">
-            <h3>Evidence</h3>
+            <h3>Scan evidence</h3>
             <div className="case-field-grid">
               <label>Contravention<select value={scanEvidence.values.contravention} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
               <label>Enforcement action<select value={scanEvidence.values.action} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
@@ -40,10 +40,10 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
       </section>
 
       <div className="officer-decision-stack">
-        <section className={`verification-result ${risk.severity}${isValid ? ' compact-verification-result' : ''}`} aria-live="polite">
+        <section className={`verification-result ${risk.toneClass}${isValid ? ' compact-verification-result' : ''}`} aria-live="polite">
           <div>
             <p>Result</p>
-            <h2>{riskVerdictLabels[risk.verdict]}</h2>
+            <h2>{verificationVerdictLabels[risk.verdict]}</h2>
           </div>
           <div className="result-detail">
             <strong>Risk score {risk.score}</strong>
@@ -67,7 +67,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           </div>
           {isUnknown ? (
             <dl className="detail-list detail-list-grid">
-              <div><dt>Lookup</dt><dd>{scanResult?.query ?? scanForm.query}</dd></div>
+              <div><dt>Scan input</dt><dd>{scanResult?.query ?? scanForm.input}</dd></div>
               <div><dt>Observed vehicle</dt><dd>{scanResult?.vehicle ?? scanForm.vehicle}</dd></div>
               <div><dt>Location</dt><dd>{scanResult?.location ?? scanForm.location}</dd></div>
               <div><dt>Status</dt><dd>Unknown badge or unregistered vehicle</dd></div>

@@ -5,7 +5,7 @@ import { AuditTab } from './AuditTab';
 import { CaseManagementTab } from './CaseManagementTab';
 import { RiskRulesTab } from './RiskRulesTab';
 
-const adminTabs = ['Overview', 'Cases', 'Rules', 'Audit'];
+const adminTabs = ['Overview', 'Cases', 'Risk rules', 'Audit'];
 
 export function AdminView({
   filteredBadges,
@@ -79,7 +79,7 @@ export function AdminView({
           />
         )}
 
-        {activeTab === 'Rules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={adminActions.updateRiskRule} />}
+        {activeTab === 'Risk rules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={adminActions.updateRiskRule} />}
 
         {activeTab === 'Audit' && (
           <AuditTab
