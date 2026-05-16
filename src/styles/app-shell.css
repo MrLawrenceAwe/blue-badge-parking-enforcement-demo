@@ -1,8 +1,8 @@
 .app-header {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 9px;
-  padding: 8px 0 7px;
+  gap: 14px;
+  padding: 12px 0 10px;
 }
 
 .title-block {
@@ -20,17 +20,20 @@
 .eyebrow {
   margin: 0;
   color: var(--blue-dark);
-  font-weight: 650;
-  font-size: 0.82rem;
-  letter-spacing: 0;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .demo-pill {
   display: inline-flex;
   align-items: center;
-  color: var(--muted);
-  font-size: 0.86rem;
-  font-weight: 550;
+  color: #47606f;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 h1,
@@ -42,21 +45,23 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(1.45rem, 2vw, 1.9rem);
-  line-height: 1.12;
+  font-size: clamp(1.65rem, 2.7vw, 2.65rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
 }
 
 .hero-note {
   margin: 0;
-  max-width: 65ch;
+  max-width: 48ch;
   color: var(--muted);
-  font-size: 0.93rem;
+  font-size: 0.98rem;
 }
 
 h2 {
-  font-size: 1.2rem;
+  font-size: 1.26rem;
   margin-bottom: 0;
   line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
 .role-switcher,
@@ -79,14 +84,15 @@ h2 {
 .secondary-button,
 .danger-button {
   min-height: 44px;
-  border-radius: 5px;
+  border-radius: 999px;
   border: 1px solid #9bbbd1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 9px 13px;
-  font-weight: 650;
+  padding: 9px 15px;
+  font-weight: 800;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
 .role-switcher button {
@@ -96,7 +102,8 @@ h2 {
 .role-switcher button {
   background: var(--surface);
   color: var(--blue-dark);
-  border-color: #9bbbd1;
+  border-color: #bed0dc;
+  box-shadow: 0 6px 14px rgba(16, 24, 32, 0.05);
 }
 
 .tab-list button {
@@ -118,6 +125,7 @@ h2 {
   background: var(--blue);
   color: #fff;
   border-color: var(--blue);
+  box-shadow: 0 10px 24px rgba(0, 94, 168, 0.26);
 }
 
 .role-switcher button.active,
@@ -127,7 +135,7 @@ h2 {
 
 .secondary-button {
   border-color: #b7c8d4;
-  background: transparent;
+  background: #fff;
   color: var(--blue);
 }
 
@@ -135,7 +143,16 @@ h2 {
 .role-switcher button:hover,
 .tab-list button:hover,
 .admin-filters summary:hover {
-  background: #f7fbff;
+  background: #edf7ff;
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled {
+  background: #b8c9d7;
+  border-color: #b8c9d7;
+  color: #f7fafc;
+  box-shadow: none;
+  transform: none;
 }
 
 .small-button {
@@ -150,24 +167,26 @@ h2 {
   color: #fff;
   padding: 7px 12px;
   font-size: 0.95rem;
+  box-shadow: 0 9px 20px rgba(177, 14, 30, 0.18);
 }
 
 .summary-strip {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-  margin-bottom: 9px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
 }
 
 .auth-strip {
-  background: transparent;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 7px 0;
-  margin-bottom: 9px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(151, 169, 181, 0.28);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
   display: grid;
   gap: 8px;
   align-items: center;
+  backdrop-filter: blur(10px);
 }
 
 .auth-strip span {
@@ -195,7 +214,7 @@ h2 {
 .demo-account-drawer summary {
   min-height: 40px;
   border: 1px solid #b7c8d4;
-  border-radius: 5px;
+  border-radius: 999px;
   background: #fff;
   color: var(--blue-dark);
   cursor: pointer;
@@ -260,6 +279,16 @@ h2 {
   background: #f7fbff;
 }
 
+.role-admin .hero-note,
+.role-officer .hero-note {
+  max-width: 36ch;
+}
+
+.role-admin .auth-strip,
+.role-officer .auth-strip {
+  padding-block: 8px;
+}
+
 .auth-controls form {
   display: grid;
   grid-template-columns: 1fr;
@@ -287,25 +316,28 @@ h2 {
 }
 
 .metric {
-  background: var(--soft-surface);
-  border: 1px solid #d8e2e8;
-  border-radius: 5px;
-  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(151, 169, 181, 0.34);
+  border-radius: 999px;
+  padding: 8px 12px;
   display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 8px;
+  grid-template-columns: auto auto 1fr;
+  column-gap: 7px;
   row-gap: 0;
   align-items: center;
+  min-width: 0;
 }
 
 .metric span {
   color: var(--muted);
-  font-weight: 450;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.84rem;
+  white-space: nowrap;
 }
 
 .metric strong {
-  grid-column: 2;
-  font-size: 1.34rem;
+  grid-column: auto;
+  justify-self: end;
+  font-size: 1.08rem;
   line-height: 1;
 }

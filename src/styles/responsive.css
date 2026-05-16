@@ -4,8 +4,8 @@
   }
 
   .app-header {
-    gap: 8px;
-    padding-top: 8px;
+    gap: 10px;
+    padding-top: 6px;
   }
 
   .title-block {
@@ -21,14 +21,14 @@
   .role-switcher {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
+    gap: 5px;
   }
 
   .role-switcher button {
     min-width: 0;
-    gap: 4px;
-    padding: 8px 6px;
-    font-size: 0.82rem;
+    gap: 3px;
+    padding: 8px 4px;
+    font-size: 0.76rem;
   }
 
   .role-switcher button svg {
@@ -53,6 +53,19 @@
     text-overflow: ellipsis;
   }
 
+  .tab-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    gap: 6px;
+  }
+
+  .tab-list button {
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 0.82rem;
+  }
+
   .role-switcher button span.visually-hidden {
     position: absolute;
     width: 1px;
@@ -63,12 +76,15 @@
   }
 
   .summary-strip {
-    gap: 6px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 12px;
   }
 
   .metric {
-    min-height: 56px;
+    min-height: 44px;
     padding: 8px 10px;
+    border-radius: 12px;
   }
 
   .metric svg {
@@ -82,7 +98,12 @@
 
   .app-panel,
   .filter-toolbar {
-    padding: 10px;
+    padding: 14px;
+    border-radius: 13px;
+  }
+
+  .auth-strip {
+    border-radius: 13px;
   }
 
   .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
@@ -175,9 +196,9 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 12px;
     background: #fbfcfd;
-    padding: 9px 11px;
+    padding: 10px 12px;
   }
 
   td {
@@ -209,6 +230,15 @@
     font-weight: 800;
     margin-bottom: 2px;
   }
+
+  .digital-badge {
+    grid-template-columns: 1fr;
+  }
+
+  .digital-badge svg {
+    justify-self: start;
+    max-width: 112px;
+  }
 }
 
 tr:focus,
@@ -233,7 +263,7 @@ textarea:focus {
 
 @media (min-width: 720px) {
   main {
-    padding: 16px 26px;
+    padding: 20px 32px 34px;
   }
 
   .app-header {
@@ -290,7 +320,7 @@ textarea:focus {
 
   .admin-layout .app-panel,
   .admin-layout .filter-toolbar {
-    padding: 11px 13px;
+    padding: 18px;
   }
 
   .admin-layout .admin-filters {

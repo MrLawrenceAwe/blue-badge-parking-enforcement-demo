@@ -1,16 +1,17 @@
 .risk-banner,
 .account-status,
 .verification-result {
-  border-radius: 8px;
+  border-radius: 16px;
   color: #fff;
-  padding: 14px;
+  padding: 18px;
   display: grid;
-  gap: 5px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-tight);
 }
 
 .verification-result {
-  min-height: 168px;
+  min-height: 154px;
   align-content: center;
 }
 
@@ -85,8 +86,8 @@
 .status {
   display: inline-flex;
   width: fit-content;
-  border-radius: 4px;
-  padding: 5px 8px;
+  border-radius: 999px;
+  padding: 5px 9px;
   font-weight: 800;
   font-size: 0.82rem;
   border: 1px solid currentColor;
