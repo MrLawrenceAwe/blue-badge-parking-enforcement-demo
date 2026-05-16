@@ -48,7 +48,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
         >
           <div>
             <p>{hasScanResult ? 'Verification result' : 'Scan status'}</p>
-            <h2>{hasScanResult ? verificationStatusLabels[risk.verificationStatus] : 'Ready to verify'}</h2>
+            <h2>{hasScanResult ? verificationStatusLabels[risk.verificationStatus] : 'Awaiting check'}</h2>
           </div>
           <div className="result-detail">
             {hasScanResult ? (
@@ -60,7 +60,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
                 </div>
               </>
             ) : (
-              <span>Enter a badge ID, signed QR code, or vehicle registration, then run verification.</span>
+              <span>Ready to verify the badge, QR code, or vehicle registration shown in the form.</span>
             )}
           </div>
           {canOpenCaseFromScan && (
