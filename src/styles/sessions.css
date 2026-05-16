@@ -99,6 +99,10 @@
   gap: 8px;
 }
 
+.badge-notifications {
+  margin-top: 14px;
+}
+
 .risk-explanation small {
   display: block;
 }

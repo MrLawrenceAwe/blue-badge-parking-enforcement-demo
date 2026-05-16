@@ -61,7 +61,7 @@ export function App() {
   });
 
   return (
-    <main>
+    <main className={`app-shell role-${auth.role}`}>
       <AppHeader
         role={auth.role}
         availableRoles={auth.availableRoles}

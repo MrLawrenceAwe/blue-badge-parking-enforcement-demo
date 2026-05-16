@@ -8,6 +8,8 @@ export function CaseDraftForm({
   updateCaseForm,
   caseActions
 }) {
+  const canReactivateBadge = ['stolen', 'suspended', 'under review'].includes(selectedBadge.status);
+
   return (
     <>
       <label>Selected badge<select value={selectedBadge.id} onChange={(event) => caseActions.selectBadge(event.target.value)}>{allBadges.map((badge) => <option key={badge.id} value={badge.id}>{badge.id} - {badge.holder}</option>)}</select></label>
@@ -25,7 +27,9 @@ export function CaseDraftForm({
       <label>Evidence reference<input value={caseForm.evidence} onChange={(event) => updateCaseForm('evidence', event.target.value)} placeholder="Photo, scan log, witness note, file reference" aria-label="Evidence reference" /></label>
       <div className="button-row">
         <button className="primary-button" onClick={caseActions.createCaseForSelectedBadge}><FileText aria-hidden="true" size={20} /> Create case</button>
-        <button className="secondary-button" onClick={caseActions.reactivateBadge}><ShieldCheck aria-hidden="true" size={20} /> Reactivate after review</button>
+        {canReactivateBadge && (
+          <button className="secondary-button" onClick={caseActions.reactivateBadge}><ShieldCheck aria-hidden="true" size={20} /> Reactivate after review</button>
+        )}
       </div>
     </>
   );

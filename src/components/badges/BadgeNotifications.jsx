@@ -1,6 +1,6 @@
 export function BadgeNotifications({ notifications }) {
   return (
-    <div className="timeline-list">
+    <div className="timeline-list badge-notifications">
       <h3>Notifications</h3>
       {notifications.map((notification) => (
         <small key={notification.id}>

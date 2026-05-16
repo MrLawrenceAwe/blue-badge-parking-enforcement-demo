@@ -115,15 +115,15 @@
     order: 20;
   }
 
-  .dashboard-grid > .suspicious-cases-panel {
+  .dashboard-grid > .risk-panel {
     order: 1;
   }
 
-  .dashboard-grid > .badge-status-panel {
+  .dashboard-grid > .suspicious-cases-panel {
     order: 2;
   }
 
-  .dashboard-grid > .risk-panel {
+  .dashboard-grid > .badge-status-panel {
     order: 3;
   }
 
@@ -141,6 +141,19 @@
 
   .dashboard-grid > .risk-rules-panel {
     order: 7;
+  }
+
+  .role-officer .summary-strip {
+    display: none;
+  }
+
+  .role-officer .auth-strip {
+    margin-bottom: 7px;
+    padding: 6px 0;
+  }
+
+  .role-officer .demo-security-note {
+    display: none;
   }
 
   .table-wrap {
@@ -230,13 +243,15 @@
     align-items: center;
   }
 
-  .auth-controls[open] {
-    grid-column: 1 / -1;
-  }
-
   .auth-controls form {
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) auto;
     align-items: end;
+  }
+
+  .auth-controls[open] {
+    justify-self: end;
+    max-width: min(780px, 100%);
+    width: min(780px, 100%);
   }
 
   .login-error {
