@@ -53,9 +53,11 @@ export function CarerView({
           <h2>Session</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
-        {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
-        <StolenReportForm reportStolen={reportStolen} />
+        <div className="session-panel-stack">
+          <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
+          {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
+          <StolenReportForm reportStolen={reportStolen} />
+        </div>
         {selectedBadge.status === 'stolen' && (
           <ReplacementRequestForm
             replacementForm={replacementForm}
