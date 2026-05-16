@@ -137,7 +137,7 @@ export const initialCases = [
     badgeId: 'BB-CAM-550912',
     title: 'Reported stolen badge scanned in central zone',
     status: 'High priority',
-    assignedTo: 'Fraud Team A',
+    assignedTo: 'Risk Review Team A',
     dueDate: '2026-05-16',
     closureReason: '',
     notes: ['Holder reported theft at 09:40. Officer scan confirmed use at 15:58.'],

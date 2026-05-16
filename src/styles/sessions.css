@@ -1,0 +1,120 @@
+.session-form {
+  display: grid;
+  gap: 4px;
+}
+
+.session-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.stolen-report-form {
+  border: 1px solid #f0a8b0;
+  border-left: 6px solid var(--red);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff7f8;
+  display: grid;
+  gap: 10px;
+}
+
+.replacement-request-form {
+  border: 1px solid #9bbbd1;
+  border-left: 6px solid var(--blue);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  background: #f7fbff;
+  display: grid;
+  gap: 10px;
+}
+
+.checkbox-label {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  color: var(--ink);
+}
+
+.checkbox-label input {
+  width: auto;
+  min-height: auto;
+}
+
+.button-row .danger-button {
+  width: auto;
+}
+
+.result-action {
+  width: fit-content;
+  margin-top: 10px;
+}
+
+.result-message {
+  margin: 0;
+  font-weight: 700;
+}
+
+.risk-explanation,
+.timeline-list {
+  display: grid;
+  gap: 8px;
+}
+
+.risk-explanation small {
+  display: block;
+}
+
+.session-card,
+.scan-card,
+.case-card,
+.badge-record-button,
+.timeline-item {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 11px;
+  background: #fbfcfd;
+}
+
+.session-card {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.session-card-main,
+.session-lock,
+.session-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.session-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.session-location svg {
+  flex: 0 0 auto;
+}
+
+.session-meta {
+  color: var(--muted);
+}
+
+.session-meta small,
+.session-lock small {
+  display: block;
+}
+
+.session-lock {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.session-lock b {
+  display: block;
+}

@@ -1,0 +1,50 @@
+.page-grid,
+.officer-layout,
+.dashboard-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.app-panel,
+.filter-toolbar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 13px;
+}
+
+.app-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.field-label,
+label {
+  display: grid;
+  gap: 7px;
+  color: var(--ink);
+  font-weight: 650;
+  margin-bottom: 14px;
+}
+
+input,
+select,
+textarea {
+  min-height: 44px;
+  border: 2px solid #7b8b95;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+

@@ -12,7 +12,7 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
     badgeId: badge.id,
     title: 'Badge reported stolen by holder',
     status: 'High priority',
-    assignedTo: 'Fraud Team A',
+    assignedTo: 'Risk Review Team A',
     dueDate,
     closureReason: '',
     notes: [`Immediate digital deactivation triggered from holder portal. Details: ${details}. Contact: ${contact}.`],
@@ -48,7 +48,7 @@ export function createOfficerScanCase({ id, badgeId, scanResult, addedAt }) {
     badgeId,
     title: `Officer scan escalation - ${riskLevelLabels[risk.level]}`,
     status: risk.score >= 81 ? 'High priority' : 'Officer review',
-    assignedTo: risk.score >= 81 ? 'Fraud Team A' : 'Duty review team',
+    assignedTo: risk.score >= 81 ? 'Risk Review Team A' : 'Duty review team',
     dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     closureReason: '',
     notes: [
@@ -63,4 +63,3 @@ export function createOfficerScanCase({ id, badgeId, scanResult, addedAt }) {
     ].filter(Boolean)
   };
 }
-

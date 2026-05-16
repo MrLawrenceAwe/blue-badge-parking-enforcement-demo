@@ -16,16 +16,18 @@ export function AdminView({
   riskByBadge,
   filters,
   selectedBadge,
-  newCaseForm,
-  caseDraftNotes,
+  draftCase,
+  updateDraftCase,
+  caseNoteDraftsById,
+  setCaseNoteDraftsById,
   auditEvents,
   notifications,
   replacementRequests,
   riskRules,
   adminActions,
   adminMessage,
-  suspiciousCases,
-  restrictedBadges
+  reviewQueueCases,
+  deactivatedBadges
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
@@ -55,8 +57,8 @@ export function AdminView({
             filteredBadges={filteredBadges}
             visibleActiveSessions={visibleActiveSessions}
             visibleScans={visibleScans}
-            suspiciousCases={suspiciousCases}
-            restrictedBadges={restrictedBadges}
+            reviewQueueCases={reviewQueueCases}
+            deactivatedBadges={deactivatedBadges}
             riskByBadge={riskByBadge}
             selectBadge={adminActions.selectBadge}
           />
@@ -67,8 +69,10 @@ export function AdminView({
             allBadges={allBadges}
             selectedBadge={selectedBadge}
             selectedBadgeCases={selectedBadgeCases}
-            newCaseForm={newCaseForm}
-            caseDraftNotes={caseDraftNotes}
+            draftCase={draftCase}
+            updateDraftCase={updateDraftCase}
+            caseNoteDraftsById={caseNoteDraftsById}
+            setCaseNoteDraftsById={setCaseNoteDraftsById}
             adminMessage={adminMessage}
             caseActions={adminActions}
           />

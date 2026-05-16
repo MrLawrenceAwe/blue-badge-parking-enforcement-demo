@@ -81,8 +81,8 @@ export const defaultRiskRules = {
   highRiskThreshold: 81,
   reviewThreshold: 61,
   monitorThreshold: 31,
-  closeScanMinutes: 45,
-  closeScanDistanceKm: 2,
+  impossibleTravelWindowMins: 45,
+  impossibleTravelMinDistanceKm: 2,
   longStayMinutes: 210,
   weights: {
     stolenOrSuspended: 85,
@@ -121,12 +121,12 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
   const failedScans = badgeScans.filter((scan) => scan.outcome !== 'valid').length + (scanContext.includeCurrentFailure ? 1 : 0);
   if (failedScans >= 2) events.push(riskEvent('multipleFailedScans', rules));
 
-  const closeLocationScan = badgeScans.some((scan) => {
-    const closeInTime = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.closeScanMinutes : true;
+  const recentDistantScanDetected = badgeScans.some((scan) => {
+    const withinImpossibleTravelWindow = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.impossibleTravelWindowMins : true;
     const scanGps = scan.gps ?? demoGpsForLocation(scan.location);
-    return closeInTime && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.closeScanDistanceKm;
+    return withinImpossibleTravelWindow && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.impossibleTravelMinDistanceKm;
   });
-  if (closeLocationScan) events.push(riskEvent('impossibleTravel', rules));
+  if (recentDistantScanDetected) events.push(riskEvent('impossibleTravel', rules));
 
   const activeSessions = sessions.filter((session) => session.badgeId === badge.id);
   if (activeSessions.some((session) => session.durationMins > rules.longStayMinutes)) {

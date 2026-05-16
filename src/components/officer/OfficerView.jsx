@@ -3,8 +3,8 @@ import { statusLabel } from '../../domain/badges';
 import { RISK_VERDICT, riskVerdictLabels } from '../../domain/risk';
 import { isSessionActive } from '../../domain/sessions';
 import { formatDate } from '../../utils/date';
-import { FraudEvents } from '../common/FraudEvents';
-import { SessionCard } from '../common/SessionCard';
+import { RiskAlerts } from '../risk/RiskAlerts';
+import { SessionCard } from '../sessions/SessionCard';
 
 const contraventionOptions = ['No action', 'Badge mismatch', 'Expired badge', 'Reported stolen badge', 'Suspected misuse', 'No active session'];
 const actionOptions = ['No action', 'Warning issued', 'PCN recommended', 'Case review required', 'Badge seized'];
@@ -82,7 +82,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
             </dl>
           )}
           {activeSession && <SessionCard session={activeSession} />}
-          <FraudEvents risk={risk} />
+          <RiskAlerts risk={risk} />
         </section>
       </div>
     </div>

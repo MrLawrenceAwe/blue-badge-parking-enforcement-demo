@@ -28,7 +28,7 @@ export function filterBadgesForAdmin({ badges, sessions, scans, filters, riskByB
   });
 }
 
-export function adminRecordSets({ badges, sessions, scans, cases, filters, riskByBadge, selectedBadgeId }) {
+export function buildAdminDashboardData({ badges, sessions, scans, cases, filters, riskByBadge, selectedBadgeId }) {
   const filteredBadges = filterBadgesForAdmin({ badges, sessions, scans, filters, riskByBadge });
   const filteredBadgeIds = new Set(filteredBadges.map((badge) => badge.id));
   const knownBadgeIds = new Set(badges.map((badge) => badge.id));
@@ -39,11 +39,10 @@ export function adminRecordSets({ badges, sessions, scans, cases, filters, riskB
     visibleActiveSessions: sessions.filter((session) => isSessionActive(session) && filteredBadgeIds.has(session.badgeId)),
     visibleScans: scans.filter((scan) => filteredBadgeIds.has(scan.badgeId)),
     selectedBadgeCases: filteredCases.filter((caseRecord) => caseRecord.badgeId === selectedBadgeId),
-    suspiciousCases: filteredCases.filter((caseRecord) => {
+    reviewQueueCases: filteredCases.filter((caseRecord) => {
       const risk = riskByBadge[caseRecord.badgeId];
       return isCaseOpen(caseRecord) && (risk?.score >= 31 || ['Officer review', 'High priority', 'Evidence requested'].includes(caseRecord.status));
     }),
-    restrictedBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status))
+    deactivatedBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status))
   };
 }
-

@@ -1,10 +1,10 @@
 import { Clock3, FileText, UsersRound } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
-import { SessionCard } from '../common/SessionCard';
+import { SessionCard } from '../sessions/SessionCard';
 import { StatusPill } from '../common/StatusPill';
 import { StolenReportForm } from '../common/StolenReportForm';
-import { BadgeNotifications } from '../common/BadgeNotifications';
-import { ReplacementRequestForm } from '../common/ReplacementRequestForm';
+import { BadgeNotifications } from '../badges/BadgeNotifications';
+import { ReplacementRequestForm } from '../replacements/ReplacementRequestForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
 export function CarerView({
