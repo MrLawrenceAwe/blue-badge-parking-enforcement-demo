@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { initialScans } from '../data/demoActivity';
+import { useEffect, useMemo, useState } from 'react';
 import { normaliseVehicle, vehicleSearchKey } from '../domain/badges';
 import { createOfficerScanCase, isCaseOpen } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
-import { formatRecordId, nextNumberFromRecords } from '../domain/ids';
+import { nextRecordId } from '../domain/ids';
 import { gpsForKnownLocation } from '../domain/locations';
 import {
   VERIFICATION_STATUS,
@@ -45,8 +44,8 @@ export function useOfficerScan({
   const [scanEvidenceDraft, setScanEvidenceDraft] = useState(initialScanEvidenceDraft);
   const [lastScanResult, setLastScanResult] = useState(null);
   const [officerNotice, setOfficerNotice] = useState('');
-  const nextScanNumber = useRef(nextNumberFromRecords(initialScans, 'SC-', 90199));
   const { reserveCaseIdForBadge } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
+  const inputDescription = useMemo(() => describeScanInput(scanInput), [scanInput]);
 
   useEffect(() => {
     resetScanResult();
@@ -146,8 +145,8 @@ export function useOfficerScan({
       riskRules,
     );
 
-    const scanId = formatRecordId('SC-', nextScanNumber.current);
-    nextScanNumber.current += 1;
+    const scanId = nextRecordId(scans, 'SC-', 90199);
+    const failureReason = explainScanFailure(parsedScanInput, verifiedQrPayload, candidateBadge, badge);
     setScans((current) => [
       buildOfficerScanRecord({
         id: scanId,
@@ -169,6 +168,8 @@ export function useOfficerScan({
       scannedAt,
       scanId,
       evidence: scanEvidenceDraft,
+      inputDescription: describeParsedScanInput(parsedScanInput),
+      failureReason,
     });
     appendAuditEvent({
       badgeId: badge?.id ?? parsedScanInput.value,
@@ -248,10 +249,36 @@ export function useOfficerScan({
     lastScanResult,
     displayedRisk,
     officerNotice,
+    inputDescription,
     resetScanResult,
     recordBadgeScan,
     createCaseFromScan,
   };
+}
+
+function describeScanInput(scanInput) {
+  return describeParsedScanInput(parseScanInput(scanInput));
+}
+
+function describeParsedScanInput(parsedScanInput) {
+  if (parsedScanInput.kind === 'qr-token') return 'Detected signed QR verification token';
+  if (parsedScanInput.kind === 'vehicle') return 'Detected vehicle registration lookup';
+  return 'Detected badge ID lookup';
+}
+
+function explainScanFailure(parsedScanInput, verifiedQrPayload, candidateBadge, verifiedBadge) {
+  if (verifiedBadge) return '';
+  if (parsedScanInput.kind === 'qr-token' && !verifiedQrPayload) {
+    return 'QR token could not be trusted. It may be expired, malformed, or signed for a different verification audience.';
+  }
+  if (parsedScanInput.kind === 'qr-token' && verifiedQrPayload && !candidateBadge) {
+    return `QR token is trusted, but no badge record exists for ${verifiedQrPayload.badgeId}.`;
+  }
+  if (parsedScanInput.kind === 'qr-token' && candidateBadge && !verifiedBadge) {
+    return 'QR token does not match the stored badge record or council.';
+  }
+  if (parsedScanInput.kind === 'vehicle') return 'No badge is linked to that vehicle registration.';
+  return 'No badge record matches that badge ID.';
 }
 
 function buildOfficerScanContext({ vehicle, location, scannedAt }) {

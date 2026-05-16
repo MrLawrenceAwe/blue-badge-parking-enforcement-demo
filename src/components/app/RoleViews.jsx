@@ -94,7 +94,12 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
       risk={officerScan.displayedRisk}
       scanResult={officerScan.lastScanResult}
       sessions={enforcementStore.activeSessions}
-      scanInputForm={{ input: officerScan.scanInput, location: officerScan.scanLocation, vehicle: officerScan.scanVehicle }}
+      scanInputForm={{
+        input: officerScan.scanInput,
+        inputDescription: officerScan.inputDescription,
+        location: officerScan.scanLocation,
+        vehicle: officerScan.scanVehicle
+      }}
       scanEvidenceForm={{ values: officerScan.scanEvidenceDraft, setValues: officerScan.updateScanEvidenceDraft }}
       scanCommands={{
         setInput: officerScan.setScanInput,

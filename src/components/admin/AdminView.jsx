@@ -33,7 +33,10 @@ export function AdminView({
               key={section.id}
               type="button"
               role="tab"
+              id={`admin-tab-${section.id}`}
+              aria-controls={`admin-panel-${section.id}`}
               aria-selected={activeSectionId === section.id}
+              tabIndex={activeSectionId === section.id ? 0 : -1}
               className={activeSectionId === section.id ? 'active' : ''}
               onClick={() => setActiveSectionId(section.id)}
             >
@@ -44,7 +47,12 @@ export function AdminView({
         <AdminFilters filterForm={filterForm} filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
       </div>
 
-      <section className="dashboard-grid">
+      <section
+        className="dashboard-grid"
+        role="tabpanel"
+        id={`admin-panel-${activeSectionId}`}
+        aria-labelledby={`admin-tab-${activeSectionId}`}
+      >
         {activeSectionId === 'overview' && (
           <AdminOverviewTab
             filteredBadges={adminDashboard.filteredBadges}

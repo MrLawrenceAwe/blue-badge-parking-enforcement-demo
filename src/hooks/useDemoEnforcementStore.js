@@ -5,7 +5,7 @@ import { initialCases, initialNotifications, initialReplacementRequests } from '
 import { createSignedSessionRecord } from '../domain/sessionProofs';
 import { defaultRiskRules } from '../domain/risk';
 import { buildRiskByBadge, selectActiveSessions, selectOpenCases } from '../domain/enforcementSelectors';
-import { formatRecordId } from '../domain/ids';
+import { nextRecordId } from '../domain/ids';
 import { createBrowserEnforcementRepository } from '../services/enforcementRepository';
 import { timestampNow } from '../utils/date';
 
@@ -42,7 +42,8 @@ export function useDemoEnforcementStore(currentActor = 'System') {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(sessions.map((session) => createSignedSessionRecord({ ...session, locked: true }))).then(
+    const unsignedSessions = sessions.filter((session) => !session.proof);
+    Promise.all(unsignedSessions.map((session) => createSignedSessionRecord({ ...session, locked: true }))).then(
       (signedSessions) => {
         if (cancelled) return;
         setSessions((current) => {
@@ -82,7 +83,7 @@ export function useDemoEnforcementStore(currentActor = 'System') {
   function appendAuditEvent({ badgeId, type, actor = currentActor, detail }) {
     setAuditEvents((current) => [
       {
-        id: formatRecordId('AUD-', 1000 + current.length + 1),
+        id: nextRecordId(current, 'AUD-', 1000),
         badgeId,
         type,
         actor,
@@ -96,7 +97,7 @@ export function useDemoEnforcementStore(currentActor = 'System') {
   function queueNotification({ badgeId, recipient, channel = 'Email', message }) {
     setNotifications((current) => [
       {
-        id: formatRecordId('NOT-', 1000 + current.length + 1),
+        id: nextRecordId(current, 'NOT-', 1000),
         badgeId,
         recipient,
         channel,

@@ -5,7 +5,7 @@ import { gpsForKnownLocation } from '../domain/locations';
 import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { createSignedSessionRecord, createSessionId } from '../domain/sessionProofs';
 import { buildSessionPayload, isSessionActive } from '../domain/sessions';
-import { formatRecordId } from '../domain/ids';
+import { nextRecordId } from '../domain/ids';
 import { timestampNow } from '../utils/date';
 
 export function useBadgeActions({
@@ -152,7 +152,7 @@ export function useBadgeActions({
     );
     setCases((current) => [
       createStolenBadgeCase({
-        id: formatRecordId('CASE-', 4200 + current.length),
+        id: nextRecordId(current, 'CASE-', 4199),
         badge: selectedBadge,
         details,
         contact,
@@ -193,7 +193,7 @@ export function useBadgeActions({
     }
     setReplacementRequests((current) => [
       {
-        id: formatRecordId('REP-', 1000 + current.length + 1),
+        id: nextRecordId(current, 'REP-', 1000),
         badgeId: selectedBadge.id,
         status: 'Pending evidence review',
         requestedAt: timestampNow(),
