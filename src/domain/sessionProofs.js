@@ -2,12 +2,12 @@ import { initialSessions } from '../data/demoActivity';
 import { bytesToBase64Url } from './base64Url';
 
 const textEncoder = new TextEncoder();
-const demoSessionProofs = new Map();
+const sessionProofsById = new Map();
 
 let nextSessionNumber = Math.max(
   ...initialSessions.map((session) => Number(session.id.replace('PS-', ''))).filter(Number.isFinite)
 ) + 1;
-let demoSessionKeysPromise;
+let sessionSigningKeysPromise;
 
 function canonicalSessionPayload(session) {
   return JSON.stringify({
@@ -20,9 +20,9 @@ function canonicalSessionPayload(session) {
   });
 }
 
-async function getDemoSessionKeys() {
-  if (!demoSessionKeysPromise) {
-    demoSessionKeysPromise = crypto.subtle.generateKey(
+async function getSessionSigningKeys() {
+  if (!sessionSigningKeysPromise) {
+    sessionSigningKeysPromise = crypto.subtle.generateKey(
       {
         name: 'ECDSA',
         namedCurve: 'P-256'
@@ -31,11 +31,11 @@ async function getDemoSessionKeys() {
       ['sign', 'verify']
     );
   }
-  return demoSessionKeysPromise;
+  return sessionSigningKeysPromise;
 }
 
-export async function createDemoAttestedSession(sessionRecord) {
-  const { privateKey, publicKey } = await getDemoSessionKeys();
+export async function createSignedSessionRecord(sessionRecord) {
+  const { privateKey, publicKey } = await getSessionSigningKeys();
   const payload = canonicalSessionPayload(sessionRecord);
   const signatureBuffer = await crypto.subtle.sign(
     { name: 'ECDSA', hash: 'SHA-256' },
@@ -48,7 +48,7 @@ export async function createDemoAttestedSession(sessionRecord) {
     signatureBuffer,
     textEncoder.encode(payload)
   );
-  demoSessionProofs.set(sessionRecord.id, {
+  sessionProofsById.set(sessionRecord.id, {
     payload,
     signature: bytesToBase64Url(new Uint8Array(signatureBuffer)),
     verified
@@ -66,11 +66,11 @@ export function createSessionId() {
 }
 
 export function isSessionRecordTrusted(session) {
-  const proof = demoSessionProofs.get(session.id);
+  const proof = sessionProofsById.get(session.id);
   return Boolean(proof?.verified) && session.locked && proof.payload === canonicalSessionPayload(session);
 }
 
 export function sessionIntegrityState(session) {
-  if (!demoSessionProofs.has(session.id)) return 'pending';
+  if (!sessionProofsById.has(session.id)) return 'pending';
   return isSessionRecordTrusted(session) ? 'trusted' : 'tampered';
 }

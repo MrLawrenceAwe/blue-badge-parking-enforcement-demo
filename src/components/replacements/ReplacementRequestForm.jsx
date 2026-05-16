@@ -1,4 +1,4 @@
-export function ReplacementRequestForm({ replacementForm, replacementRequests, requestReplacementBadge, showTemporaryPermit = true }) {
+export function ReplacementRequestForm({ replacementRequestForm, replacementRequests, requestReplacementBadge, showTemporaryPermit = true }) {
   return (
     <form
       className="replacement-request-form"
@@ -12,8 +12,8 @@ export function ReplacementRequestForm({ replacementForm, replacementRequests, r
         Crime, loss, or council reference
         <input
           name="reference"
-          value={replacementForm.values.reference}
-          onChange={(event) => replacementForm.setValues((current) => ({ ...current, reference: event.target.value }))}
+          value={replacementRequestForm.values.reference}
+          onChange={(event) => replacementRequestForm.setValues((current) => ({ ...current, reference: event.target.value }))}
           required
         />
       </label>
@@ -21,8 +21,8 @@ export function ReplacementRequestForm({ replacementForm, replacementRequests, r
         Temporary permit
         <select
           name="temporaryPermit"
-          value={replacementForm.values.temporaryPermit}
-          onChange={(event) => replacementForm.setValues((current) => ({ ...current, temporaryPermit: event.target.value }))}
+          value={replacementRequestForm.values.temporaryPermit}
+          onChange={(event) => replacementRequestForm.setValues((current) => ({ ...current, temporaryPermit: event.target.value }))}
         >
           <option>Requested</option>
           <option>Not required</option>

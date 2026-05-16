@@ -1,15 +1,15 @@
 import { Clock3, Gauge, QrCode, ShieldAlert, Siren } from 'lucide-react';
-import { riskLevelLabels } from '../../domain/risk';
+import { riskBandLabels } from '../../domain/risk';
 import { formatTime } from '../../utils/date';
 import { SessionCard } from '../sessions/SessionCard';
-import { StatusPill } from '../common/StatusPill';
+import { BadgeStatusPill } from '../ui/BadgeStatusPill';
 
 export function AdminOverviewTab({
   filteredBadges,
   filteredActiveSessions,
   filteredScans,
   reviewQueueCases,
-  restrictedBadges,
+  suspendedOrStolenBadges,
   riskByBadge,
   selectBadge
 }) {
@@ -37,8 +37,8 @@ export function AdminOverviewTab({
                 >
                   <td data-label="Badge">{badge.id}<br /><small>{badge.holder}</small></td>
                   <td data-label="Vehicle">{badge.vehicle}</td>
-                  <td data-label="Status"><StatusPill status={badge.status} /></td>
-                  <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskLevelLabels[riskByBadge[badge.id].level]}</small></td>
+                  <td data-label="Status"><BadgeStatusPill status={badge.status} /></td>
+                  <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskBandLabels[riskByBadge[badge.id].riskBand]}</small></td>
                 </tr>
               ))}
             </tbody>
@@ -58,7 +58,7 @@ export function AdminOverviewTab({
             <article key={scan.id} className="scan-card">
               <strong>{scan.badgeId}</strong>
               <span>{scan.vehicle} - {scan.location}</span>
-              <small>{scan.officer} - {formatTime(scan.time)} - {scan.outcome}</small>
+              <small>{scan.officer} - {formatTime(scan.time)} - {scan.scanOutcome}</small>
             </article>
           ))}
         </div>
@@ -79,15 +79,15 @@ export function AdminOverviewTab({
       </div>
 
       <div className="app-panel badge-status-panel">
-        <div className="app-panel-heading"><h2>Restricted badges</h2><Siren aria-hidden="true" /></div>
+        <div className="app-panel-heading"><h2>Suspended or stolen badges</h2><Siren aria-hidden="true" /></div>
         <div className="record-list constrained-list">
-          {restrictedBadges.map((badge) => (
+          {suspendedOrStolenBadges.map((badge) => (
             <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectBadge(badge.id)}>
               <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
-              <StatusPill status={badge.status} />
+              <BadgeStatusPill status={badge.status} />
             </button>
           ))}
-          {!restrictedBadges.length && <p className="muted-text">No restricted badges match the filters.</p>}
+          {!suspendedOrStolenBadges.length && <p className="muted-text">No suspended or stolen badges match the filters.</p>}
         </div>
       </div>
     </>

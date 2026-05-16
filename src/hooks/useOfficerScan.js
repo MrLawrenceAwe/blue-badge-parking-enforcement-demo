@@ -4,8 +4,8 @@ import { normaliseVehicle, vehicleSearchKey } from '../domain/badges';
 import { createOfficerScanCase, isCaseOpen } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { formatRecordId, nextNumberFromRecords } from '../domain/ids';
-import { demoGpsForLocation } from '../domain/locations';
-import { VERIFICATION_VERDICT, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForVerification } from '../domain/risk';
+import { gpsForKnownLocation } from '../domain/locations';
+import { VERIFICATION_STATUS, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForVerification } from '../domain/risk';
 import { parseScanInput } from '../domain/scanInput';
 import { verifyBadgeToken } from '../domain/badgeTokens';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
@@ -57,9 +57,9 @@ export function useOfficerScan({
     setOfficerNotice('');
   }
 
-  function updateScanEvidenceDraft(updater) {
+  function updateScanEvidenceDraft(evidenceDraftUpdater) {
     setScanEvidenceDraft((currentEvidence) => {
-      const nextEvidence = typeof updater === 'function' ? updater(currentEvidence) : updater;
+      const nextEvidence = typeof evidenceDraftUpdater === 'function' ? evidenceDraftUpdater(currentEvidence) : evidenceDraftUpdater;
       setLastScanResult((currentResult) => {
         if (!currentResult) return currentResult;
         setScans((currentScans) =>
@@ -107,11 +107,11 @@ export function useOfficerScan({
     const preFailureVerdict = badge
       ? evaluateBadgeRisk(badge, sessions, scans, {
         ...scanContext
-      }, riskRules).verdict
-      : VERIFICATION_VERDICT.invalid;
+      }, riskRules).verificationStatus
+      : VERIFICATION_STATUS.invalid;
     const risk = evaluateBadgeRisk(badge, sessions, scans, {
       ...scanContext,
-      includeCurrentFailure: preFailureVerdict !== VERIFICATION_VERDICT.valid
+      includeCurrentFailure: preFailureVerdict !== VERIFICATION_STATUS.valid
     }, riskRules);
 
     const scanId = formatRecordId('SC-', nextScanNumber.current);
@@ -216,7 +216,7 @@ function buildOfficerScanContext({ vehicle, location, scannedAt }) {
   return {
     vehicle,
     location,
-    gps: demoGpsForLocation(location),
+    gps: gpsForKnownLocation(location),
     time: scannedAt,
     device: location.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07'
   };
@@ -232,7 +232,7 @@ function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, risk, evi
     officer: officerName,
     time: scannedAt,
     device: scanContext.device,
-    outcome: scanOutcomeForVerification(risk),
+    scanOutcome: scanOutcomeForVerification(risk),
     contravention: evidence.contravention,
     action: evidence.action,
     officerNote: evidence.officerNote,

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { canStartSessionForBadge, normaliseVehicle, statusLabel } from '../domain/badges';
 import { createStolenBadgeCase } from '../domain/cases';
-import { demoGpsForLocation } from '../domain/locations';
-import { createDemoAttestedSession, createSessionId } from '../domain/sessionProofs';
+import { gpsForKnownLocation } from '../domain/locations';
+import { createSignedSessionRecord, createSessionId } from '../domain/sessionProofs';
 import { buildSessionPayload, isSessionActive } from '../domain/sessions';
 import { formatRecordId } from '../domain/ids';
 import { timestampNow } from '../utils/date';
@@ -36,18 +36,18 @@ export function useBadgeActions({
       return false;
     }
     if (sessions.some((session) => session.badgeId === selectedBadge.id && isSessionActive(session))) {
-      setBadgeNotice('A locked active session already exists for this badge. End-of-session handling would be added in the production workflow.');
+      setBadgeNotice('A locked active session already exists for this badge.');
       return false;
     }
 
     const location = formData.get('location').toString();
-    const session = await createDemoAttestedSession({
+    const session = await createSignedSessionRecord({
       id: createSessionId(),
       ...buildSessionPayload({
         badgeId: selectedBadge.id,
         vehicle: normaliseVehicle(formData.get('vehicle').toString()),
         location,
-        gps: demoGpsForLocation(location),
+        gps: gpsForKnownLocation(location),
         startedAt: timestampNow(),
         durationMins: Number(formData.get('duration'))
       })
@@ -59,7 +59,7 @@ export function useBadgeActions({
       actor: authUser.name,
       detail: `Locked session ${session.id} started at ${location} for ${session.durationMins} minutes.`
     });
-    setBadgeNotice('Session started and locked. Arrival time, GPS coordinates, vehicle, and duration are bound to a signed demo attestation and will flag as tampered if changed.');
+    setBadgeNotice('Session started and locked. Arrival details are signed for enforcement audit.');
     return true;
   }
 
@@ -73,7 +73,7 @@ export function useBadgeActions({
       setBadgeNotice('This session is not available to the signed-in user.');
       return;
     }
-    const updatedSession = await createDemoAttestedSession({
+    const updatedSession = await createSignedSessionRecord({
       ...session,
       durationMins: Math.min(session.durationMins + extraMins, 240)
     });
@@ -85,8 +85,8 @@ export function useBadgeActions({
       detail: `Session ${sessionId} extended to ${updatedSession.durationMins} minutes.`
     });
     setBadgeNotice(updatedSession.durationMins === session.durationMins
-      ? 'This session is already at the maximum 4 hour duration.'
-      : 'Session extended and re-signed. The original arrival details remain locked.');
+      ? 'This session is already at the 4 hour maximum.'
+      : 'Session extended and re-signed.');
   }
 
   function endSession(sessionId) {
@@ -106,7 +106,7 @@ export function useBadgeActions({
       actor: authUser.name,
       detail: `Session ${sessionId} ended by ${authUser.name}.`
     });
-    setBadgeNotice('Session ended. The signed arrival record remains available for enforcement audit.');
+    setBadgeNotice('Session ended. The signed arrival record remains available for audit.');
   }
 
   function reportStolen(formData) {
@@ -115,7 +115,7 @@ export function useBadgeActions({
       return false;
     }
     if (selectedBadge.status === 'stolen') {
-      setBadgeNotice('This badge has already been reported stolen. Use the replacement request workflow or contact the council with new evidence.');
+      setBadgeNotice('This badge has already been reported stolen.');
       return false;
     }
     const details = formData?.get('details')?.toString().trim();
@@ -125,7 +125,7 @@ export function useBadgeActions({
       setBadgeNotice('Confirm the deactivation and provide incident details before reporting the badge stolen.');
       return false;
     }
-    setBadgeNotice('Badge reported stolen. The badge is now deactivated for new parking sessions and will return a black high-risk result to officers.');
+    setBadgeNotice('Badge reported stolen. New sessions are blocked and officer scans will show a high-risk deactivated status.');
     setBadges((current) => current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)));
     setCases((current) => [
       createStolenBadgeCase({

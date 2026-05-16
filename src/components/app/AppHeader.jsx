@@ -7,7 +7,7 @@ const roleOptions = [
   ['admin', LayoutDashboard, 'Admin']
 ];
 
-export function AppHeader({ role, currentDemoRoles, demoUsers, setRole, selectDemoUser }) {
+export function AppHeader({ role, availableRoles, demoUsers, setRole, selectDemoUser }) {
   return (
     <header className="app-header">
       <div className="title-block">
@@ -21,7 +21,7 @@ export function AppHeader({ role, currentDemoRoles, demoUsers, setRole, selectDe
       <div className="role-switcher" aria-label="Choose role">
         {roleOptions.map(([value, Icon, label]) => {
           const demoUser = demoUsers.find((user) => user.role === value);
-          const canAccess = currentDemoRoles.includes(value);
+          const canAccess = availableRoles.includes(value);
           return (
             <button
               key={value}

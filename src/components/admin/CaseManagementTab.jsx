@@ -11,7 +11,7 @@ export function CaseManagementTab({
   noteDraftByCaseId,
   setNoteDraftByCaseId,
   adminMessage,
-  caseActions
+  caseCommands
 }) {
   return (
     <div className="app-panel case-management-panel full-span">
@@ -21,7 +21,7 @@ export function CaseManagementTab({
         selectedBadge={selectedBadge}
         newCaseDraft={newCaseDraft}
         updateNewCaseDraft={updateNewCaseDraft}
-        caseActions={caseActions}
+        caseCommands={caseCommands}
       />
       {adminMessage && <p className="form-message" role="status">{adminMessage}</p>}
       <div className="record-list constrained-list">
@@ -32,7 +32,7 @@ export function CaseManagementTab({
             caseRecord={caseRecord}
             noteDraft={noteDraftByCaseId[caseRecord.id]}
             setNoteDraftByCaseId={setNoteDraftByCaseId}
-            caseActions={caseActions}
+            caseCommands={caseCommands}
           />
         ))}
       </div>

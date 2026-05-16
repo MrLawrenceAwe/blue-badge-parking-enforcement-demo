@@ -1,7 +1,7 @@
 import { Clock3, FileText, UsersRound } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { SessionCard } from '../sessions/SessionCard';
-import { StatusPill } from '../common/StatusPill';
+import { BadgeStatusPill } from '../ui/BadgeStatusPill';
 import { BadgeNotifications } from '../badges/BadgeNotifications';
 import { BadgeActions } from '../badges/BadgeActions';
 
@@ -15,7 +15,7 @@ export function CarerView({
   endSession,
   reportStolen,
   requestReplacementBadge,
-  replacementForm,
+  replacementRequestForm,
   replacementRequests,
   notifications,
   sessionMessage
@@ -32,7 +32,7 @@ export function CarerView({
           {badges.map((badge) => (
             <button key={badge.id} className={`badge-record-button ${badge.id === selectedBadge.id ? 'selected' : ''}`} onClick={() => setSelectedBadgeId(badge.id)}>
               <span><strong>{badge.holder}</strong><small>{badge.delegatedTo}</small></span>
-              <StatusPill status={badge.status} />
+              <BadgeStatusPill status={badge.status} />
             </button>
           ))}
         </div>
@@ -42,7 +42,6 @@ export function CarerView({
           <h2>Badge activity</h2>
           <FileText aria-hidden="true" />
         </div>
-        <p className="muted-text">Delegated sessions and notices.</p>
         {sessions.filter((session) => session.badgeId === selectedBadge.id).map((session) => <SessionCard key={session.id} session={session} />)}
         <BadgeNotifications notifications={notifications} />
       </section>
@@ -61,7 +60,7 @@ export function CarerView({
             endSession={endSession}
             reportStolen={reportStolen}
             requestReplacementBadge={requestReplacementBadge}
-            replacementForm={replacementForm}
+            replacementRequestForm={replacementRequestForm}
             replacementRequests={replacementRequests}
             notifications={notifications}
             showActiveSession={false}

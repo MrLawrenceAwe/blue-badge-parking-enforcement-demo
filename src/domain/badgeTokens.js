@@ -40,6 +40,6 @@ export async function verifyBadgeToken(token) {
   }
 }
 
-export function verificationTokenForBadge(badgeId) {
+export function issuedVerificationTokenForBadge(badgeId) {
   return issuedBadgeTokens[badgeId] ?? null;
 }

@@ -20,7 +20,7 @@ export function distanceInKm(firstCoordinates, secondCoordinates) {
   return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
-export function demoGpsForLocation(location) {
+export function gpsForKnownLocation(location) {
   const lookup = [
     ['Oxford Street', '51.5152, -0.1419'],
     ['Bermondsey Street', '51.5009, -0.0811'],

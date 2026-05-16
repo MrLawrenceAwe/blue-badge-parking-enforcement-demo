@@ -1,30 +1,30 @@
 import { vehicleSearchKey } from './badges';
-import { distanceInKm, demoGpsForLocation } from './locations';
+import { distanceInKm, gpsForKnownLocation } from './locations';
 import { isSessionActive } from './sessions';
 import { minutesBetween } from '../utils/date';
 
-export const VERIFICATION_VERDICT = {
+export const VERIFICATION_STATUS = {
   valid: 'valid',
   suspicious: 'suspicious',
   deactivated: 'deactivated',
   invalid: 'invalid'
 };
 
-export const riskLevelLabels = {
+export const riskBandLabels = {
   normal: 'Normal',
   monitor: 'Monitor',
   review: 'Officer review',
   high: 'High priority alert'
 };
 
-export const verificationVerdictLabels = {
-  [VERIFICATION_VERDICT.valid]: 'Valid',
-  [VERIFICATION_VERDICT.suspicious]: 'Suspicious',
-  [VERIFICATION_VERDICT.deactivated]: 'Stolen / deactivated',
-  [VERIFICATION_VERDICT.invalid]: 'Invalid'
+export const verificationStatusLabels = {
+  [VERIFICATION_STATUS.valid]: 'Valid',
+  [VERIFICATION_STATUS.suspicious]: 'Suspicious',
+  [VERIFICATION_STATUS.deactivated]: 'Stolen / deactivated',
+  [VERIFICATION_STATUS.invalid]: 'Invalid'
 };
 
-const RISK_LEVEL = {
+const RISK_BAND = {
   normal: 'normal',
   monitor: 'monitor',
   review: 'review',
@@ -98,10 +98,10 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
   if (!badge) {
     return buildRiskAssessment({
       score: 100,
-      level: RISK_LEVEL.high,
+      riskBand: RISK_BAND.high,
       triggers: [buildRiskTrigger('unknownBadge', rules)],
-      severityClass: 'risk-high',
-      verdict: VERIFICATION_VERDICT.invalid,
+      riskToneClass: 'risk-high',
+      verificationStatus: VERIFICATION_STATUS.invalid,
       explanation: ['No matching badge record or trusted QR code was found.']
     });
   }
@@ -115,12 +115,12 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
   }
 
   const badgeScans = scans.filter((scan) => scan.badgeId === badge.id);
-  const failedScans = badgeScans.filter((scan) => scan.outcome !== 'valid').length + (scanContext.includeCurrentFailure ? 1 : 0);
+  const failedScans = badgeScans.filter((scan) => scan.scanOutcome !== 'valid').length + (scanContext.includeCurrentFailure ? 1 : 0);
   if (failedScans >= 2) triggeredRules.push(buildRiskTrigger('multipleFailedScans', rules));
 
   const recentDistantScanDetected = badgeScans.some((scan) => {
     const withinImpossibleTravelWindow = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.impossibleTravelWindowMins : true;
-    const scanGps = scan.gps ?? demoGpsForLocation(scan.location);
+    const scanGps = scan.gps ?? gpsForKnownLocation(scan.location);
     return withinImpossibleTravelWindow && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.impossibleTravelMinDistanceKm;
   });
   if (recentDistantScanDetected) triggeredRules.push(buildRiskTrigger('impossibleTravel', rules));
@@ -144,42 +144,42 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
     score = Math.max(score, 85);
-    return buildRiskAssessment({ score, level: RISK_LEVEL.high, triggers: triggeredRules, severityClass: 'risk-critical', verdict: VERIFICATION_VERDICT.deactivated, explanation });
+    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, riskToneClass: 'risk-critical', verificationStatus: VERIFICATION_STATUS.deactivated, explanation });
   }
 
   if (badge.status === 'expired') {
     score = Math.max(score, 70);
     return buildRiskAssessment({
       score,
-      level: score >= rules.highRiskThreshold ? RISK_LEVEL.high : RISK_LEVEL.review,
+      riskBand: score >= rules.highRiskThreshold ? RISK_BAND.high : RISK_BAND.review,
       triggers: triggeredRules,
-      severityClass: 'risk-high',
-      verdict: VERIFICATION_VERDICT.invalid,
+      riskToneClass: 'risk-high',
+      verificationStatus: VERIFICATION_STATUS.invalid,
       explanation
     });
   }
 
   if (score >= rules.highRiskThreshold) {
-    return buildRiskAssessment({ score, level: RISK_LEVEL.high, triggers: triggeredRules, severityClass: 'risk-high', verdict: VERIFICATION_VERDICT.invalid, explanation });
+    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, riskToneClass: 'risk-high', verificationStatus: VERIFICATION_STATUS.invalid, explanation });
   }
 
   if (score >= rules.monitorThreshold || badge.status === 'under review') {
     return buildRiskAssessment({
       score,
-      level: score >= rules.reviewThreshold ? RISK_LEVEL.review : RISK_LEVEL.monitor,
+      riskBand: score >= rules.reviewThreshold ? RISK_BAND.review : RISK_BAND.monitor,
       triggers: triggeredRules,
-      severityClass: 'risk-watch',
-      verdict: VERIFICATION_VERDICT.suspicious,
+      riskToneClass: 'risk-watch',
+      verificationStatus: VERIFICATION_STATUS.suspicious,
       explanation
     });
   }
 
   return buildRiskAssessment({
     score,
-    level: RISK_LEVEL.normal,
+    riskBand: RISK_BAND.normal,
     triggers: triggeredRules,
-    severityClass: 'risk-low',
-    verdict: VERIFICATION_VERDICT.valid,
+    riskToneClass: 'risk-low',
+    verificationStatus: VERIFICATION_STATUS.valid,
     explanation: ['No configured risk rules were triggered.']
   });
 }
@@ -187,37 +187,37 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 export function riskFromPermissionError(message) {
   return buildRiskAssessment({
     score: 100,
-    level: RISK_LEVEL.high,
+    riskBand: RISK_BAND.high,
     triggers: [{ type: 'permissionError', label: message, score: 100 }],
-    severityClass: 'risk-high',
-    verdict: VERIFICATION_VERDICT.invalid
+    riskToneClass: 'risk-high',
+    verificationStatus: VERIFICATION_STATUS.invalid
   });
 }
 
 export function scanOutcomeForVerification(risk) {
-  if (risk.verdict === VERIFICATION_VERDICT.valid) return 'valid';
-  if (risk.verdict === VERIFICATION_VERDICT.suspicious) return 'review';
-  if (risk.verdict === VERIFICATION_VERDICT.deactivated) return 'deactivated';
+  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return 'valid';
+  if (risk.verificationStatus === VERIFICATION_STATUS.suspicious) return 'review';
+  if (risk.verificationStatus === VERIFICATION_STATUS.deactivated) return 'deactivated';
   return 'invalid';
 }
 
-function buildRiskTrigger(type, rules) {
-  const triggerDefinition = RISK_TRIGGER_DEFINITIONS[type] ?? RISK_TRIGGER_DEFINITIONS.unknownBadge;
+function buildRiskTrigger(triggerType, rules) {
+  const triggerDefinition = RISK_TRIGGER_DEFINITIONS[triggerType] ?? RISK_TRIGGER_DEFINITIONS.unknownBadge;
   return {
-    type,
+    type: triggerType,
     label: triggerDefinition.label,
     score: rules.weights[triggerDefinition.weight] ?? rules.weights.default
   };
 }
 
-function buildRiskAssessment({ score, level, triggers, severityClass, verdict, explanation = [] }) {
+function buildRiskAssessment({ score, riskBand, triggers, riskToneClass, verificationStatus, explanation = [] }) {
   return {
     score,
-    level,
+    riskBand,
     triggers,
-    severityClass,
-    verdict,
-    outcome: scanOutcomeForVerification({ verdict }),
+    riskToneClass,
+    verificationStatus,
+    scanOutcome: scanOutcomeForVerification({ verificationStatus }),
     explanation
   };
 }
