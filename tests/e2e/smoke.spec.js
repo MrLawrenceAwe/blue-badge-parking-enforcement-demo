@@ -16,7 +16,7 @@ test('core demo workflows render and navigate without accessibility violations',
   await resetDemo(page);
 
   await expect(page.getByRole('heading', { name: /Blue Badge/i })).toBeVisible();
-  await expect(page.getByText(/Demo only: authentication/i)).toBeVisible();
+  await expect(page.getByText(/Demo data is stored in this browser/i)).toBeVisible();
   await expectNoA11yViolations(page);
 
   await page.getByRole('button', { name: /Officer/i }).click();

@@ -89,8 +89,15 @@ export function App() {
       />
 
       <SummaryStrip
+        role={auth.role}
         badgeCount={enforcementStore.badges.length}
         activeSessionCount={enforcementStore.activeSessions.length}
+        roleBadgeCount={auth.roleBadges.length}
+        roleActiveSessionCount={
+          enforcementStore.activeSessions.filter((session) =>
+            auth.roleBadges.some((badge) => badge.id === session.badgeId),
+          ).length
+        }
         highRiskCount={Object.values(enforcementStore.riskByBadge).filter((risk) => risk.score >= 81).length}
         openCaseCount={enforcementStore.openCases.length}
       />
