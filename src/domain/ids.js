@@ -12,3 +12,6 @@ export function formatRecordId(prefix, number) {
   return `${prefix}${number}`;
 }
 
+export function nextRecordId(records, prefix, fallback) {
+  return formatRecordId(prefix, nextNumberFromRecords(records, prefix, fallback));
+}

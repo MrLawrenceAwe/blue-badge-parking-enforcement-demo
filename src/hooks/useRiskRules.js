@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { validateRiskRules } from '../domain/risk';
 
 const riskRuleLimits = {
   highRiskThreshold: { min: 1, max: 100 },
@@ -25,8 +26,16 @@ export function useRiskRules({ setRiskRules }) {
       return;
     }
     const clampedValue = Math.min(limits.max, Math.max(limits.min, numericValue));
-    setRiskRules((current) => ({ ...current, [field]: clampedValue }));
-    setRiskRuleNotice(`Risk rule updated: ${riskRuleLabels[field]} is now ${clampedValue}.`);
+    setRiskRules((current) => {
+      const nextRules = { ...current, [field]: clampedValue };
+      const validation = validateRiskRules(nextRules);
+      if (!validation.valid) {
+        setRiskRuleNotice(`Risk rule not updated: ${validation.issues[0]}.`);
+        return current;
+      }
+      setRiskRuleNotice(`Risk rule updated: ${riskRuleLabels[field]} is now ${clampedValue}.`);
+      return nextRules;
+    });
   }
 
   return {

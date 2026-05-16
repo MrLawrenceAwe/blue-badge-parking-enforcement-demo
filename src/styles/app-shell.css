@@ -94,6 +94,14 @@ h2 {
   color: var(--muted);
 }
 
+.demo-security-note,
+.input-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
 .demo-account-drawer {
   min-width: 0;
 }

@@ -100,7 +100,65 @@ export const defaultRiskRules = {
   }
 };
 
+const RISK_RULE_LIMITS = {
+  highRiskThreshold: { min: 1, max: 100 },
+  reviewThreshold: { min: 1, max: 100 },
+  monitorThreshold: { min: 1, max: 100 },
+  impossibleTravelWindowMins: { min: 5, max: 240 },
+  impossibleTravelMinDistanceKm: { min: 0.1, max: 100 },
+  longStayMinutes: { min: 30, max: 480 },
+};
+
+const RISK_WEIGHT_LIMITS = { min: 0, max: 100 };
+
+export function normaliseRiskRules(rules = defaultRiskRules) {
+  const nextRules = {
+    ...defaultRiskRules,
+    ...rules,
+    weights: {
+      ...defaultRiskRules.weights,
+      ...(rules.weights ?? {}),
+    },
+  };
+
+  Object.entries(RISK_RULE_LIMITS).forEach(([field, limits]) => {
+    nextRules[field] = clampNumber(nextRules[field], defaultRiskRules[field], limits);
+  });
+  Object.keys(nextRules.weights).forEach((field) => {
+    nextRules.weights[field] = clampNumber(nextRules.weights[field], defaultRiskRules.weights[field], RISK_WEIGHT_LIMITS);
+  });
+
+  nextRules.reviewThreshold = Math.min(nextRules.reviewThreshold, nextRules.highRiskThreshold);
+  nextRules.monitorThreshold = Math.min(nextRules.monitorThreshold, nextRules.reviewThreshold);
+  return nextRules;
+}
+
+export function validateRiskRules(rules = defaultRiskRules) {
+  const issues = [];
+  Object.entries(RISK_RULE_LIMITS).forEach(([field, limits]) => {
+    if (!Number.isFinite(Number(rules[field])) || Number(rules[field]) < limits.min || Number(rules[field]) > limits.max) {
+      issues.push(`${field} must be between ${limits.min} and ${limits.max}`);
+    }
+  });
+  Object.entries(rules.weights ?? {}).forEach(([field, value]) => {
+    if (!Number.isFinite(Number(value)) || Number(value) < RISK_WEIGHT_LIMITS.min || Number(value) > RISK_WEIGHT_LIMITS.max) {
+      issues.push(`weights.${field} must be between ${RISK_WEIGHT_LIMITS.min} and ${RISK_WEIGHT_LIMITS.max}`);
+    }
+  });
+  if (Number(rules.highRiskThreshold) < Number(rules.reviewThreshold)) {
+    issues.push('highRiskThreshold must be greater than or equal to reviewThreshold');
+  }
+  if (Number(rules.reviewThreshold) < Number(rules.monitorThreshold)) {
+    issues.push('reviewThreshold must be greater than or equal to monitorThreshold');
+  }
+  return {
+    valid: issues.length === 0,
+    issues,
+  };
+}
+
 export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rules = defaultRiskRules) {
+  rules = normaliseRiskRules(rules);
   const triggeredRules = [];
   if (!badge) {
     return buildRiskAssessment({
@@ -178,6 +236,12 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
     verificationStatus: VERIFICATION_STATUS.valid,
     explanation: ['No configured risk rules were triggered.']
   });
+}
+
+function clampNumber(value, fallback, { min, max }) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return fallback;
+  return Math.min(max, Math.max(min, numericValue));
 }
 
 export function riskFromPermissionError(message) {

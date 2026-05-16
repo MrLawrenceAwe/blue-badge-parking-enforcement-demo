@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateBadgeRisk, VERIFICATION_STATUS } from './risk';
+import { evaluateBadgeRisk, normaliseRiskRules, validateRiskRules, VERIFICATION_STATUS } from './risk';
 
 const validBadge = {
   id: 'BB-WCC-104928',
@@ -51,5 +51,31 @@ describe('evaluateBadgeRisk', () => {
     );
 
     expect(risk.triggers.some((trigger) => trigger.type === 'impossibleTravel')).toBe(true);
+  });
+
+  it('normalises malformed persisted risk rules before scoring', () => {
+    const risk = evaluateBadgeRisk(validBadge, [], [], { vehicle: 'WR64 BAD' }, {
+      highRiskThreshold: 200,
+      reviewThreshold: 150,
+      monitorThreshold: 120,
+      impossibleTravelWindowMins: -1,
+      impossibleTravelMinDistanceKm: -1,
+      longStayMinutes: -1,
+      weights: { unregisteredVehicle: 999 },
+    });
+
+    expect(risk.score).toBe(100);
+    expect(risk.verificationStatus).toBe(VERIFICATION_STATUS.invalid);
+  });
+
+  it('validates threshold ordering for council risk rules', () => {
+    expect(validateRiskRules({
+      ...normaliseRiskRules(),
+      highRiskThreshold: 50,
+      reviewThreshold: 60,
+    })).toEqual({
+      valid: false,
+      issues: ['highRiskThreshold must be greater than or equal to reviewThreshold'],
+    });
   });
 });

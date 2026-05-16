@@ -22,6 +22,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
           <QrCode aria-hidden="true" />
         </div>
         <label>Badge ID, QR code, or vehicle registration<input value={scanInputForm.input} onChange={(event) => scanCommands.setInput(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
+        <p className="input-hint" aria-live="polite">{scanResult?.inputDescription ?? scanInputForm.inputDescription}</p>
         <label>Observed vehicle<input value={scanInputForm.vehicle} onChange={(event) => scanCommands.setVehicle(event.target.value)} aria-label="Observed vehicle registration" /></label>
         <label>Scan location<input value={scanInputForm.location} onChange={(event) => scanCommands.setLocation(event.target.value)} aria-label="Scan location" /></label>
         <button className="primary-button" onClick={scanCommands.verifyBadge}><Search aria-hidden="true" size={21} /> Verify</button>
@@ -49,6 +50,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
             <strong>Risk score {risk.score}</strong>
             <div className="risk-explanation">
               {risk.explanation.map((item) => <small key={item}>{item}</small>)}
+              {scanResult?.failureReason && <small>{scanResult.failureReason}</small>}
             </div>
           </div>
           {canOpenCaseFromScan && (
