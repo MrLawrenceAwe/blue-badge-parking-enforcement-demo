@@ -1,15 +1,15 @@
 import { Clock3, Gauge, QrCode, ShieldAlert, Siren } from 'lucide-react';
 import { riskLevelLabels } from '../../domain/risk';
 import { formatTime } from '../../utils/date';
-import { SessionCard } from '../common/SessionCard';
+import { SessionCard } from '../sessions/SessionCard';
 import { StatusPill } from '../common/StatusPill';
 
 export function AdminOverviewTab({
   filteredBadges,
   visibleActiveSessions,
   visibleScans,
-  suspiciousCases,
-  restrictedBadges,
+  reviewQueueCases,
+  deactivatedBadges,
   riskByBadge,
   selectBadge
 }) {
@@ -67,27 +67,27 @@ export function AdminOverviewTab({
       <div className="app-panel suspicious-cases-panel">
         <div className="app-panel-heading"><h2>Cases needing review</h2><ShieldAlert aria-hidden="true" /></div>
         <div className="record-list constrained-list">
-          {suspiciousCases.map((caseRecord) => (
+          {reviewQueueCases.map((caseRecord) => (
             <article key={caseRecord.id} className="case-card">
               <strong>{caseRecord.id}</strong>
               <span>{caseRecord.badgeId} - {caseRecord.status}</span>
               <small>{caseRecord.assignedTo}</small>
             </article>
           ))}
-          {!suspiciousCases.length && <p className="muted-text">No review cases match the current filters.</p>}
+          {!reviewQueueCases.length && <p className="muted-text">No review cases match the current filters.</p>}
         </div>
       </div>
 
       <div className="app-panel badge-status-panel">
         <div className="app-panel-heading"><h2>Restricted badges</h2><Siren aria-hidden="true" /></div>
         <div className="record-list constrained-list">
-          {restrictedBadges.map((badge) => (
+          {deactivatedBadges.map((badge) => (
             <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectBadge(badge.id)}>
               <span><strong>{badge.id}</strong><small>{badge.holder} - {badge.vehicle}</small></span>
               <StatusPill status={badge.status} />
             </button>
           ))}
-          {!restrictedBadges.length && <p className="muted-text">No restricted badges match the filters.</p>}
+          {!deactivatedBadges.length && <p className="muted-text">No deactivated badges match the filters.</p>}
         </div>
       </div>
     </>

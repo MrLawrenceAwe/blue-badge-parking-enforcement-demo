@@ -1,0 +1,292 @@
+.app-header {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 14px 0 12px;
+}
+
+.title-block {
+  display: grid;
+  gap: 8px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--blue-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0;
+}
+
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(1.75rem, 3vw, 2.65rem);
+  line-height: 1.1;
+}
+
+.hero-note {
+  margin: 0;
+  max-width: 65ch;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+h2 {
+  font-size: 1.28rem;
+  margin-bottom: 0;
+  line-height: 1.2;
+}
+
+.role-switcher,
+.button-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.role-switcher button,
+.tab-list button,
+.primary-button,
+.secondary-button,
+.danger-button {
+  min-height: 44px;
+  border-radius: 6px;
+  border: 2px solid var(--blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.role-switcher button {
+  background: var(--surface);
+  color: var(--blue-dark);
+}
+
+.tab-list button {
+  border-color: #9bbbd1;
+  background: transparent;
+  color: var(--blue-dark);
+}
+
+.role-switcher button:disabled {
+  border-color: #aeb9c0;
+  color: #6f7b84;
+  background: #e6ecef;
+  cursor: not-allowed;
+}
+
+.role-switcher button.active,
+.tab-list button.active,
+.primary-button {
+  background: var(--blue);
+  color: #fff;
+}
+
+.role-switcher button.active,
+.tab-list button.active {
+  border-color: var(--blue-dark);
+}
+
+.secondary-button {
+  border-color: #9bbbd1;
+  background: transparent;
+  color: var(--blue);
+}
+
+.small-button {
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+.danger-button {
+  width: 100%;
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-strip {
+  background: #d8e8f3;
+  border: 1px solid #9bbbd1;
+  border-left: 6px solid var(--blue);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: grid;
+  gap: 8px;
+  align-items: center;
+}
+
+.auth-strip span {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.auth-strip-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.demo-note {
+  margin: 0;
+  color: var(--muted);
+}
+
+.demo-account-drawer {
+  min-width: 0;
+}
+
+.auth-controls summary,
+.demo-account-drawer summary {
+  min-height: 40px;
+  border: 2px solid var(--blue);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--blue-dark);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-weight: 700;
+}
+
+.auth-controls {
+  min-width: 0;
+}
+
+.auth-controls[open] {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-controls[open] > summary {
+  margin-bottom: 0;
+}
+
+.demo-account-drawer[open] summary {
+  margin-bottom: 10px;
+}
+
+.demo-account-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.demo-account-button {
+  min-height: 72px;
+  border: 1px solid #9bbbd1;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 12px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.demo-account-button span,
+.demo-account-button small {
+  display: block;
+}
+
+.demo-account-button span {
+  font-weight: 700;
+}
+
+.demo-account-button small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.demo-account-button.active {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 2px var(--blue);
+  background: #f7fbff;
+}
+
+.auth-controls form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-width: 0;
+}
+
+.auth-strip label {
+  margin-bottom: 0;
+}
+
+.login-error {
+  margin: 0;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.form-message {
+  border-left: 5px solid var(--blue);
+  background: #e8f2fa;
+  color: var(--ink);
+  margin: 12px 0 0;
+  padding: 10px;
+  font-weight: 700;
+}
+
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--blue);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: grid;
+  gap: 1px;
+}
+
+.metric span {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.metric strong {
+  font-size: 1.45rem;
+}
+

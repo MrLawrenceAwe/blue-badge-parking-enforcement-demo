@@ -5,8 +5,10 @@ export function CaseManagementTab({
   allBadges,
   selectedBadge,
   selectedBadgeCases,
-  newCaseForm,
-  caseDraftNotes,
+  draftCase,
+  updateDraftCase,
+  caseNoteDraftsById,
+  setCaseNoteDraftsById,
   adminMessage,
   caseActions
 }) {
@@ -19,13 +21,13 @@ export function CaseManagementTab({
         <span>{selectedBadge.id} - {selectedBadge.vehicle}</span>
       </div>
       <div className="case-field-grid">
-        <label>Status<select value={newCaseForm.status} onChange={(event) => newCaseForm.setStatus(event.target.value)}>{caseStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
-        <label>Assigned to<input value={newCaseForm.assignee} onChange={(event) => newCaseForm.setAssignee(event.target.value)} aria-label="Assigned case officer or team" /></label>
-        <label>Due date<input type="date" value={newCaseForm.dueDate} onChange={(event) => newCaseForm.setDueDate(event.target.value)} aria-label="Case due date" /></label>
-        <label>Closure reason<input value={newCaseForm.closureReason} onChange={(event) => newCaseForm.setClosureReason(event.target.value)} placeholder="Required when resolving" aria-label="Closure reason" /></label>
+        <label>Status<select value={draftCase.status} onChange={(event) => updateDraftCase('status', event.target.value)}>{caseStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
+        <label>Assigned to<input value={draftCase.assignee} onChange={(event) => updateDraftCase('assignee', event.target.value)} aria-label="Assigned case officer or team" /></label>
+        <label>Due date<input type="date" value={draftCase.dueDate} onChange={(event) => updateDraftCase('dueDate', event.target.value)} aria-label="Case due date" /></label>
+        <label>Closure reason<input value={draftCase.closureReason} onChange={(event) => updateDraftCase('closureReason', event.target.value)} placeholder="Required when resolving" aria-label="Closure reason" /></label>
       </div>
-      <textarea value={newCaseForm.note} onChange={(event) => newCaseForm.setNote(event.target.value)} aria-label="Case note" placeholder="Add officer note, evidence reference, or review outcome" />
-      <label>Evidence reference<input value={newCaseForm.evidence} onChange={(event) => newCaseForm.setEvidence(event.target.value)} placeholder="Photo, scan log, witness note, file reference" aria-label="Evidence reference" /></label>
+      <textarea value={draftCase.note} onChange={(event) => updateDraftCase('note', event.target.value)} aria-label="Case note" placeholder="Add officer note, evidence reference, or review outcome" />
+      <label>Evidence reference<input value={draftCase.evidence} onChange={(event) => updateDraftCase('evidence', event.target.value)} placeholder="Photo, scan log, witness note, file reference" aria-label="Evidence reference" /></label>
       <div className="button-row">
         <button className="primary-button" onClick={caseActions.addCase}><FileText aria-hidden="true" size={20} /> Create case</button>
         <button className="secondary-button" onClick={caseActions.reactivateBadge}><ShieldCheck aria-hidden="true" size={20} /> Reactivate after review</button>
@@ -52,7 +54,7 @@ export function CaseManagementTab({
               {(caseRecord.evidenceItems ?? []).map((item, index) => <small key={`${caseRecord.id}-evidence-${index}`}>{item.type}: {item.reference} - {item.addedBy}</small>)}
               {!(caseRecord.evidenceItems ?? []).length && <small>No structured evidence metadata yet.</small>}
             </div>
-            <label>Add note<textarea value={caseDraftNotes.values[caseRecord.id] ?? ''} onChange={(event) => caseDraftNotes.setValues((current) => ({ ...current, [caseRecord.id]: event.target.value }))} aria-label={`Add note to ${caseRecord.id}`} placeholder="Officer update, holder contact, evidence summary" /></label>
+            <label>Add note<textarea value={caseNoteDraftsById[caseRecord.id] ?? ''} onChange={(event) => setCaseNoteDraftsById((current) => ({ ...current, [caseRecord.id]: event.target.value }))} aria-label={`Add note to ${caseRecord.id}`} placeholder="Officer update, holder contact, evidence summary" /></label>
             <button className="secondary-button" type="button" onClick={() => caseActions.appendCaseNote(caseRecord.id)}><FileText aria-hidden="true" size={18} /> Add note</button>
             <small>{caseRecord.evidence}</small>
             <label>Upload evidence<input type="file" onChange={(event) => {

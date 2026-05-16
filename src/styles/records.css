@@ -1,0 +1,103 @@
+.badge-record-button {
+  width: 100%;
+  min-height: 68px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-record-button.selected {
+  border-color: var(--blue);
+  outline: 3px solid #cce1f2;
+}
+
+.badge-record-button small,
+.scan-card small,
+.case-card small,
+.timeline-item small {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.timeline-item {
+  display: grid;
+  gap: 4px;
+}
+
+.scan-card {
+  display: grid;
+  gap: 3px;
+}
+
+.timeline-item span {
+  color: var(--muted);
+}
+
+.record-list {
+  display: grid;
+  gap: 10px;
+}
+
+.case-scope {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f4f8fb;
+}
+
+.case-scope span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.case-field-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.case-card {
+  display: grid;
+  gap: 7px;
+}
+
+.case-card label {
+  margin-bottom: 0;
+}
+
+.case-card input,
+.case-card select {
+  min-height: 42px;
+}
+
+.constrained-list {
+  min-width: 0;
+}
+
+.muted-text {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.scan-panel {
+  align-self: start;
+}
+
+.fraud-events {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.risk-event-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 5px solid var(--amber);
+  background: #fff8e8;
+  padding: 10px;
+}

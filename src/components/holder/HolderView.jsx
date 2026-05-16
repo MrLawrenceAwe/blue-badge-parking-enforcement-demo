@@ -4,11 +4,11 @@ import { isSessionActive } from '../../domain/sessions';
 import { verificationTokenForBadge } from '../../domain/badgeTokens';
 import { RISK_VERDICT } from '../../domain/risk';
 import { formatDate } from '../../utils/date';
-import { SessionCard } from '../common/SessionCard';
+import { SessionCard } from '../sessions/SessionCard';
 import { StatusPill } from '../common/StatusPill';
 import { StolenReportForm } from '../common/StolenReportForm';
-import { BadgeNotifications } from '../common/BadgeNotifications';
-import { ReplacementRequestForm } from '../common/ReplacementRequestForm';
+import { BadgeNotifications } from '../badges/BadgeNotifications';
+import { ReplacementRequestForm } from '../replacements/ReplacementRequestForm';
 import { SessionStartForm } from '../sessions/SessionStartForm';
 
 export function HolderView({

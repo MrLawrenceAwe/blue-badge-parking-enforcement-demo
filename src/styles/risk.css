@@ -1,0 +1,110 @@
+.risk-banner,
+.account-status,
+.verification-result {
+  border-radius: 8px;
+  color: #fff;
+  padding: 14px;
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.verification-result {
+  min-height: 168px;
+  align-content: center;
+}
+
+.compact-verification-result {
+  min-height: 0;
+  grid-template-columns: 1fr;
+  align-content: start;
+  align-self: start;
+}
+
+.verification-result h2 {
+  font-size: clamp(1.85rem, 5vw, 3.2rem);
+}
+
+.compact-verification-result h2 {
+  font-size: 2rem;
+}
+
+.compact-verification-result p {
+  margin-bottom: 2px;
+}
+
+.officer-decision-stack {
+  align-self: start;
+  display: grid;
+  gap: 14px;
+}
+
+.evidence-section {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 14px;
+}
+
+.evidence-section h3 {
+  margin-bottom: 0;
+}
+
+.detail-list-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-list-grid > div:first-child,
+.detail-list-grid > div:last-child {
+  grid-column: 1 / -1;
+}
+
+.result-detail {
+  display: grid;
+  gap: 4px;
+}
+
+.risk-low {
+  background: var(--green);
+}
+
+.risk-watch {
+  background: var(--amber);
+  color: #101820;
+}
+
+.risk-high {
+  background: var(--red);
+}
+
+.risk-critical {
+  background: var(--black);
+}
+
+.status {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  border: 1px solid currentColor;
+}
+
+.status-valid {
+  color: var(--green);
+  background: #e8f5ee;
+}
+
+.status-expired,
+.status-under-review {
+  color: #7a4b00;
+  background: #fff4d6;
+}
+
+.status-suspended,
+.status-stolen {
+  color: var(--red);
+  background: #fde8eb;
+}
