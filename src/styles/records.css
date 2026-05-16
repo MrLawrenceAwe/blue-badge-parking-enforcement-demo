@@ -1,6 +1,6 @@
 .badge-record-button {
   width: 100%;
-  min-height: 68px;
+  min-height: 62px;
   text-align: left;
   display: flex;
   justify-content: space-between;
@@ -38,7 +38,7 @@
 
 .record-list {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .case-scope {

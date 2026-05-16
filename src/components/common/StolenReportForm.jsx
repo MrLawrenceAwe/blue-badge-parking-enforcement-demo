@@ -8,7 +8,7 @@ export function StolenReportForm({ reportStolen }) {
     return (
       <button className="danger-button" onClick={() => setIsOpen(true)}>
         <Siren aria-hidden="true" size={21} />
-        Report badge stolen
+        Report stolen
       </button>
     );
   }
@@ -22,8 +22,8 @@ export function StolenReportForm({ reportStolen }) {
         if (reported) setIsOpen(false);
       }}
     >
-      <label>Incident details<textarea name="details" required placeholder="Where and when was the badge lost or stolen?" /></label>
-      <label>Contact number<input name="contact" required placeholder="Best number for the council to verify this report" /></label>
+      <label>Incident details<textarea name="details" required placeholder="Where and when it happened" /></label>
+      <label>Contact number<input name="contact" required placeholder="Verification contact" /></label>
       <label className="checkbox-label">
         <input name="confirmed" type="checkbox" value="yes" required />
         I understand this will immediately deactivate the digital badge.
