@@ -115,23 +115,23 @@
     order: 20;
   }
 
-  .dashboard-grid > .risk-panel {
+  .dashboard-grid > .suspicious-cases-panel {
     order: 1;
   }
 
-  .dashboard-grid > .active-sessions-panel {
+  .dashboard-grid > .badge-status-panel {
     order: 2;
   }
 
-  .dashboard-grid > .recent-scans-panel {
+  .dashboard-grid > .risk-panel {
     order: 3;
   }
 
-  .dashboard-grid > .suspicious-cases-panel {
+  .dashboard-grid > .active-sessions-panel {
     order: 4;
   }
 
-  .dashboard-grid > .badge-status-panel {
+  .dashboard-grid > .recent-scans-panel {
     order: 5;
   }
 

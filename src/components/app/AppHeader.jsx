@@ -18,7 +18,7 @@ export function AppHeader({ role, availableRoles, demoUsers, setRole, selectDemo
         <h1>Blue Badge enforcement</h1>
         <p className="hero-note">Badge checks, sessions, and cases.</p>
       </div>
-      <div className="role-switcher" aria-label="Choose role">
+      <div className="role-switcher" aria-label="Switch demo role">
         {roleOptions.map(([value, Icon, label]) => {
           const demoUser = demoUsers.find((user) => user.role === value);
           const canAccess = availableRoles.includes(value);
@@ -28,7 +28,7 @@ export function AppHeader({ role, availableRoles, demoUsers, setRole, selectDemo
               className={role === value ? 'active' : ''}
               onClick={() => (canAccess ? setRole(value) : selectDemoUser(demoUser))}
               aria-pressed={role === value}
-              title={canAccess ? label : `Switch to ${label.toLowerCase()} demo`}
+              title={canAccess ? `Demo role: ${label}` : `Switch to ${label.toLowerCase()} demo account`}
             >
               <Icon aria-hidden="true" size={19} />
               <span>{label}</span>

@@ -15,6 +15,34 @@
   margin-top: 8px;
 }
 
+.active-session-state {
+  align-items: flex-start;
+  background: #e8f2fa;
+  border: 1px solid #9bbbd1;
+  border-left: 5px solid var(--blue);
+  border-radius: 6px;
+  color: var(--ink);
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+}
+
+.active-session-state svg {
+  color: var(--blue);
+  flex: 0 0 auto;
+}
+
+.active-session-state strong,
+.active-session-state span {
+  display: block;
+}
+
+.active-session-state span {
+  color: var(--muted);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
 .stolen-report-form {
   border: 1px solid #f0a8b0;
   border-left: 4px solid var(--red);
