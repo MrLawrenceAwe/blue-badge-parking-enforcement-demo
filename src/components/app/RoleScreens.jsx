@@ -3,13 +3,12 @@ import { CarerView } from '../carer/CarerView';
 import { HolderView } from '../holder/HolderView';
 import { OfficerView } from '../officer/OfficerView';
 
-export function HolderRoleView({
+export function HolderScreen({
   auth,
   records,
-  selfServiceActions,
+  holderActions,
   replacementForm,
-  selectedBadgeReplacementRequests,
-  selectedBadgeNotifications
+  selectedBadgeActivity
 }) {
   return (
     <HolderView
@@ -17,27 +16,26 @@ export function HolderRoleView({
       badges={auth.roleBadges}
       setSelectedBadgeId={auth.setSelectedBadgeId}
       sessions={records.sessions}
-      startSession={selfServiceActions.startSession}
-      extendSession={selfServiceActions.extendSession}
-      endSession={selfServiceActions.endSession}
-      reportStolen={selfServiceActions.reportStolen}
-      requestReplacementBadge={selfServiceActions.requestReplacementBadge}
+      startSession={holderActions.startSession}
+      extendSession={holderActions.extendSession}
+      endSession={holderActions.endSession}
+      reportStolen={holderActions.reportStolen}
+      requestReplacementBadge={holderActions.requestReplacementBadge}
       replacementForm={replacementForm}
-      replacementRequests={selectedBadgeReplacementRequests}
-      notifications={selectedBadgeNotifications}
+      replacementRequests={selectedBadgeActivity.replacementRequests}
+      notifications={selectedBadgeActivity.notifications}
       risk={records.riskByBadge[auth.selectedBadge.id]}
-      sessionMessage={selfServiceActions.selfServiceNotice}
+      sessionMessage={holderActions.holderNotice}
     />
   );
 }
 
-export function CarerRoleView({
+export function CarerScreen({
   auth,
   records,
-  selfServiceActions,
+  holderActions,
   replacementForm,
-  selectedBadgeReplacementRequests,
-  selectedBadgeNotifications
+  selectedBadgeActivity
 }) {
   return (
     <CarerView
@@ -45,20 +43,20 @@ export function CarerRoleView({
       selectedBadge={auth.selectedBadge}
       setSelectedBadgeId={auth.setSelectedBadgeId}
       sessions={records.sessions}
-      startSession={selfServiceActions.startSession}
-      extendSession={selfServiceActions.extendSession}
-      endSession={selfServiceActions.endSession}
-      reportStolen={selfServiceActions.reportStolen}
-      requestReplacementBadge={selfServiceActions.requestReplacementBadge}
+      startSession={holderActions.startSession}
+      extendSession={holderActions.extendSession}
+      endSession={holderActions.endSession}
+      reportStolen={holderActions.reportStolen}
+      requestReplacementBadge={holderActions.requestReplacementBadge}
       replacementForm={replacementForm}
-      replacementRequests={selectedBadgeReplacementRequests}
-      notifications={selectedBadgeNotifications}
-      sessionMessage={selfServiceActions.selfServiceNotice}
+      replacementRequests={selectedBadgeActivity.replacementRequests}
+      notifications={selectedBadgeActivity.notifications}
+      sessionMessage={holderActions.holderNotice}
     />
   );
 }
 
-export function OfficerRoleView({ auth, records, scanActions }) {
+export function OfficerScreen({ auth, records, scanActions }) {
   return (
     <OfficerView
       badge={scanActions.lastScanResult ? scanActions.lastScanResult.badge : auth.selectedBadge}
@@ -79,21 +77,21 @@ export function OfficerRoleView({ auth, records, scanActions }) {
   );
 }
 
-export function AdminRoleView({
+export function AdminScreen({
   auth,
   records,
   caseManagement,
   adminFilters,
   adminActions,
-  dashboardData
+  adminRecordView
 }) {
   return (
     <AdminView
-      filteredBadges={dashboardData.filteredBadges}
+      filteredBadges={adminRecordView.filteredBadges}
       allBadges={records.badges}
-      filteredActiveSessions={dashboardData.filteredActiveSessions}
-      filteredScans={dashboardData.filteredScans}
-      selectedBadgeCases={dashboardData.selectedBadgeCases}
+      filteredActiveSessions={adminRecordView.filteredActiveSessions}
+      filteredScans={adminRecordView.filteredScans}
+      selectedBadgeCases={adminRecordView.selectedBadgeCases}
       riskByBadge={records.riskByBadge}
       filters={adminFilters}
       selectedBadge={auth.selectedBadge}
@@ -107,8 +105,8 @@ export function AdminRoleView({
       riskRules={records.riskRules}
       adminActions={adminActions}
       adminMessage={caseManagement.adminNotice}
-      reviewQueueCases={dashboardData.reviewQueueCases}
-      restrictedBadges={dashboardData.restrictedBadges}
+      reviewQueueCases={adminRecordView.reviewQueueCases}
+      restrictedBadges={adminRecordView.restrictedBadges}
     />
   );
 }

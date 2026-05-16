@@ -3,7 +3,7 @@ import { isSessionActive } from '../../domain/sessions';
 import { SessionCard } from '../sessions/SessionCard';
 import { StatusPill } from '../common/StatusPill';
 import { BadgeNotifications } from '../badges/BadgeNotifications';
-import { BadgeSelfServicePanel } from '../badges/BadgeSelfServicePanel';
+import { BadgeActions } from '../badges/BadgeActions';
 
 export function CarerView({
   badges,
@@ -52,7 +52,7 @@ export function CarerView({
           <Clock3 aria-hidden="true" />
         </div>
         <div className="session-panel-stack">
-          <BadgeSelfServicePanel
+          <BadgeActions
             badge={selectedBadge}
             activeSession={activeSession}
             sessionMessage={sessionMessage}

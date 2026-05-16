@@ -1,10 +1,10 @@
 import { BadgeNotifications } from './BadgeNotifications';
+import { StolenReportForm } from './StolenReportForm';
 import { ReplacementRequestForm } from '../replacements/ReplacementRequestForm';
 import { SessionCard } from '../sessions/SessionCard';
 import { SessionStartForm } from '../sessions/SessionStartForm';
-import { StolenReportForm } from '../common/StolenReportForm';
 
-export function BadgeSelfServicePanel({
+export function BadgeActions({
   badge,
   activeSession,
   sessionMessage,

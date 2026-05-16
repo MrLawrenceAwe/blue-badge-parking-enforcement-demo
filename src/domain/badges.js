@@ -23,7 +23,7 @@ export function accessibleBadgesFor(user, badges) {
   return badges.filter((badge) => user.badgeIds.includes(badge.id));
 }
 
-export function currentDemoRolesFor(user) {
+export function demoRolesForUser(user) {
   return [user.role];
 }
 

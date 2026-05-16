@@ -7,7 +7,7 @@ import { buildSessionPayload, isSessionActive } from '../domain/sessions';
 import { formatRecordId } from '../domain/ids';
 import { timestampNow } from '../utils/date';
 
-export function useBadgeSelfServiceActions({
+export function useHolderBadgeActions({
   authUser,
   role,
   selectedBadge,
@@ -19,7 +19,7 @@ export function useBadgeSelfServiceActions({
   appendAuditEvent,
   queueNotification
 }) {
-  const [selfServiceNotice, setSelfServiceNotice] = useState('');
+  const [holderNotice, setHolderNotice] = useState('');
   const [replacementDraft, setReplacementDraft] = useState({ reference: '', temporaryPermit: 'Requested' });
 
   function userCanManageSelectedBadge() {
@@ -28,15 +28,15 @@ export function useBadgeSelfServiceActions({
 
   async function startSession(formData) {
     if (!userCanManageSelectedBadge()) {
-      setSelfServiceNotice('Only the holder or delegated carer for this badge can start a parking session in the demo.');
+      setHolderNotice('Only the holder or delegated carer for this badge can start a parking session in the demo.');
       return false;
     }
     if (!canStartSessionForBadge(selectedBadge.status)) {
-      setSelfServiceNotice(`Sessions cannot be started while this badge is ${statusLabel[selectedBadge.status].toLowerCase()}.`);
+      setHolderNotice(`Sessions cannot be started while this badge is ${statusLabel[selectedBadge.status].toLowerCase()}.`);
       return false;
     }
     if (sessions.some((session) => session.badgeId === selectedBadge.id && isSessionActive(session))) {
-      setSelfServiceNotice('A locked active session already exists for this badge. End-of-session handling would be added in the production workflow.');
+      setHolderNotice('A locked active session already exists for this badge. End-of-session handling would be added in the production workflow.');
       return false;
     }
 
@@ -59,18 +59,18 @@ export function useBadgeSelfServiceActions({
       actor: authUser.name,
       detail: `Locked session ${session.id} started at ${location} for ${session.durationMins} minutes.`
     });
-    setSelfServiceNotice('Session started and locked. Arrival time, GPS, vehicle, and duration are bound to a signed demo attestation and will flag as tampered if changed.');
+    setHolderNotice('Session started and locked. Arrival time, location fix, vehicle, and duration are bound to a signed demo attestation and will flag as tampered if changed.');
     return true;
   }
 
   async function extendSession(sessionId, extraMins) {
     if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role) {
-      setSelfServiceNotice('Only the holder or delegated carer can extend a parking session in the demo.');
+      setHolderNotice('Only the holder or delegated carer can extend a parking session in the demo.');
       return;
     }
     const session = sessions.find((sessionRecord) => sessionRecord.id === sessionId);
     if (!session || !authUser.badgeIds.includes(session.badgeId)) {
-      setSelfServiceNotice('This session is not available to the signed-in user.');
+      setHolderNotice('This session is not available to the signed-in user.');
       return;
     }
     const updatedSession = await createDemoAttestedSession({
@@ -84,19 +84,19 @@ export function useBadgeSelfServiceActions({
       actor: authUser.name,
       detail: `Session ${sessionId} extended to ${updatedSession.durationMins} minutes.`
     });
-    setSelfServiceNotice(updatedSession.durationMins === session.durationMins
+    setHolderNotice(updatedSession.durationMins === session.durationMins
       ? 'This session is already at the maximum 4 hour duration.'
       : 'Session extended and re-signed. The original arrival details remain locked.');
   }
 
   function endSession(sessionId) {
     if (!['holder', 'carer'].includes(authUser.role) || authUser.role !== role) {
-      setSelfServiceNotice('Only the holder or delegated carer can end a parking session in the demo.');
+      setHolderNotice('Only the holder or delegated carer can end a parking session in the demo.');
       return;
     }
     const session = sessions.find((sessionRecord) => sessionRecord.id === sessionId);
     if (!session || !authUser.badgeIds.includes(session.badgeId)) {
-      setSelfServiceNotice('This session is not available to the signed-in user.');
+      setHolderNotice('This session is not available to the signed-in user.');
       return;
     }
     setSessions((current) => current.map((sessionRecord) => (sessionRecord.id === sessionId ? { ...sessionRecord, endedAt: timestampNow() } : sessionRecord)));
@@ -106,26 +106,26 @@ export function useBadgeSelfServiceActions({
       actor: authUser.name,
       detail: `Session ${sessionId} ended by ${authUser.name}.`
     });
-    setSelfServiceNotice('Session ended. The signed arrival record remains available for enforcement audit.');
+    setHolderNotice('Session ended. The signed arrival record remains available for enforcement audit.');
   }
 
   function reportStolen(formData) {
     if (!userCanManageSelectedBadge()) {
-      setSelfServiceNotice('Only the holder or delegated carer for this badge can report it stolen in the demo.');
+      setHolderNotice('Only the holder or delegated carer for this badge can report it stolen in the demo.');
       return false;
     }
     if (selectedBadge.status === 'stolen') {
-      setSelfServiceNotice('This badge has already been reported stolen. Use the replacement request workflow or contact the council with new evidence.');
+      setHolderNotice('This badge has already been reported stolen. Use the replacement request workflow or contact the council with new evidence.');
       return false;
     }
     const details = formData?.get('details')?.toString().trim();
     const contact = formData?.get('contact')?.toString().trim();
     const confirmed = formData?.get('confirmed') === 'yes';
     if (!details || !contact || !confirmed) {
-      setSelfServiceNotice('Confirm the deactivation and provide incident details before reporting the badge stolen.');
+      setHolderNotice('Confirm the deactivation and provide incident details before reporting the badge stolen.');
       return false;
     }
-    setSelfServiceNotice('Badge reported stolen. The badge is now deactivated for new parking sessions and will return a black high-risk result to officers.');
+    setHolderNotice('Badge reported stolen. The badge is now deactivated for new parking sessions and will return a black high-risk result to officers.');
     setBadges((current) => current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)));
     setCases((current) => [
       createStolenBadgeCase({
@@ -155,17 +155,17 @@ export function useBadgeSelfServiceActions({
 
   function requestReplacementBadge(formData) {
     if (!userCanManageSelectedBadge()) {
-      setSelfServiceNotice('Only the holder or delegated carer for this badge can request a replacement in the demo.');
+      setHolderNotice('Only the holder or delegated carer for this badge can request a replacement in the demo.');
       return false;
     }
     if (selectedBadge.status !== 'stolen') {
-      setSelfServiceNotice('Replacement requests are available after a badge has been reported stolen.');
+      setHolderNotice('Replacement requests are available after a badge has been reported stolen.');
       return false;
     }
     const reference = formData.get('reference').toString().trim();
     const temporaryPermit = formData.get('temporaryPermit').toString();
     if (!reference) {
-      setSelfServiceNotice('Add a crime, loss, or council reference before requesting a replacement.');
+      setHolderNotice('Add a crime, loss, or council reference before requesting a replacement.');
       return false;
     }
     setReplacementRequests((current) => [
@@ -191,12 +191,12 @@ export function useBadgeSelfServiceActions({
       message: `Replacement request received. Reference: ${reference}.`
     });
     setReplacementDraft({ reference: '', temporaryPermit: 'Requested' });
-    setSelfServiceNotice('Replacement request recorded and notification queued.');
+    setHolderNotice('Replacement request recorded and notification queued.');
     return true;
   }
 
   return {
-    selfServiceNotice,
+    holderNotice,
     replacementDraft,
     setReplacementDraft,
     startSession,

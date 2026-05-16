@@ -5,7 +5,7 @@ import { verificationTokenForBadge } from '../../domain/badgeTokens';
 import { VERIFICATION_VERDICT } from '../../domain/risk';
 import { formatDate } from '../../utils/date';
 import { StatusPill } from '../common/StatusPill';
-import { BadgeSelfServicePanel } from '../badges/BadgeSelfServicePanel';
+import { BadgeActions } from '../badges/BadgeActions';
 
 export function HolderView({
   badge,
@@ -71,7 +71,7 @@ export function HolderView({
           <h2>Parking session</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <BadgeSelfServicePanel
+        <BadgeActions
           badge={badge}
           activeSession={activeSession}
           sessionMessage={sessionMessage}

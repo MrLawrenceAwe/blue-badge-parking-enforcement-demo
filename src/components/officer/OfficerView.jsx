@@ -12,7 +12,7 @@ const actionOptions = ['No action', 'Warning issued', 'Penalty charge notice rec
 export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanEvidence, scanActions, officerMessage }) {
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
-  const canEscalate = scanResult && risk.verdict !== VERIFICATION_VERDICT.valid;
+  const canOpenCaseFromScan = scanResult && risk.verdict !== VERIFICATION_VERDICT.valid;
   const isValid = risk.verdict === VERIFICATION_VERDICT.valid;
   return (
     <div className="officer-layout">
@@ -27,7 +27,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
         <button className="primary-button" onClick={scanActions.verifyBadge}><Search aria-hidden="true" size={21} /> Verify</button>
         {scanResult && (
           <div className="evidence-section">
-            <h3>Scan evidence</h3>
+            <h3>Enforcement details</h3>
             <div className="case-field-grid">
               <label>Contravention<select value={scanEvidence.values.contravention} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
               <label>Enforcement action<select value={scanEvidence.values.action} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
@@ -51,7 +51,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
               {risk.explanation.map((item) => <small key={item}>{item}</small>)}
             </div>
           </div>
-          {canEscalate && (
+          {canOpenCaseFromScan && (
             <button className="secondary-button result-action" onClick={scanActions.createCaseFromScan}>
               <FileText aria-hidden="true" size={20} />
               Open case
