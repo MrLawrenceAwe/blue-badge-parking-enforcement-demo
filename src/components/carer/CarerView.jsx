@@ -33,7 +33,7 @@ export function CarerView({
         <div className="record-list">
           {badges.map((badge) => (
             <button key={badge.id} className={`badge-record-button ${badge.id === selectedBadge.id ? 'selected' : ''}`} onClick={() => setSelectedBadgeId(badge.id)}>
-              <span><strong>{badge.holder}</strong><small>{badge.delegatedTo} can assist</small></span>
+              <span><strong>{badge.holder}</strong><small>{badge.delegatedTo}</small></span>
               <StatusPill status={badge.status} />
             </button>
           ))}
@@ -41,16 +41,16 @@ export function CarerView({
       </section>
       <section className="app-panel">
         <div className="app-panel-heading">
-          <h2>Badge activity</h2>
+          <h2>Activity</h2>
           <FileText aria-hidden="true" />
         </div>
-        <p className="muted-text">Manage delegated access and confirm session details.</p>
+        <p className="muted-text">Delegated sessions and notices.</p>
         {sessions.filter((session) => session.badgeId === selectedBadge.id).map((session) => <SessionCard key={session.id} session={session} />)}
         <BadgeNotifications notifications={notifications} />
       </section>
       <section className="app-panel">
         <div className="app-panel-heading">
-          <h2>Delegated session</h2>
+          <h2>Session</h2>
           <Clock3 aria-hidden="true" />
         </div>
         <SessionStartForm badge={selectedBadge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />

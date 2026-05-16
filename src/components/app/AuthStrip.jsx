@@ -19,10 +19,10 @@ export function AuthStrip({
     <section className="auth-strip" aria-label="Demo sign in">
       <div className="auth-strip-copy">
         <strong>Signed in as {authUser.name}</strong>
-        <span>{authUser.email} - {authUser.role}</span>
+        <span>{authUser.email} · {authUser.role}</span>
       </div>
       <details className="auth-controls">
-        <summary>Sign in or switch account</summary>
+        <summary>Switch account</summary>
         <details className="demo-account-drawer" open={demoDrawerOpen} onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}>
           <summary>Switch demo account</summary>
           <div className="demo-account-list" aria-label="Quick demo accounts">

@@ -4,8 +4,12 @@
   }
 
   .app-header {
-    gap: 10px;
-    padding-top: 10px;
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .title-block {
+    gap: 4px;
   }
 
   .role-switcher button,
@@ -14,12 +18,56 @@
     padding: 8px 11px;
   }
 
+  .role-switcher {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .role-switcher button {
+    min-width: 0;
+    gap: 4px;
+    padding: 8px 6px;
+    font-size: 0.82rem;
+  }
+
+  .role-switcher button svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  @media (max-width: 359px) {
+    .role-switcher button span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+
+  .role-switcher button span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .role-switcher button span.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
   .summary-strip {
     gap: 6px;
   }
 
   .metric {
-    min-height: 62px;
+    min-height: 56px;
     padding: 8px 10px;
   }
 
@@ -35,6 +83,10 @@
   .app-panel,
   .filter-toolbar {
     padding: 10px;
+  }
+
+  .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
+    padding-top: 6px;
   }
 
   .admin-filters {
@@ -120,6 +172,8 @@
   }
 
   tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     border: 1px solid var(--line);
     border-radius: 6px;
     background: #fbfcfd;
@@ -130,6 +184,10 @@
     border-bottom: 0;
     padding: 6px 0;
     width: 100%;
+  }
+
+  td:first-child {
+    grid-column: 1 / -1;
   }
 
   th:nth-child(1),

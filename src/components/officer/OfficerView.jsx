@@ -21,10 +21,10 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           <h2>Verify badge</h2>
           <QrCode aria-hidden="true" />
         </div>
-        <label>QR, badge ID, or vehicle<input value={scanForm.query} onChange={(event) => scanActions.setQuery(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
+        <label>Lookup<input value={scanForm.query} onChange={(event) => scanActions.setQuery(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
         <label>Observed vehicle<input value={scanForm.vehicle} onChange={(event) => scanActions.setVehicle(event.target.value)} aria-label="Observed vehicle registration" /></label>
         <label>Scan location<input value={scanForm.location} onChange={(event) => scanActions.setLocation(event.target.value)} aria-label="Scan location" /></label>
-        <button className="primary-button" onClick={scanActions.runScan}><Search aria-hidden="true" size={21} /> Verify now</button>
+        <button className="primary-button" onClick={scanActions.runScan}><Search aria-hidden="true" size={21} /> Verify</button>
         {scanResult && (
           <div className="evidence-section">
             <h3>Evidence</h3>
@@ -54,7 +54,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           {canEscalate && (
             <button className="secondary-button result-action" onClick={scanActions.createCaseFromScan}>
               <FileText aria-hidden="true" size={20} />
-              Open enforcement case
+              Open case
             </button>
           )}
           {officerMessage && <p className="result-message" role="status">{officerMessage}</p>}

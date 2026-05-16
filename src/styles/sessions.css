@@ -79,10 +79,10 @@
 .case-card,
 .badge-record-button,
 .timeline-item {
-  border: 1px solid var(--line);
+  border: 1px solid #dce5ea;
   border-radius: 5px;
-  padding: 10px;
-  background: #fcfdfe;
+  padding: 9px 10px;
+  background: #fbfdfe;
 }
 
 .session-card {

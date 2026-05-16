@@ -2,7 +2,7 @@
 .officer-layout,
 .dashboard-grid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .app-panel,
@@ -11,7 +11,7 @@
   border: 1px solid #d8e2e8;
   border-radius: 6px;
   min-width: 0;
-  padding: 12px;
+  padding: 12px 13px;
 }
 
 .app-panel-heading {
@@ -19,7 +19,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 .field-label,

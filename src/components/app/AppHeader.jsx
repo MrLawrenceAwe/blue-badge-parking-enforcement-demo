@@ -15,8 +15,8 @@ export function AppHeader({ role, currentDemoRoles, demoUsers, setRole, selectDe
           <p className="eyebrow">Digital Blue Badge</p>
           <span className="demo-pill">Prototype</span>
         </div>
-        <h1>Parking Enforcement System</h1>
-        <p className="hero-note">Verify badges, sessions, and enforcement cases.</p>
+        <h1>Parking enforcement</h1>
+        <p className="hero-note">Badge checks, sessions, and cases.</p>
       </div>
       <div className="role-switcher" aria-label="Choose role">
         {roleOptions.map(([value, Icon, label]) => {
@@ -31,7 +31,7 @@ export function AppHeader({ role, currentDemoRoles, demoUsers, setRole, selectDe
               title={canAccess ? label : `Switch to ${label.toLowerCase()} demo`}
             >
               <Icon aria-hidden="true" size={19} />
-              {label}
+              <span>{label}</span>
             </button>
           );
         })}

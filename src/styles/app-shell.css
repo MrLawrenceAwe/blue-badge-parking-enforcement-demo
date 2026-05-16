@@ -1,8 +1,8 @@
 .app-header {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
-  padding: 10px 0 8px;
+  gap: 9px;
+  padding: 8px 0 7px;
 }
 
 .title-block {
@@ -42,7 +42,7 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(1.55rem, 2.15vw, 2rem);
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
   line-height: 1.12;
 }
 
@@ -87,6 +87,10 @@ h2 {
   gap: 8px;
   padding: 9px 13px;
   font-weight: 650;
+}
+
+.role-switcher button {
+  min-width: 104px;
 }
 
 .role-switcher button {
@@ -151,16 +155,16 @@ h2 {
 .summary-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 7px;
+  margin-bottom: 9px;
 }
 
 .auth-strip {
   background: transparent;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  padding: 8px 0;
-  margin-bottom: 10px;
+  padding: 7px 0;
+  margin-bottom: 9px;
   display: grid;
   gap: 8px;
   align-items: center;
@@ -283,19 +287,25 @@ h2 {
 }
 
 .metric {
-  background: #f8fbfd;
+  background: var(--soft-surface);
   border: 1px solid #d8e2e8;
   border-radius: 5px;
-  padding: 8px 10px 9px;
+  padding: 9px 10px;
   display: grid;
-  gap: 1px;
+  grid-template-columns: auto 1fr;
+  column-gap: 8px;
+  row-gap: 0;
+  align-items: center;
 }
 
 .metric span {
   color: var(--muted);
   font-weight: 450;
+  font-size: 0.9rem;
 }
 
 .metric strong {
-  font-size: 1.3rem;
+  grid-column: 2;
+  font-size: 1.34rem;
+  line-height: 1;
 }

@@ -11,7 +11,7 @@
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 .admin-controls .tab-list {
@@ -72,6 +72,21 @@
   grid-column: 1 / -1;
 }
 
+.admin-layout .app-panel {
+  box-shadow: none;
+}
+
+.admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
+  background: transparent;
+  border-color: transparent;
+  padding: 8px 0 0;
+}
+
+.admin-layout .dashboard-grid > .app-panel:not(.risk-panel) .app-panel-heading {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 7px;
+}
+
 .admin-filters[open] summary {
   margin-bottom: 8px;
 }
@@ -98,7 +113,7 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 8px 12px;
+  padding: 9px 12px;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -126,6 +141,9 @@ td:nth-child(4) {
 
 th {
   background: #edf3f7;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-transform: uppercase;
 }
 
 tr {
