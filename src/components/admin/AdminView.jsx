@@ -5,7 +5,12 @@ import { AuditTab } from './AuditTab';
 import { CaseManagementTab } from './CaseManagementTab';
 import { RiskRulesTab } from './RiskRulesTab';
 
-const adminTabs = ['Overview', 'Cases', 'Risk rules', 'Audit'];
+const adminSections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'cases', label: 'Cases' },
+  { id: 'riskRules', label: 'Risk rules' },
+  { id: 'audit', label: 'Audit' }
+];
 
 export function AdminView({
   filteredBadges,
@@ -30,22 +35,22 @@ export function AdminView({
   restrictedBadges
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeSectionId, setActiveSectionId] = useState('overview');
 
   return (
     <div className="admin-layout">
       <div className="admin-controls">
         <div className="tab-list" role="tablist" aria-label="Admin sections">
-          {adminTabs.map((tab) => (
+          {adminSections.map((section) => (
             <button
-              key={tab}
+              key={section.id}
               type="button"
               role="tab"
-              aria-selected={activeTab === tab}
-              className={activeTab === tab ? 'active' : ''}
-              onClick={() => setActiveTab(tab)}
+              aria-selected={activeSectionId === section.id}
+              className={activeSectionId === section.id ? 'active' : ''}
+              onClick={() => setActiveSectionId(section.id)}
             >
-              {tab}
+              {section.label}
             </button>
           ))}
         </div>
@@ -53,7 +58,7 @@ export function AdminView({
       </div>
 
       <section className="dashboard-grid">
-        {activeTab === 'Overview' && (
+        {activeSectionId === 'overview' && (
           <AdminOverviewTab
             filteredBadges={filteredBadges}
             filteredActiveSessions={filteredActiveSessions}
@@ -65,7 +70,7 @@ export function AdminView({
           />
         )}
 
-        {activeTab === 'Cases' && (
+        {activeSectionId === 'cases' && (
           <CaseManagementTab
             allBadges={allBadges}
             selectedBadge={selectedBadge}
@@ -79,9 +84,9 @@ export function AdminView({
           />
         )}
 
-        {activeTab === 'Risk rules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={adminActions.updateRiskRule} />}
+        {activeSectionId === 'riskRules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={adminActions.updateRiskRule} />}
 
-        {activeTab === 'Audit' && (
+        {activeSectionId === 'audit' && (
           <AuditTab
             auditEvents={auditEvents}
             notifications={notifications}

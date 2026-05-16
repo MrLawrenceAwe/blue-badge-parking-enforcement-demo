@@ -24,7 +24,7 @@ export function AuthStrip({
       <details className="auth-controls">
         <summary>Switch account</summary>
         <details className="demo-account-drawer" open={demoDrawerOpen} onToggle={(event) => setDemoDrawerOpen(event.currentTarget.open)}>
-          <summary>Switch demo account</summary>
+          <summary>Demo accounts</summary>
           <div className="demo-account-list" aria-label="Quick demo accounts">
             {demoAccountOrder.map((demoRole) => {
               const demoUser = demoUsers.find((user) => user.role === demoRole);

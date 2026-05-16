@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { seedScans } from '../data/demoActivity';
 import { normaliseVehicle, vehicleSearchKey } from '../domain/badges';
-import { createOfficerScanCase, isCaseOpen } from '../domain/cases';
+import { createOfficerScanCase } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { formatRecordId, nextNumberFromRecords } from '../domain/ids';
 import { demoGpsForLocation } from '../domain/locations';
 import { VERIFICATION_VERDICT, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForVerification } from '../domain/risk';
 import { parseScanInput } from '../domain/scanInput';
 import { verifyBadgeToken } from '../domain/badgeTokens';
+import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
 
 const initialScanEvidence = {
@@ -39,13 +40,7 @@ export function useOfficerScan({
   const [lastScanResult, setLastScanResult] = useState(null);
   const [officerNotice, setOfficerNotice] = useState('');
   const nextScanNumber = useRef(nextNumberFromRecords(seedScans, 'SC-', 90199));
-  const nextCaseNumber = useRef(nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
-  const openCaseBadgeIds = useRef(new Set(cases.filter(isCaseOpen).map((caseRecord) => caseRecord.badgeId)));
-
-  useEffect(() => {
-    openCaseBadgeIds.current = new Set(cases.filter(isCaseOpen).map((caseRecord) => caseRecord.badgeId));
-    nextCaseNumber.current = Math.max(nextCaseNumber.current, nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
-  }, [cases]);
+  const { reserveCaseIdForBadge } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
 
   useEffect(() => {
     resetScanResult();
@@ -174,13 +169,11 @@ export function useOfficerScan({
       setOfficerNotice(`Open case ${duplicateOpenCase.id} already exists. The scan has been kept in the audit trail.`);
       return;
     }
-    if (openCaseBadgeIds.current.has(badgeId)) {
+    const caseId = reserveCaseIdForBadge(badgeId);
+    if (!caseId) {
       setOfficerNotice(`An open case is already being created for ${badgeId}. The scan has been kept in the audit trail.`);
       return;
     }
-    openCaseBadgeIds.current.add(badgeId);
-    const caseId = formatRecordId('CASE-', nextCaseNumber.current);
-    nextCaseNumber.current += 1;
     setCases((current) => [
       createOfficerScanCase({
         id: caseId,

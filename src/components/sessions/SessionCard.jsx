@@ -16,7 +16,7 @@ export function SessionCard({ session }) {
         <strong>{session.vehicle}</strong>
         <span className="session-location"><MapPin aria-hidden="true" size={16} /> {session.location}</span>
         <div className="session-meta">
-          <small>{sessionState} - GPS {session.gps}</small>
+          <small>{sessionState} - location fix {session.gps}</small>
         </div>
       </div>
       <div className="session-lock">

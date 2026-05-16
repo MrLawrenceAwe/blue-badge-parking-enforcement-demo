@@ -1,10 +1,10 @@
 import { AppHeader } from './components/app/AppHeader';
 import { AuthStrip } from './components/app/AuthStrip';
-import { AdminRoleView, CarerRoleView, HolderRoleView, OfficerRoleView } from './components/app/RoleViews';
+import { AdminScreen, CarerScreen, HolderScreen, OfficerScreen } from './components/app/RoleScreens';
 import { SummaryStrip } from './components/app/SummaryStrip';
 import { demoAccountOrder, demoUsers } from './data/demoUsers';
-import { buildAdminDashboardData } from './domain/adminFilters';
-import { useBadgeSelfServiceActions } from './hooks/useBadgeSelfServiceActions';
+import { buildAdminRecordView } from './domain/adminFilters';
+import { useHolderBadgeActions } from './hooks/useHolderBadgeActions';
 import { useCaseManagement } from './hooks/useCaseManagement';
 import { useDemoAuth } from './hooks/useDemoAuth';
 import { useDemoRecords } from './hooks/useDemoRecords';
@@ -17,7 +17,7 @@ export function App() {
     badges: records.badges
   });
 
-  const selfServiceActions = useBadgeSelfServiceActions({
+  const holderActions = useHolderBadgeActions({
     authUser: auth.authUser,
     role: auth.role,
     selectedBadge: auth.selectedBadge,
@@ -58,7 +58,7 @@ export function App() {
     queueNotification: records.queueNotification
   });
 
-  const dashboardData = buildAdminDashboardData({
+  const adminRecordView = buildAdminRecordView({
     badges: records.badges,
     sessions: records.sessions,
     scans: records.scans,
@@ -67,11 +67,13 @@ export function App() {
     riskByBadge: records.riskByBadge,
     selectedBadgeId: auth.selectedBadge.id
   });
-  const selectedBadgeReplacementRequests = records.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id);
-  const selectedBadgeNotifications = records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id);
+  const selectedBadgeActivity = {
+    replacementRequests: records.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id),
+    notifications: records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id)
+  };
   const replacementForm = {
-    values: selfServiceActions.replacementDraft,
-    setValues: selfServiceActions.setReplacementDraft
+    values: holderActions.replacementDraft,
+    setValues: holderActions.setReplacementDraft
   };
   const adminFilters = {
     values: caseManagement.adminFilters,
@@ -113,39 +115,37 @@ export function App() {
       />
 
       {auth.role === 'holder' && (
-        <HolderRoleView
+        <HolderScreen
           auth={auth}
           records={records}
-          selfServiceActions={selfServiceActions}
+          holderActions={holderActions}
           replacementForm={replacementForm}
-          selectedBadgeReplacementRequests={selectedBadgeReplacementRequests}
-          selectedBadgeNotifications={selectedBadgeNotifications}
+          selectedBadgeActivity={selectedBadgeActivity}
         />
       )}
 
       {auth.role === 'carer' && (
-        <CarerRoleView
+        <CarerScreen
           auth={auth}
           records={records}
-          selfServiceActions={selfServiceActions}
+          holderActions={holderActions}
           replacementForm={replacementForm}
-          selectedBadgeReplacementRequests={selectedBadgeReplacementRequests}
-          selectedBadgeNotifications={selectedBadgeNotifications}
+          selectedBadgeActivity={selectedBadgeActivity}
         />
       )}
 
       {auth.role === 'officer' && (
-        <OfficerRoleView auth={auth} records={records} scanActions={scanActions} />
+        <OfficerScreen auth={auth} records={records} scanActions={scanActions} />
       )}
 
       {auth.role === 'admin' && (
-        <AdminRoleView
+        <AdminScreen
           auth={auth}
           records={records}
           caseManagement={caseManagement}
           adminFilters={adminFilters}
           adminActions={adminActions}
-          dashboardData={dashboardData}
+          adminRecordView={adminRecordView}
         />
       )}
     </main>

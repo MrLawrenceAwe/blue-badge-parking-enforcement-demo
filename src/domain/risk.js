@@ -96,14 +96,14 @@ export const defaultRiskRules = {
 export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rules = defaultRiskRules) {
   const triggeredRules = [];
   if (!badge) {
-    return {
+    return buildRiskAssessment({
       score: 100,
       level: RISK_LEVEL.high,
       triggers: [buildRiskTrigger('unknownBadge', rules)],
       toneClass: 'risk-high',
       verdict: VERIFICATION_VERDICT.invalid,
       explanation: ['No matching badge record or trusted QR code was found.']
-    };
+    });
   }
 
   if (badge.status === 'stolen') triggeredRules.push(buildRiskTrigger('stolenBadge', rules));
@@ -144,54 +144,54 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
     score = Math.max(score, 85);
-    return { score, level: RISK_LEVEL.high, triggers: triggeredRules, toneClass: 'risk-critical', verdict: VERIFICATION_VERDICT.deactivated, explanation };
+    return buildRiskAssessment({ score, level: RISK_LEVEL.high, triggers: triggeredRules, toneClass: 'risk-critical', verdict: VERIFICATION_VERDICT.deactivated, explanation });
   }
 
   if (badge.status === 'expired') {
     score = Math.max(score, 70);
-    return {
+    return buildRiskAssessment({
       score,
       level: score >= rules.highRiskThreshold ? RISK_LEVEL.high : RISK_LEVEL.review,
       triggers: triggeredRules,
       toneClass: 'risk-high',
       verdict: VERIFICATION_VERDICT.invalid,
       explanation
-    };
+    });
   }
 
   if (score >= rules.highRiskThreshold) {
-    return { score, level: RISK_LEVEL.high, triggers: triggeredRules, toneClass: 'risk-high', verdict: VERIFICATION_VERDICT.invalid, explanation };
+    return buildRiskAssessment({ score, level: RISK_LEVEL.high, triggers: triggeredRules, toneClass: 'risk-high', verdict: VERIFICATION_VERDICT.invalid, explanation });
   }
 
   if (score >= rules.monitorThreshold || badge.status === 'under review') {
-    return {
+    return buildRiskAssessment({
       score,
       level: score >= rules.reviewThreshold ? RISK_LEVEL.review : RISK_LEVEL.monitor,
       triggers: triggeredRules,
       toneClass: 'risk-watch',
       verdict: VERIFICATION_VERDICT.suspicious,
       explanation
-    };
+    });
   }
 
-  return {
+  return buildRiskAssessment({
     score,
     level: RISK_LEVEL.normal,
     triggers: triggeredRules,
     toneClass: 'risk-low',
     verdict: VERIFICATION_VERDICT.valid,
     explanation: ['No configured risk rules were triggered.']
-  };
+  });
 }
 
 export function riskFromPermissionError(message) {
-  return {
+  return buildRiskAssessment({
     score: 100,
     level: RISK_LEVEL.high,
     triggers: [{ type: 'permissionError', label: message, score: 100 }],
     toneClass: 'risk-high',
     verdict: VERIFICATION_VERDICT.invalid
-  };
+  });
 }
 
 export function scanOutcomeForVerification(risk) {
@@ -207,6 +207,23 @@ function buildRiskTrigger(type, rules) {
     type,
     label: triggerDefinition.label,
     score: rules.weights[triggerDefinition.weight] ?? rules.weights.default
+  };
+}
+
+function buildRiskAssessment({ score, level, triggers, toneClass, verdict, explanation = [] }) {
+  return {
+    score,
+    level,
+    triggers,
+    toneClass,
+    verdict,
+    explanation,
+    risk: { score, level, triggers, explanation },
+    verification: {
+      verdict,
+      outcome: scanOutcomeForVerification({ verdict })
+    },
+    presentation: { toneClass }
   };
 }
 
