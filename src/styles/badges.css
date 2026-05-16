@@ -1,30 +1,30 @@
 .digital-badge {
-  border: 3px solid var(--blue);
-  border-radius: 8px;
-  padding: 14px;
+  border: 2px solid var(--blue);
+  border-radius: 6px;
+  padding: 12px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
   background: #f7fbff;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .digital-badge h3 {
-  font-size: 1.45rem;
-  margin-bottom: 10px;
+  font-size: 1.32rem;
+  margin-bottom: 8px;
 }
 
 dl,
 .detail-list {
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 dt {
   color: var(--muted);
   font-size: 0.86rem;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 dd {

@@ -2,24 +2,24 @@
 .officer-layout,
 .dashboard-grid {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .app-panel,
 .filter-toolbar {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid #d8e2e8;
+  border-radius: 6px;
   min-width: 0;
-  padding: 13px;
+  padding: 12px;
 }
 
 .app-panel-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .field-label,
@@ -27,15 +27,15 @@ label {
   display: grid;
   gap: 7px;
   color: var(--ink);
-  font-weight: 650;
-  margin-bottom: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 input,
 select,
 textarea {
   min-height: 44px;
-  border: 2px solid #7b8b95;
+  border: 1px solid #8c9aa3;
   border-radius: 4px;
   padding: 10px;
   background: #fff;
@@ -47,4 +47,3 @@ textarea {
   min-height: 120px;
   resize: vertical;
 }
-
