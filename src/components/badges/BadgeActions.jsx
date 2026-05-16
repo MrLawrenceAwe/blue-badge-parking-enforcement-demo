@@ -8,12 +8,8 @@ export function BadgeActions({
   badge,
   activeSession,
   sessionMessage,
-  startSession,
-  extendSession,
-  endSession,
-  reportStolen,
-  requestReplacementBadge,
-  replacementRequestForm,
+  badgeActions,
+  replacementForm,
   replacementRequests,
   notifications,
   showActiveSession = true,
@@ -22,15 +18,21 @@ export function BadgeActions({
 }) {
   return (
     <>
-      <SessionStartForm badge={badge} activeSession={activeSession} startSession={startSession} extendSession={extendSession} endSession={endSession} />
+      <SessionStartForm
+        badge={badge}
+        activeSession={activeSession}
+        startSession={badgeActions.startSession}
+        extendSession={badgeActions.extendSession}
+        endSession={badgeActions.endSession}
+      />
       {sessionMessage && <p className="form-message" role="status">{sessionMessage}</p>}
       {showActiveSession && activeSession && <SessionCard session={activeSession} />}
-      <StolenReportForm reportStolen={reportStolen} />
+      <StolenReportForm reportStolen={badgeActions.reportStolen} />
       {badge.status === 'stolen' && (
         <ReplacementRequestForm
-          replacementRequestForm={replacementRequestForm}
+          replacementForm={replacementForm}
           replacementRequests={replacementRequests}
-          requestReplacementBadge={requestReplacementBadge}
+          requestReplacementBadge={badgeActions.requestReplacementBadge}
           showTemporaryPermit={showTemporaryPermit}
         />
       )}

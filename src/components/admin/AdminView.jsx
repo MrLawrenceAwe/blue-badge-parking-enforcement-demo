@@ -13,11 +13,11 @@ const adminSections = [
 ];
 
 export function AdminView({
-  dashboardRecords,
+  adminDashboard,
   filterForm,
   selectedBadge,
-  caseDraft,
-  caseCommands,
+  caseForm,
+  caseActions,
   riskRules,
   adminMessage
 }) {
@@ -47,27 +47,27 @@ export function AdminView({
       <section className="dashboard-grid">
         {activeSectionId === 'overview' && (
           <AdminOverviewTab
-            filteredBadges={dashboardRecords.filteredBadges}
-            filteredActiveSessions={dashboardRecords.filteredActiveSessions}
-            filteredScans={dashboardRecords.filteredScans}
-            reviewQueueCases={dashboardRecords.reviewQueueCases}
-            suspendedOrStolenBadges={dashboardRecords.suspendedOrStolenBadges}
-            riskByBadge={dashboardRecords.riskByBadge}
-            selectBadge={caseCommands.selectBadge}
+            filteredBadges={adminDashboard.filteredBadges}
+            filteredActiveSessions={adminDashboard.filteredActiveSessions}
+            filteredScans={adminDashboard.filteredScans}
+            reviewQueueCases={adminDashboard.reviewQueueCases}
+            suspendedOrStolenBadges={adminDashboard.suspendedOrStolenBadges}
+            riskByBadge={adminDashboard.riskByBadge}
+            selectBadge={caseActions.selectBadge}
           />
         )}
 
         {activeSectionId === 'cases' && (
           <CaseManagementTab
-            allBadges={dashboardRecords.allBadges}
+            allBadges={adminDashboard.allBadges}
             selectedBadge={selectedBadge}
-            selectedBadgeCases={dashboardRecords.selectedBadgeCases}
-            newCaseDraft={caseDraft.values}
-            updateNewCaseDraft={caseDraft.update}
-            noteDraftByCaseId={caseDraft.noteDraftByCaseId}
-            setNoteDraftByCaseId={caseDraft.setNoteDraftByCaseId}
+            selectedBadgeCases={adminDashboard.selectedBadgeCases}
+            caseForm={caseForm.values}
+            updateCaseForm={caseForm.update}
+            noteDraftByCaseId={caseForm.noteDraftByCaseId}
+            setNoteDraftByCaseId={caseForm.setNoteDraftByCaseId}
             adminMessage={adminMessage}
-            caseCommands={caseCommands}
+            caseActions={caseActions}
           />
         )}
 
@@ -75,9 +75,9 @@ export function AdminView({
 
         {activeSectionId === 'audit' && (
           <AuditTab
-            auditEvents={dashboardRecords.auditEvents}
-            notifications={dashboardRecords.notifications}
-            replacementRequests={dashboardRecords.replacementRequests}
+            auditEvents={adminDashboard.auditEvents}
+            notifications={adminDashboard.notifications}
+            replacementRequests={adminDashboard.replacementRequests}
           />
         )}
       </section>

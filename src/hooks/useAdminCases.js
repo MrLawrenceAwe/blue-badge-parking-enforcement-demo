@@ -3,7 +3,7 @@ import { createAdminCase, isCaseOpen } from '../domain/cases';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
 
-const initialCaseDraft = {
+const initialCaseForm = {
   note: '',
   status: 'Open',
   assignee: 'Unassigned',
@@ -23,18 +23,18 @@ export function useAdminCases({
   appendAuditEvent,
   queueNotification
 }) {
-  const [newCaseDraft, setNewCaseDraft] = useState(initialCaseDraft);
+  const [caseForm, setCaseForm] = useState(initialCaseForm);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
   const [dashboardFilters, setDashboardFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
   const { reserveCaseIdForBadge, releaseBadgeCaseSlot } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
 
-  function updateNewCaseDraft(field, value) {
-    setNewCaseDraft((current) => ({ ...current, [field]: value }));
+  function updateCaseDraft(field, value) {
+    setCaseForm((current) => ({ ...current, [field]: value }));
   }
 
-  function resetNewCaseDraft() {
-    setNewCaseDraft(initialCaseDraft);
+  function resetCaseDraft() {
+    setCaseForm(initialCaseForm);
   }
 
   function createCaseForSelectedBadge() {
@@ -54,7 +54,7 @@ export function useAdminCases({
         id: caseId,
         badge: selectedBadge,
         risk,
-        caseDraft: newCaseDraft,
+        caseForm,
         addedBy: authUser.name,
         addedAt: timestampNow()
       }),
@@ -64,9 +64,9 @@ export function useAdminCases({
       badgeId: selectedBadge.id,
       type: 'Case opened',
       actor: authUser.name,
-      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && newCaseDraft.status === 'Open' ? 'High priority' : newCaseDraft.status}.`
+      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && caseForm.status === 'Open' ? 'High priority' : caseForm.status}.`
     });
-    resetNewCaseDraft();
+    resetCaseDraft();
     setAdminNotice(`Case ${caseId} opened for ${selectedBadge.id}.`);
   }
 
@@ -75,7 +75,7 @@ export function useAdminCases({
       setAdminNotice('Only a council admin can reactivate a badge after review.');
       return;
     }
-    const reviewNote = newCaseDraft.note.trim();
+    const reviewNote = caseForm.note.trim();
     if (!['stolen', 'suspended'].includes(selectedBadge.status)) {
       setAdminNotice('Only stolen or suspended badges can be reactivated from the review workflow.');
       return;
@@ -105,7 +105,7 @@ export function useAdminCases({
       message: `Badge ${selectedBadge.id} has been reactivated after council review.`
     });
     setAdminNotice(`Badge ${selectedBadge.id} reactivated after admin review.`);
-    updateNewCaseDraft('note', '');
+    updateCaseDraft('note', '');
   }
 
   function updateCase(caseId, caseUpdates) {
@@ -142,8 +142,8 @@ export function useAdminCases({
   }
 
   return {
-    newCaseDraft,
-    updateNewCaseDraft,
+    caseForm,
+    updateCaseDraft,
     noteDraftByCaseId,
     setNoteDraftByCaseId,
     dashboardFilters,

@@ -23,20 +23,20 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
   };
 }
 
-export function createAdminCase({ id, badge, risk, caseDraft, addedBy, addedAt }) {
-  const status = risk.score >= 81 && caseDraft.status === 'Open' ? 'High priority' : caseDraft.status;
+export function createAdminCase({ id, badge, risk, caseForm, addedBy, addedAt }) {
+  const status = risk.score >= 81 && caseForm.status === 'Open' ? 'High priority' : caseForm.status;
   return {
     id,
     badgeId: badge.id,
     title: `${badge.holder} - ${riskBandLabels[risk.riskBand]}`,
     status,
-    assignedTo: caseDraft.assignee,
-    dueDate: caseDraft.dueDate,
-    closureReason: caseDraft.closureReason,
-    notes: [caseDraft.note || 'Case opened from admin dashboard.'],
-    evidence: caseDraft.evidence || 'Evidence upload pending',
-    evidenceItems: caseDraft.evidence
-      ? [{ type: 'Admin evidence', reference: caseDraft.evidence, addedBy, addedAt }]
+    assignedTo: caseForm.assignee,
+    dueDate: caseForm.dueDate,
+    closureReason: caseForm.closureReason,
+    notes: [caseForm.note || 'Case opened from admin dashboard.'],
+    evidence: caseForm.evidence || 'Evidence upload pending',
+    evidenceItems: caseForm.evidence
+      ? [{ type: 'Admin evidence', reference: caseForm.evidence, addedBy, addedAt }]
       : []
   };
 }

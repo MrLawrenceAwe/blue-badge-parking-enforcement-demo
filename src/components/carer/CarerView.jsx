@@ -10,15 +10,10 @@ export function CarerView({
   selectedBadge,
   setSelectedBadgeId,
   sessions,
-  startSession,
-  extendSession,
-  endSession,
-  reportStolen,
-  requestReplacementBadge,
-  replacementRequestForm,
+  badgeActions,
+  replacementForm,
   replacementRequests,
-  notifications,
-  sessionMessage
+  notifications
 }) {
   const activeSession = sessions.find((session) => session.badgeId === selectedBadge.id && isSessionActive(session));
   return (
@@ -54,13 +49,9 @@ export function CarerView({
           <BadgeActions
             badge={selectedBadge}
             activeSession={activeSession}
-            sessionMessage={sessionMessage}
-            startSession={startSession}
-            extendSession={extendSession}
-            endSession={endSession}
-            reportStolen={reportStolen}
-            requestReplacementBadge={requestReplacementBadge}
-            replacementRequestForm={replacementRequestForm}
+            sessionMessage={badgeActions.badgeNotice}
+            badgeActions={badgeActions}
+            replacementForm={replacementForm}
             replacementRequests={replacementRequests}
             notifications={notifications}
             showActiveSession={false}

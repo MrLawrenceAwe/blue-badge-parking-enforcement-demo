@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { accessibleBadgesFor, availableRolesForUser } from '../domain/badges';
+import { accessibleBadgesFor, rolesForUser } from '../domain/badges';
 
 export function useDemoAuth({ demoUsers, badges }) {
   const [role, setRole] = useState(demoUsers[0].role);
@@ -38,7 +38,7 @@ export function useDemoAuth({ demoUsers, badges }) {
     role,
     setRole,
     authUser,
-    availableRoles: availableRolesForUser(authUser),
+    availableRoles: rolesForUser(authUser),
     roleBadges,
     selectedBadge,
     setSelectedBadgeId,

@@ -12,16 +12,11 @@ export function HolderView({
   badges,
   setSelectedBadgeId,
   sessions,
-  startSession,
-  extendSession,
-  endSession,
-  reportStolen,
-  requestReplacementBadge,
-  replacementRequestForm,
+  badgeActions,
+  replacementForm,
   replacementRequests,
   notifications,
-  risk,
-  sessionMessage
+  risk
 }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   const verificationToken = issuedVerificationTokenForBadge(badge.id);
@@ -60,7 +55,7 @@ export function HolderView({
             aria-label={`Signed verification QR code for ${badge.id}`}
           />
         </div>
-        <div className={`account-status ${risk.riskToneClass}`}>
+        <div className={`account-status ${risk.severityClass}`}>
           <ShieldCheck aria-hidden="true" />
           <strong>{accountMessage}</strong>
         </div>
@@ -71,19 +66,15 @@ export function HolderView({
           <h2>Parking session</h2>
           <Clock3 aria-hidden="true" />
         </div>
-        <BadgeActions
-          badge={badge}
-          activeSession={activeSession}
-          sessionMessage={sessionMessage}
-          startSession={startSession}
-          extendSession={extendSession}
-          endSession={endSession}
-          reportStolen={reportStolen}
-          requestReplacementBadge={requestReplacementBadge}
-          replacementRequestForm={replacementRequestForm}
-          replacementRequests={replacementRequests}
-          notifications={notifications}
-        />
+          <BadgeActions
+            badge={badge}
+            activeSession={activeSession}
+            sessionMessage={badgeActions.badgeNotice}
+            badgeActions={badgeActions}
+            replacementForm={replacementForm}
+            replacementRequests={replacementRequests}
+            notifications={notifications}
+          />
       </section>
     </div>
   );
