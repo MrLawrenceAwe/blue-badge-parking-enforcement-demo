@@ -11,7 +11,7 @@
   .role-switcher button,
   .tab-list button {
     min-height: 42px;
-    padding: 8px 12px;
+    padding: 8px 11px;
   }
 
   .summary-strip {
@@ -19,7 +19,7 @@
   }
 
   .metric {
-    min-height: 68px;
+    min-height: 62px;
     padding: 8px 10px;
   }
 
@@ -34,7 +34,7 @@
 
   .app-panel,
   .filter-toolbar {
-    padding: 11px;
+    padding: 10px;
   }
 
   .admin-filters {
@@ -53,6 +53,10 @@
   .dashboard-grid {
     display: flex;
     flex-direction: column;
+  }
+
+  .admin-controls {
+    align-items: stretch;
   }
 
   .dashboard-grid > .app-panel {
@@ -171,12 +175,12 @@ textarea:focus {
 
 @media (min-width: 720px) {
   main {
-    padding: 20px 26px;
+    padding: 16px 26px;
   }
 
   .app-header {
     grid-template-columns: 1fr auto;
-    align-items: end;
+    align-items: center;
   }
 
   .summary-strip {

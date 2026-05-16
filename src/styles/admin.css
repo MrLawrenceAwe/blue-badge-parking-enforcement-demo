@@ -2,7 +2,24 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.admin-controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.admin-controls .tab-list {
+  order: 1;
+}
+
+.admin-controls .admin-filters {
+  order: 1;
 }
 
 .admin-filters {
@@ -14,8 +31,8 @@
 .admin-filters summary {
   width: fit-content;
   min-height: 40px;
-  border: 1px solid #9bbbd1;
-  border-radius: 6px;
+  border: 1px solid #b7c8d4;
+  border-radius: 5px;
   background: var(--surface);
   padding: 8px 12px;
   display: flex;
@@ -23,14 +40,16 @@
   gap: 8px;
   color: var(--blue-dark);
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .admin-filters[open] {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 6px;
+  flex-basis: 100%;
+  padding: 10px 12px;
+  order: 2;
 }
 
 .filter-count {
@@ -60,7 +79,7 @@
 .filter-toolbar-fields {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .table-wrap {
@@ -79,7 +98,7 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 9px 12px;
+  padding: 8px 12px;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -106,7 +125,7 @@ td:nth-child(4) {
 }
 
 th {
-  background: #e8eef2;
+  background: #edf3f7;
 }
 
 tr {

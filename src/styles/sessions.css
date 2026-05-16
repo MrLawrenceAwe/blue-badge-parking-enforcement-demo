@@ -11,8 +11,8 @@
 
 .stolen-report-form {
   border: 1px solid #f0a8b0;
-  border-left: 6px solid var(--red);
-  border-radius: 8px;
+  border-left: 4px solid var(--red);
+  border-radius: 6px;
   padding: 12px;
   background: #fff7f8;
   display: grid;
@@ -21,8 +21,8 @@
 
 .replacement-request-form {
   border: 1px solid #9bbbd1;
-  border-left: 6px solid var(--blue);
-  border-radius: 8px;
+  border-left: 4px solid var(--blue);
+  border-radius: 6px;
   padding: 12px;
   margin-top: 12px;
   background: #f7fbff;
@@ -71,15 +71,15 @@
 .badge-record-button,
 .timeline-item {
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 11px;
-  background: #fbfcfd;
+  border-radius: 5px;
+  padding: 10px;
+  background: #fcfdfe;
 }
 
 .session-card {
   display: grid;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .session-card-main,
