@@ -1,5 +1,4 @@
 import { LayoutDashboard, ShieldCheck, UserRound, UsersRound } from 'lucide-react';
-import { ThemeSwitcher } from './ThemeSwitcher';
 
 const roleOptions = [
   ['holder', UserRound, 'Holder'],
@@ -14,8 +13,6 @@ export function AppHeader({
   demoUsers,
   setRole,
   selectDemoUser,
-  themePreference,
-  setThemePreference,
 }) {
   return (
     <header className="app-header">
@@ -28,13 +25,7 @@ export function AppHeader({
         <p className="hero-note">Badge checks, sessions, and cases.</p>
       </div>
       <div className="role-switcher-wrap">
-        <div className="header-controls">
-          <ThemeSwitcher
-            themePreference={themePreference}
-            setThemePreference={setThemePreference}
-          />
-          <span className="switcher-caption">Switch demo account</span>
-        </div>
+        <span className="switcher-caption">Switch demo account</span>
         <div className="role-switcher" aria-label="Switch demo account by role">
           {roleOptions.map(([value, Icon, label]) => {
             const demoUser = demoUsers.find((user) => user.role === value);
