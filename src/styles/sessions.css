@@ -3,6 +3,11 @@
   gap: 4px;
 }
 
+.session-panel-stack {
+  display: grid;
+  gap: 12px;
+}
+
 .session-actions {
   display: flex;
   flex-wrap: wrap;
@@ -15,14 +20,9 @@
   border-left: 4px solid var(--red);
   border-radius: 6px;
   padding: 12px;
-  margin-top: 12px;
   background: #fff7f8;
   display: grid;
   gap: 10px;
-}
-
-.stolen-report-trigger {
-  margin-top: 12px;
 }
 
 .replacement-request-form {
