@@ -28,7 +28,7 @@ export function AuthStrip({
         </p>
       </div>
       <details className="auth-controls">
-        <summary>Switch account</summary>
+        <summary>Account sign in</summary>
         <details
           className="demo-account-drawer"
           open={demoDrawerOpen}

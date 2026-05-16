@@ -33,6 +33,20 @@
   margin-bottom: 2px;
 }
 
+.verification-pending {
+  background: var(--surface);
+  border: 1px solid #9bbbd1;
+  color: var(--ink);
+}
+
+.verification-pending h2 {
+  color: var(--blue-dark);
+}
+
+.verification-pending span {
+  color: var(--muted);
+}
+
 .officer-decision-stack {
   align-self: start;
   display: grid;

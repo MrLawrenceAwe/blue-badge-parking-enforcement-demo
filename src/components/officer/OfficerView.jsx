@@ -12,6 +12,7 @@ const actionOptions = ['No action', 'Warning issued', 'Penalty charge notice rec
 export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, scanEvidenceForm, scanCommands, officerMessage }) {
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
+  const hasScanResult = Boolean(scanResult);
   const canOpenCaseFromScan = scanResult && risk.verificationStatus !== VERIFICATION_STATUS.valid;
   const isValid = risk.verificationStatus === VERIFICATION_STATUS.valid;
   return (
@@ -41,17 +42,26 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
       </section>
 
       <div className="officer-decision-stack">
-        <section className={`verification-result ${risk.severityClass}${isValid ? ' compact-verification-result' : ''}`} aria-live="polite">
+        <section
+          className={`verification-result ${hasScanResult ? risk.severityClass : 'verification-pending'}${hasScanResult && isValid ? ' compact-verification-result' : ''}`}
+          aria-live="polite"
+        >
           <div>
-            <p>Verification result</p>
-            <h2>{verificationStatusLabels[risk.verificationStatus]}</h2>
+            <p>{hasScanResult ? 'Verification result' : 'Scan status'}</p>
+            <h2>{hasScanResult ? verificationStatusLabels[risk.verificationStatus] : 'Ready to verify'}</h2>
           </div>
           <div className="result-detail">
-            <strong>Risk score {risk.score}</strong>
-            <div className="risk-explanation">
-              {risk.explanation.map((item) => <small key={item}>{item}</small>)}
-              {scanResult?.failureReason && <small>{scanResult.failureReason}</small>}
-            </div>
+            {hasScanResult ? (
+              <>
+                <strong>Risk score {risk.score}</strong>
+                <div className="risk-explanation">
+                  {risk.explanation.map((item) => <small key={item}>{item}</small>)}
+                  {scanResult?.failureReason && <small>{scanResult.failureReason}</small>}
+                </div>
+              </>
+            ) : (
+              <span>Enter a badge ID, signed QR code, or vehicle registration, then run verification.</span>
+            )}
           </div>
           {canOpenCaseFromScan && (
             <button className="secondary-button result-action" onClick={scanCommands.createCaseFromScan}>
