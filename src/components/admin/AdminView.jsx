@@ -16,16 +16,16 @@ export function AdminView({
   riskByBadge,
   filters,
   selectedBadge,
-  caseForm,
-  caseNoteDrafts,
+  newCaseForm,
+  caseDraftNotes,
   auditEvents,
   notifications,
   replacementRequests,
   riskRules,
-  actions,
+  adminActions,
   adminMessage,
   suspiciousCases,
-  stolenOrSuspendedBadges
+  restrictedBadges
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
@@ -56,9 +56,9 @@ export function AdminView({
             visibleActiveSessions={visibleActiveSessions}
             visibleScans={visibleScans}
             suspiciousCases={suspiciousCases}
-            stolenOrSuspendedBadges={stolenOrSuspendedBadges}
+            restrictedBadges={restrictedBadges}
             riskByBadge={riskByBadge}
-            selectBadge={actions.selectBadge}
+            selectBadge={adminActions.selectBadge}
           />
         )}
 
@@ -67,14 +67,14 @@ export function AdminView({
             allBadges={allBadges}
             selectedBadge={selectedBadge}
             selectedBadgeCases={selectedBadgeCases}
-            caseForm={caseForm}
-            caseNoteDrafts={caseNoteDrafts}
+            newCaseForm={newCaseForm}
+            caseDraftNotes={caseDraftNotes}
             adminMessage={adminMessage}
-            actions={actions}
+            caseActions={adminActions}
           />
         )}
 
-        {activeTab === 'Rules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={actions.updateRiskRule} />}
+        {activeTab === 'Rules' && <RiskRulesTab riskRules={riskRules} updateRiskRule={adminActions.updateRiskRule} />}
 
         {activeTab === 'Audit' && (
           <AuditTab

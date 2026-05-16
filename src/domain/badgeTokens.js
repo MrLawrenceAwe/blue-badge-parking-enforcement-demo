@@ -1,4 +1,4 @@
-import { badgeVerificationPublicKey, issuedBadgeTokens } from '../data/demoData';
+import { badgeVerificationPublicKey, issuedBadgeTokens } from '../data/demoRecords';
 import { base64UrlToBytes } from './base64Url';
 
 const textEncoder = new TextEncoder();

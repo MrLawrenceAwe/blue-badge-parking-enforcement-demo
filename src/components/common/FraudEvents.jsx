@@ -5,7 +5,7 @@ export function FraudEvents({ risk }) {
     <div className="fraud-events">
       <h3>Fraud alerts</h3>
       {risk.events.map((event) => (
-        <div key={event.type} className="event-row">
+        <div key={event.type} className="risk-event-row">
           <AlertTriangle aria-hidden="true" size={18} />
           <span>{event.label}</span>
         </div>

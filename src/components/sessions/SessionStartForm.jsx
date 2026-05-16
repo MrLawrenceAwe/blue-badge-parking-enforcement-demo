@@ -19,11 +19,11 @@ export function SessionStartForm({ badge, activeSession, startSession, extendSes
         <label>Session duration<select name="duration" defaultValue="180" aria-label="Session duration" disabled={sessionBlocked}><option value="60">1 hour</option><option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option></select></label>
         <button type="submit" className="primary-button" disabled={sessionBlocked}><Clock3 aria-hidden="true" size={21} /> Start locked session</button>
       </form>
-      {badge.status === 'under review' && <p className="plain-text">This badge can still park, but new sessions are monitored until the review is resolved.</p>}
-      {!canStartSessionForBadge(badge.status) && <p className="plain-text">This badge must be reactivated or renewed before a new parking session can start.</p>}
+      {badge.status === 'under review' && <p className="muted-text">This badge can still park, but new sessions are monitored until the review is resolved.</p>}
+      {!canStartSessionForBadge(badge.status) && <p className="muted-text">This badge must be reactivated or renewed before a new parking session can start.</p>}
       {activeSession && (
         <div className="session-actions" aria-label="Active session actions">
-          <button type="button" className="secondary-button compact-button" onClick={() => extendSession(activeSession.id, 60)}>Extend 1 hour</button>
+          <button type="button" className="secondary-button small-button" onClick={() => extendSession(activeSession.id, 60)}>Extend 1 hour</button>
           <button type="button" className="danger-button" onClick={() => endSession(activeSession.id)}>End session</button>
         </div>
       )}

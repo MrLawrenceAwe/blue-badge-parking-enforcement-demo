@@ -16,7 +16,7 @@ import {
   initialReplacementRequests,
   initialScans,
   initialSessions
-} from './data/demoData';
+} from './data/demoRecords';
 import {
   accessibleBadgesFor,
   currentDemoRolesFor,
@@ -25,12 +25,16 @@ import {
   statusLabel,
   vehicleSearchKey
 } from './domain/badges';
-import { mockGpsForLocation } from './domain/locations';
-import { defaultRiskRules, evaluateBadgeRisk, riskFromPermissionError, riskLevelLabel, scanOutcomeForRisk } from './domain/risk';
+import { demoGpsForLocation } from './domain/locations';
+import { RISK_VERDICT, defaultRiskRules, evaluateBadgeRisk, riskFromPermissionError, scanOutcomeForRisk } from './domain/risk';
 import { parseScanInput } from './domain/scanInput';
 import { verifyBadgeToken } from './domain/badgeTokens';
-import { createSessionId, createSignedSessionRecord } from './domain/sessionProofs';
+import { createSessionId, createDemoAttestedSession } from './domain/sessionProofs';
 import { buildSessionPayload, isSessionActive } from './domain/sessions';
+import { adminRecordSets } from './domain/adminFilters';
+import { createAdminCase, createOfficerScanCase, createStolenBadgeCase, isCaseOpen } from './domain/cases';
+import { scanEvidenceItems } from './domain/evidence';
+import { formatRecordId, nextNumberFromRecords } from './domain/ids';
 import { timestampNow } from './utils/date';
 
 const riskRuleLimits = {
@@ -39,24 +43,6 @@ const riskRuleLimits = {
   monitorThreshold: { min: 1, max: 100 },
   closeScanMinutes: { min: 5, max: 240 }
 };
-
-function nextNumericId(records, prefix, fallback) {
-  const highestExistingId = Math.max(
-    fallback,
-    ...records
-      .map((record) => Number(String(record.id).replace(prefix, '')))
-      .filter(Number.isFinite)
-  );
-  return highestExistingId + 1;
-}
-
-function buildScanEvidenceItems(evidence, addedAt) {
-  return [
-    evidence.vehiclePhotoRef && { type: 'Vehicle photo', reference: evidence.vehiclePhotoRef, addedBy: 'EO Current User', addedAt },
-    evidence.badgePhotoRef && { type: 'Badge photo', reference: evidence.badgePhotoRef, addedBy: 'EO Current User', addedAt },
-    evidence.officerNote && { type: 'Officer note', reference: evidence.officerNote, addedBy: 'EO Current User', addedAt }
-  ].filter(Boolean);
-}
 
 export function App() {
   const [role, setRole] = useState(demoUsers[0].role);
@@ -90,18 +76,18 @@ export function App() {
   const [caseEvidence, setCaseEvidence] = useState('');
   const [caseDueDate, setCaseDueDate] = useState('');
   const [caseClosureReason, setCaseClosureReason] = useState('');
-  const [caseNoteDrafts, setCaseNoteDrafts] = useState({});
+  const [caseDraftNotes, setCaseDraftNotes] = useState({});
   const [replacementForm, setReplacementForm] = useState({ reference: '', temporaryPermit: 'Requested' });
   const [filters, setFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
   const [sessionMessage, setSessionMessage] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
   const [officerMessage, setOfficerMessage] = useState('');
   const [demoDrawerOpen, setDemoDrawerOpen] = useState(false);
-  const nextScanNumber = useRef(nextNumericId(initialScans, 'SC-', 90199));
+  const nextScanNumber = useRef(nextNumberFromRecords(initialScans, 'SC-', 90199));
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(initialSessions.map((session) => createSignedSessionRecord({ ...session, locked: true }))).then((signedSessions) => {
+    Promise.all(initialSessions.map((session) => createDemoAttestedSession({ ...session, locked: true }))).then((signedSessions) => {
       if (cancelled) return;
       setSessions((current) => {
         const signedById = new Map(signedSessions.map((session) => [session.id, session]));
@@ -121,7 +107,7 @@ export function App() {
   const selectedBadge = roleBadges.find((badge) => badge.id === selectedBadgeId) ?? roleBadges[0] ?? badges[0];
   const currentDemoRoles = currentDemoRolesFor(authUser);
   const activeSessions = sessions.filter((session) => isSessionActive(session));
-  const openCases = cases.filter((caseRecord) => caseRecord.status !== 'Resolved');
+  const openCases = cases.filter(isCaseOpen);
 
   const riskByBadge = useMemo(() => {
     return Object.fromEntries(badges.map((badge) => [badge.id, evaluateBadgeRisk(badge, sessions, scans, {}, riskRules)]));
@@ -159,7 +145,7 @@ export function App() {
   function appendAuditEvent({ badgeId, type, actor = authUser.name, detail }) {
     setAuditEvents((current) => [
       {
-        id: `AUD-${1000 + current.length + 1}`,
+        id: formatRecordId('AUD-', 1000 + current.length + 1),
         badgeId,
         type,
         actor,
@@ -185,7 +171,7 @@ export function App() {
               contravention: nextEvidence.contravention,
               action: nextEvidence.action,
               officerNote: nextEvidence.officerNote,
-              evidenceItems: buildScanEvidenceItems(nextEvidence, scan.time)
+              evidenceItems: scanEvidenceItems(nextEvidence, scan.time)
             }
             : scan
         )
@@ -197,7 +183,7 @@ export function App() {
   function queueNotification({ badgeId, recipient, channel = 'Email', message }) {
     setNotifications((current) => [
       {
-        id: `NOT-${1000 + current.length + 1}`,
+        id: formatRecordId('NOT-', 1000 + current.length + 1),
         badgeId,
         recipient,
         channel,
@@ -223,13 +209,13 @@ export function App() {
     }
 
     const location = formData.get('location').toString();
-    const session = await createSignedSessionRecord({
+    const session = await createDemoAttestedSession({
       id: createSessionId(),
       ...buildSessionPayload({
         badgeId: selectedBadge.id,
         vehicle: normaliseVehicle(formData.get('vehicle').toString()),
         location,
-        gps: mockGpsForLocation(location),
+        gps: demoGpsForLocation(location),
         startedAt: timestampNow(),
         durationMins: Number(formData.get('duration'))
       })
@@ -254,7 +240,7 @@ export function App() {
       setSessionMessage('This session is not available to the signed-in user.');
       return;
     }
-    const updatedSession = await createSignedSessionRecord({
+    const updatedSession = await createDemoAttestedSession({
       ...session,
       durationMins: Math.min(session.durationMins + extraMins, 240)
     });
@@ -303,20 +289,15 @@ export function App() {
     setSessionMessage('Badge reported stolen. The badge is now deactivated for new parking sessions and will return a black high-risk result to officers.');
     setBadges((current) => current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)));
     setCases((current) => [
-      {
-        id: `CASE-${4200 + current.length}`,
-        badgeId: selectedBadge.id,
-        title: 'Badge reported stolen by holder',
-        status: 'High priority',
-        assignedTo: 'Fraud Team A',
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        closureReason: '',
-        notes: [`Immediate digital deactivation triggered from holder portal. Details: ${details}. Contact: ${contact}.`],
-        evidence: 'Holder report with confirmed deactivation',
-        evidenceItems: [
-          { type: 'Holder report', reference: contact, addedBy: authUser.name, addedAt: timestampNow() }
-        ]
-      },
+      createStolenBadgeCase({
+        id: formatRecordId('CASE-', 4200 + current.length),
+        badge: selectedBadge,
+        details,
+        contact,
+        addedBy: authUser.name,
+        addedAt: timestampNow(),
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      }),
       ...current
     ]);
     appendAuditEvent({
@@ -349,7 +330,7 @@ export function App() {
     }
     setReplacementRequests((current) => [
       {
-        id: `REP-${1000 + current.length + 1}`,
+        id: formatRecordId('REP-', 1000 + current.length + 1),
         badgeId: selectedBadge.id,
         status: 'Pending evidence review',
         requestedAt: timestampNow(),
@@ -390,7 +371,7 @@ export function App() {
     setBadges((current) => current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'valid' } : badge)));
     setCases((current) =>
       current.map((caseRecord) =>
-        caseRecord.badgeId === selectedBadge.id && caseRecord.status !== 'Resolved'
+        caseRecord.badgeId === selectedBadge.id && isCaseOpen(caseRecord)
           ? { ...caseRecord, status: 'Resolved', closureReason: 'Reactivated after review', notes: [...caseRecord.notes, `Admin reactivation review completed: ${reviewNote}`] }
           : caseRecord
       )
@@ -426,7 +407,7 @@ export function App() {
     const observedVehicle = normaliseVehicle(scanVehicle);
     const scannedAt = timestampNow();
     const device = scanLocation.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07';
-    const observedGps = mockGpsForLocation(scanLocation);
+    const observedGps = demoGpsForLocation(scanLocation);
     const verifiedQrPayload = scanInput.kind === 'qr-token' ? await verifyBadgeToken(scanInput.value) : null;
     const badge = findScannedBadge(scanInput, verifiedQrPayload);
     const predictedOutcome = badge
@@ -437,17 +418,17 @@ export function App() {
         time: scannedAt,
         device
       }, riskRules).verdict
-      : 'invalid';
+      : RISK_VERDICT.invalid;
     const risk = evaluateBadgeRisk(badge, sessions, scans, {
       vehicle: observedVehicle,
       location: scanLocation,
       gps: observedGps,
       time: scannedAt,
       device,
-      includeCurrentFailure: predictedOutcome !== 'valid'
+      includeCurrentFailure: predictedOutcome !== RISK_VERDICT.valid
     }, riskRules);
 
-    const scanId = `SC-${nextScanNumber.current}`;
+    const scanId = formatRecordId('SC-', nextScanNumber.current);
     nextScanNumber.current += 1;
     setScans((current) => [
       {
@@ -463,7 +444,7 @@ export function App() {
         contravention: scanEvidence.contravention,
         action: scanEvidence.action,
         officerNote: scanEvidence.officerNote,
-        evidenceItems: buildScanEvidenceItems(scanEvidence, scannedAt)
+        evidenceItems: scanEvidenceItems(scanEvidence, scannedAt)
       },
       ...current
     ]);
@@ -496,27 +477,28 @@ export function App() {
 
   function addCase() {
     const risk = riskByBadge[selectedBadge.id];
-    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === selectedBadge.id && caseRecord.status !== 'Resolved');
+    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === selectedBadge.id && isCaseOpen(caseRecord));
     if (duplicateOpenCase) {
       setAdminMessage(`Open case ${duplicateOpenCase.id} already exists for ${selectedBadge.id}. Add evidence or notes to that case instead of creating a duplicate.`);
       return;
     }
-    const caseId = `CASE-${4200 + cases.length}`;
+    const caseId = formatRecordId('CASE-', 4200 + cases.length);
     setCases((current) => [
-      {
+      createAdminCase({
         id: caseId,
-        badgeId: selectedBadge.id,
-        title: `${selectedBadge.holder} - ${riskLevelLabel[risk.level]}`,
-        status: risk.score >= 81 && caseStatus === 'Open' ? 'High priority' : caseStatus,
-        assignedTo: caseAssignee,
-        dueDate: caseDueDate,
-        closureReason: caseClosureReason,
-        notes: [caseNote || 'Case opened from admin dashboard.'],
-        evidence: caseEvidence || 'Evidence upload pending',
-        evidenceItems: caseEvidence
-          ? [{ type: 'Admin evidence', reference: caseEvidence, addedBy: authUser.name, addedAt: timestampNow() }]
-          : []
-      },
+        badge: selectedBadge,
+        risk,
+        form: {
+          note: caseNote,
+          status: caseStatus,
+          assignee: caseAssignee,
+          evidence: caseEvidence,
+          dueDate: caseDueDate,
+          closureReason: caseClosureReason
+        },
+        addedBy: authUser.name,
+        addedAt: timestampNow()
+      }),
       ...current
     ]);
     appendAuditEvent({
@@ -543,33 +525,19 @@ export function App() {
       return;
     }
     const badgeId = lastScanResult.badge?.id ?? lastScanResult.query;
-    const risk = lastScanResult.risk;
-    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === badgeId && caseRecord.status !== 'Resolved');
+    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === badgeId && isCaseOpen(caseRecord));
     if (duplicateOpenCase) {
       setOfficerMessage(`Open case ${duplicateOpenCase.id} already exists. The scan has been kept in the audit trail.`);
       return;
     }
-    const caseId = `CASE-${4200 + cases.length}`;
+    const caseId = formatRecordId('CASE-', 4200 + cases.length);
     setCases((current) => [
-      {
+      createOfficerScanCase({
         id: caseId,
         badgeId,
-        title: `Officer scan escalation - ${riskLevelLabel[risk.level]}`,
-        status: risk.score >= 81 ? 'High priority' : 'Officer review',
-        assignedTo: risk.score >= 81 ? 'Fraud Team A' : 'Duty review team',
-        dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        closureReason: '',
-        notes: [
-          `Officer scan at ${lastScanResult.location} for vehicle ${lastScanResult.vehicle}. Verdict: ${risk.verdict}. Action: ${lastScanResult.evidence.action}. Contravention: ${lastScanResult.evidence.contravention}. Alerts: ${risk.events.map((event) => event.label).join('; ')}.`
-        ],
-        evidence: `Officer scan log ${lastScanResult.scanId}`,
-        evidenceItems: [
-          { type: 'Scan log', reference: lastScanResult.scanId, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt },
-          lastScanResult.evidence.vehiclePhotoRef && { type: 'Vehicle photo', reference: lastScanResult.evidence.vehiclePhotoRef, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt },
-          lastScanResult.evidence.badgePhotoRef && { type: 'Badge photo', reference: lastScanResult.evidence.badgePhotoRef, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt },
-          lastScanResult.evidence.officerNote && { type: 'Officer note', reference: lastScanResult.evidence.officerNote, addedBy: 'EO Current User', addedAt: lastScanResult.scannedAt }
-        ].filter(Boolean)
-      },
+        scanResult: lastScanResult,
+        addedAt: lastScanResult.scannedAt
+      }),
       ...current
     ]);
     appendAuditEvent({
@@ -595,7 +563,7 @@ export function App() {
   }
 
   function appendCaseNote(caseId) {
-    const note = caseNoteDrafts[caseId]?.trim();
+    const note = caseDraftNotes[caseId]?.trim();
     if (!note) return;
     const caseRecord = cases.find((record) => record.id === caseId);
     setCases((current) => current.map((record) => (record.id === caseId ? { ...record, notes: [...record.notes, note] } : record)));
@@ -606,7 +574,7 @@ export function App() {
         detail: `${caseId}: ${note}`
       });
     }
-    setCaseNoteDrafts((current) => ({ ...current, [caseId]: '' }));
+    setCaseDraftNotes((current) => ({ ...current, [caseId]: '' }));
   }
 
   function updateRiskRule(field, value) {
@@ -621,43 +589,22 @@ export function App() {
     setAdminMessage(`Risk rule updated: ${field} is now ${clampedValue}.`);
   }
 
-  const filteredBadges = badges.filter((badge) => {
-    const risk = riskByBadge[badge.id];
-    const relatedSessions = sessions.filter((session) => session.badgeId === badge.id);
-    const relatedScans = scans.filter((scan) => scan.badgeId === badge.id);
-    const searchableText = [
-      badge.id,
-      badge.holder,
-      badge.vehicle,
-      badge.council,
-      badge.status,
-      riskLevelLabel[risk.level],
-      risk.score,
-      ...relatedSessions.flatMap((session) => [session.location, session.startedAt]),
-      ...relatedScans.flatMap((scan) => [scan.location, scan.time, scan.outcome])
-    ].join(' ').toLowerCase();
-    const activityRecords = [...relatedSessions, ...relatedScans];
-    const matchesSearch = searchableText.includes(filters.search.toLowerCase());
-    const matchesRisk = filters.risk === 'all' || risk.level === filters.risk;
-    const matchesLocation = !filters.location || activityRecords.some((activityRecord) => activityRecord.location?.toLowerCase().includes(filters.location.toLowerCase()));
-    const matchesDate = !filters.date || activityRecords.some((activityRecord) => activityRecord.startedAt?.startsWith(filters.date) || activityRecord.time?.startsWith(filters.date));
-    const matchesStatus = filters.badgeStatus === 'all' || badge.status === filters.badgeStatus;
-    return matchesSearch && matchesRisk && matchesLocation && matchesDate && matchesStatus;
+  const {
+    filteredBadges,
+    visibleActiveSessions,
+    visibleScans,
+    selectedBadgeCases,
+    suspiciousCases,
+    restrictedBadges
+  } = adminRecordSets({
+    badges,
+    sessions,
+    scans,
+    cases,
+    filters,
+    riskByBadge,
+    selectedBadgeId: selectedBadge.id
   });
-
-  const filteredBadgeIds = new Set(filteredBadges.map((badge) => badge.id));
-  const knownBadgeIds = new Set(badges.map((badge) => badge.id));
-  const filteredSessions = activeSessions.filter((session) => filteredBadgeIds.has(session.badgeId));
-  const filteredScans = scans.filter((scan) => filteredBadgeIds.has(scan.badgeId));
-  const filteredCases = cases.filter((caseRecord) => filteredBadgeIds.has(caseRecord.badgeId) || !knownBadgeIds.has(caseRecord.badgeId));
-  const selectedBadgeCases = filteredCases.filter((caseRecord) => caseRecord.badgeId === selectedBadge.id);
-
-  const suspiciousCases = filteredCases.filter((caseRecord) => {
-    const risk = riskByBadge[caseRecord.badgeId];
-    return caseRecord.status !== 'Resolved' && (risk?.score >= 31 || ['Officer review', 'High priority', 'Evidence requested'].includes(caseRecord.status));
-  });
-
-  const stolenOrSuspendedBadges = filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status));
 
   return (
     <main>
@@ -736,13 +683,13 @@ export function App() {
         <AdminView
           filteredBadges={filteredBadges}
           allBadges={badges}
-          visibleActiveSessions={filteredSessions}
-          visibleScans={filteredScans}
+          visibleActiveSessions={visibleActiveSessions}
+          visibleScans={visibleScans}
           selectedBadgeCases={selectedBadgeCases}
           riskByBadge={riskByBadge}
           filters={{ values: filters, setValues: setFilters }}
           selectedBadge={selectedBadge}
-          caseForm={{
+          newCaseForm={{
             note: caseNote,
             setNote: setCaseNote,
             status: caseStatus,
@@ -756,12 +703,12 @@ export function App() {
             closureReason: caseClosureReason,
             setClosureReason: setCaseClosureReason
           }}
-          caseNoteDrafts={{ values: caseNoteDrafts, setValues: setCaseNoteDrafts }}
+          caseDraftNotes={{ values: caseDraftNotes, setValues: setCaseDraftNotes }}
           auditEvents={auditEvents}
           notifications={notifications}
           replacementRequests={replacementRequests}
           riskRules={riskRules}
-          actions={{
+          adminActions={{
             selectBadge: setSelectedBadgeId,
             addCase,
             updateCase,
@@ -771,7 +718,7 @@ export function App() {
           }}
           adminMessage={adminMessage}
           suspiciousCases={suspiciousCases}
-          stolenOrSuspendedBadges={stolenOrSuspendedBadges}
+          restrictedBadges={restrictedBadges}
         />
       )}
     </main>

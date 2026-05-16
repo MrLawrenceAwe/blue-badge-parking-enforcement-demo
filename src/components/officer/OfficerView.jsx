@@ -1,5 +1,6 @@
 import { Car, FileText, QrCode, Search } from 'lucide-react';
 import { statusLabel } from '../../domain/badges';
+import { RISK_VERDICT, riskVerdictLabels } from '../../domain/risk';
 import { isSessionActive } from '../../domain/sessions';
 import { formatDate } from '../../utils/date';
 import { FraudEvents } from '../common/FraudEvents';
@@ -11,13 +12,13 @@ const actionOptions = ['No action', 'Warning issued', 'PCN recommended', 'Case r
 export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanEvidence, scanActions, officerMessage }) {
   const activeSession = badge ? sessions.find((session) => session.badgeId === badge.id && isSessionActive(session)) : null;
   const isUnknown = !badge;
-  const canEscalate = scanResult && risk.verdict !== 'valid';
-  const isValid = risk.verdict === 'valid';
+  const canEscalate = scanResult && risk.verdict !== RISK_VERDICT.valid;
+  const isValid = risk.verdict === RISK_VERDICT.valid;
   return (
     <div className="officer-layout">
-      <section className="panel scan-panel">
-        <div className="panel-heading">
-          <h2>Scan or verify</h2>
+      <section className="app-panel scan-panel">
+        <div className="app-panel-heading">
+          <h2>Verify badge</h2>
           <QrCode aria-hidden="true" />
         </div>
         <label>QR, badge ID, or vehicle<input value={scanForm.query} onChange={(event) => scanActions.setQuery(event.target.value)} aria-label="QR code badge ID or vehicle registration" /></label>
@@ -27,7 +28,7 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
         {scanResult && (
           <div className="evidence-section">
             <h3>Evidence</h3>
-            <div className="case-fields">
+            <div className="case-field-grid">
               <label>Contravention<select value={scanEvidence.values.contravention} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
               <label>Enforcement action<select value={scanEvidence.values.action} onChange={(event) => scanEvidence.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
             </div>
@@ -39,10 +40,10 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
       </section>
 
       <div className="officer-decision-stack">
-        <section className={`verification-result ${risk.severity}${isValid ? ' compact-result' : ''}`} aria-live="polite">
+        <section className={`verification-result ${risk.severity}${isValid ? ' compact-verification-result' : ''}`} aria-live="polite">
           <div>
             <p>Result</p>
-            <h2>{isValid ? 'Valid' : risk.verdict === 'suspicious' ? 'Suspicious' : risk.verdict === 'stolen / deactivated' ? 'Stolen / deactivated' : 'Invalid'}</h2>
+            <h2>{riskVerdictLabels[risk.verdict]}</h2>
           </div>
           <div className="result-detail">
             <strong>Risk score {risk.score}</strong>
@@ -59,8 +60,8 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanForm, scanE
           {officerMessage && <p className="result-message" role="status">{officerMessage}</p>}
         </section>
 
-        <section className="panel">
-          <div className="panel-heading">
+        <section className="app-panel">
+          <div className="app-panel-heading">
             <h2>Badge details</h2>
             <Car aria-hidden="true" />
           </div>

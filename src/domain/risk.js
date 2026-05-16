@@ -1,12 +1,26 @@
 import { normaliseVehicle, vehicleSearchKey } from './badges';
-import { distanceInKm, mockGpsForLocation } from './locations';
+import { distanceInKm, demoGpsForLocation } from './locations';
 import { minutesBetween } from '../utils/date';
 
-export const riskLevelLabel = {
+export const RISK_VERDICT = {
+  valid: 'valid',
+  suspicious: 'suspicious',
+  deactivated: 'deactivated',
+  invalid: 'invalid'
+};
+
+export const riskLevelLabels = {
   normal: 'Normal',
   monitor: 'Monitor',
   review: 'Officer review',
-  high: 'Auto-suspend / high priority alert'
+  high: 'High priority alert'
+};
+
+export const riskVerdictLabels = {
+  [RISK_VERDICT.valid]: 'Valid',
+  [RISK_VERDICT.suspicious]: 'Suspicious',
+  [RISK_VERDICT.deactivated]: 'Stolen / deactivated',
+  [RISK_VERDICT.invalid]: 'Invalid'
 };
 
 const RISK_LEVEL = {
@@ -90,7 +104,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       level: RISK_LEVEL.high,
       events: [riskEvent('unknownBadge', rules)],
       severity: 'risk-high',
-      verdict: 'invalid',
+      verdict: RISK_VERDICT.invalid,
       explanation: ['No matching badge record or trusted QR token was found.']
     });
   }
@@ -109,7 +123,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 
   const closeLocationScan = badgeScans.some((scan) => {
     const closeInTime = scanContext.time ? minutesBetween(scan.time, scanContext.time) < rules.closeScanMinutes : true;
-    const scanGps = scan.gps ?? mockGpsForLocation(scan.location);
+    const scanGps = scan.gps ?? demoGpsForLocation(scan.location);
     return closeInTime && scanContext.gps && distanceInKm(scanGps, scanContext.gps) >= rules.closeScanDistanceKm;
   });
   if (closeLocationScan) events.push(riskEvent('impossibleTravel', rules));
@@ -132,7 +146,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
     score = Math.max(score, 85);
-    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-critical', verdict: 'stolen / deactivated', explanation });
+    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-critical', verdict: RISK_VERDICT.deactivated, explanation });
   }
 
   if (badge.status === 'expired') {
@@ -142,13 +156,13 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       level: score >= rules.highRiskThreshold ? RISK_LEVEL.high : RISK_LEVEL.review,
       events,
       severity: 'risk-high',
-      verdict: 'invalid',
+      verdict: RISK_VERDICT.invalid,
       explanation
     });
   }
 
   if (score >= rules.highRiskThreshold) {
-    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-high', verdict: 'invalid', explanation });
+    return riskResult({ score, level: RISK_LEVEL.high, events, severity: 'risk-high', verdict: RISK_VERDICT.invalid, explanation });
   }
 
   if (score >= rules.monitorThreshold || badge.status === 'under review') {
@@ -157,7 +171,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
       level: score >= rules.reviewThreshold ? RISK_LEVEL.review : RISK_LEVEL.monitor,
       events,
       severity: 'risk-watch',
-      verdict: 'suspicious',
+      verdict: RISK_VERDICT.suspicious,
       explanation
     });
   }
@@ -167,7 +181,7 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
     level: RISK_LEVEL.normal,
     events: events.length ? events : [riskEvent('noActiveRisk', rules)],
     severity: 'risk-low',
-    verdict: 'valid',
+    verdict: RISK_VERDICT.valid,
     explanation: ['No configured risk rules were triggered.']
   });
 }
@@ -178,14 +192,14 @@ export function riskFromPermissionError(message) {
     level: RISK_LEVEL.high,
     events: [{ type: 'permissionError', label: message, score: 100 }],
     severity: 'risk-high',
-    verdict: 'invalid'
+    verdict: RISK_VERDICT.invalid
   });
 }
 
 export function scanOutcomeForRisk(risk) {
-  if (risk.verdict === 'valid') return 'valid';
-  if (risk.verdict === 'suspicious') return 'review';
-  if (risk.verdict === 'stolen / deactivated') return 'deactivated';
+  if (risk.verdict === RISK_VERDICT.valid) return 'valid';
+  if (risk.verdict === RISK_VERDICT.suspicious) return 'review';
+  if (risk.verdict === RISK_VERDICT.deactivated) return 'deactivated';
   return 'invalid';
 }
 
