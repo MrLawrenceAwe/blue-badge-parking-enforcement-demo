@@ -8,7 +8,7 @@
 .app-panel,
 .filter-toolbar {
   background: var(--surface);
-  border: 1px solid #d8e2e8;
+  border: 1px solid var(--panel-border);
   border-radius: 6px;
   min-width: 0;
   padding: 12px 13px;
@@ -35,10 +35,10 @@ input,
 select,
 textarea {
   min-height: 44px;
-  border: 1px solid #8c9aa3;
+  border: 1px solid var(--interactive-border-strong);
   border-radius: 4px;
   padding: 10px;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   width: 100%;
 }

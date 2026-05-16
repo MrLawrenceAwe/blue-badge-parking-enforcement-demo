@@ -9,9 +9,11 @@ import { useDemoAuth } from './hooks/useDemoAuth';
 import { useDemoEnforcementStore } from './hooks/useDemoEnforcementStore';
 import { useOfficerScan } from './hooks/useOfficerScan';
 import { useRiskRules } from './hooks/useRiskRules';
+import { useThemePreference } from './hooks/useThemePreference';
 
 export function App() {
   const enforcementStore = useDemoEnforcementStore();
+  const theme = useThemePreference();
   const auth = useDemoAuth({
     demoUsers,
     badges: enforcementStore.badges,
@@ -68,6 +70,8 @@ export function App() {
         demoUsers={demoUsers}
         setRole={auth.setRole}
         selectDemoUser={auth.demoAccountDrawer.selectDemoUser}
+        themePreference={theme.themePreference}
+        setThemePreference={theme.setThemePreference}
       />
 
       <AuthStrip

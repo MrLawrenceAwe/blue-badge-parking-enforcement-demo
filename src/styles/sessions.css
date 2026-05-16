@@ -17,8 +17,8 @@
 
 .active-session-state {
   align-items: flex-start;
-  background: #e8f2fa;
-  border: 1px solid #9bbbd1;
+  background: var(--surface-accent);
+  border: 1px solid var(--interactive-border);
   border-left: 5px solid var(--blue);
   border-radius: 6px;
   color: var(--ink);
@@ -44,22 +44,22 @@
 }
 
 .stolen-report-form {
-  border: 1px solid #f0a8b0;
+  border: 1px solid color-mix(in srgb, var(--red) 50%, var(--surface));
   border-left: 4px solid var(--red);
   border-radius: 6px;
   padding: 12px;
-  background: #fff7f8;
+  background: var(--surface-danger-soft);
   display: grid;
   gap: 10px;
 }
 
 .replacement-request-form {
-  border: 1px solid #9bbbd1;
+  border: 1px solid var(--interactive-border);
   border-left: 4px solid var(--blue);
   border-radius: 6px;
   padding: 12px;
   margin-top: 12px;
-  background: #f7fbff;
+  background: var(--surface-tint);
   display: grid;
   gap: 10px;
 }
@@ -112,10 +112,10 @@
 .case-card,
 .badge-record-button,
 .timeline-item {
-  border: 1px solid #dce5ea;
+  border: 1px solid var(--panel-border);
   border-radius: 5px;
   padding: 9px 10px;
-  background: #fbfdfe;
+  background: var(--surface-raised);
 }
 
 .session-card {

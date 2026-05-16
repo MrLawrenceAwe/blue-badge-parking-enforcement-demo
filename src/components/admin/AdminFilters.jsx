@@ -1,6 +1,14 @@
 import { Search } from 'lucide-react';
 
-export function AdminFilters({ filterForm, filtersOpen, setFiltersOpen }) {
+const defaultFilters = {
+  search: '',
+  risk: 'all',
+  location: '',
+  date: '',
+  badgeStatus: 'all',
+};
+
+export function AdminFilters({ filterForm, filtersOpen, resultCount, setFiltersOpen }) {
   const activeFilterCount = [
     filterForm.values.search,
     filterForm.values.location,
@@ -16,6 +24,17 @@ export function AdminFilters({ filterForm, filtersOpen, setFiltersOpen }) {
         Filters
         {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
       </summary>
+      <div className="filter-toolbar-header">
+        <strong>{resultCount} badges shown</strong>
+        <button
+          type="button"
+          className="secondary-button small-button"
+          onClick={() => filterForm.setValues(defaultFilters)}
+          disabled={activeFilterCount === 0}
+        >
+          Clear filters
+        </button>
+      </div>
       <div className="filter-toolbar-fields">
         <label>Search<input value={filterForm.values.search} onChange={(event) => filterForm.setValues({ ...filterForm.values, search: event.target.value })} placeholder="Badge, vehicle registration, holder, location, date, risk" /></label>
         <label>Risk band<select value={filterForm.values.risk} onChange={(event) => filterForm.setValues({ ...filterForm.values, risk: event.target.value })}><option value="all">All</option><option value="normal">Normal</option><option value="monitor">Monitor</option><option value="review">Officer review</option><option value="high">High priority</option></select></label>

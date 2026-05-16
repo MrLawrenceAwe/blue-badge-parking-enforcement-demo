@@ -5,7 +5,7 @@
   display: grid;
   gap: 12px;
   align-items: center;
-  background: #f7fbff;
+  background: var(--surface-tint);
   margin-bottom: 12px;
 }
 

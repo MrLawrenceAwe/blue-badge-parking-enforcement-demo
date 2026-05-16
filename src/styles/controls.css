@@ -19,7 +19,7 @@
 .danger-button {
   min-height: 44px;
   border-radius: 5px;
-  border: 1px solid #9bbbd1;
+  border: 1px solid var(--interactive-border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -32,7 +32,7 @@
   min-width: 104px;
   background: var(--surface);
   color: var(--blue-dark);
-  border-color: #9bbbd1;
+  border-color: var(--interactive-border);
 }
 
 .tab-list button {
@@ -42,9 +42,9 @@
 }
 
 .role-switcher button:disabled {
-  border-color: #aeb9c0;
-  color: #6f7b84;
-  background: #e6ecef;
+  border-color: var(--interactive-disabled-border);
+  color: var(--interactive-disabled-text);
+  background: var(--interactive-disabled-surface);
   cursor: not-allowed;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .secondary-button {
-  border-color: #b7c8d4;
+  border-color: var(--interactive-border-muted);
   background: transparent;
   color: var(--blue);
 }
@@ -71,7 +71,7 @@
 .role-switcher button:hover,
 .tab-list button:hover,
 .admin-filters summary:hover {
-  background: #f7fbff;
+  background: var(--surface-tint);
 }
 
 .role-switcher button.active:hover,
@@ -107,6 +107,6 @@ textarea:focus {
 
 .role-switcher button.active:focus-visible,
 .tab-list button.active:focus-visible {
-  outline: 3px solid #9bbbd1;
+  outline: 3px solid var(--interactive-border);
   outline-offset: 2px;
 }

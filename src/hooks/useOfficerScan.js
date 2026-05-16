@@ -147,6 +147,12 @@ export function useOfficerScan({
 
     const scanId = nextRecordId(scans, 'SC-', 90199);
     const failureReason = explainScanFailure(parsedScanInput, verifiedQrPayload, candidateBadge, badge);
+    const suggestedEvidence = suggestScanEvidence({
+      currentEvidence: scanEvidenceDraft,
+      risk,
+      failureReason,
+    });
+    setScanEvidenceDraft(suggestedEvidence);
     setScans((current) => [
       buildOfficerScanRecord({
         id: scanId,
@@ -154,7 +160,7 @@ export function useOfficerScan({
         scanContext,
         scannedAt,
         risk,
-        evidence: scanEvidenceDraft,
+        evidence: suggestedEvidence,
         officerName: authUser.name,
       }),
       ...current,
@@ -167,7 +173,7 @@ export function useOfficerScan({
       location: scanLocation,
       scannedAt,
       scanId,
-      evidence: scanEvidenceDraft,
+      evidence: suggestedEvidence,
       inputDescription: describeParsedScanInput(parsedScanInput),
       failureReason,
     });
@@ -175,7 +181,7 @@ export function useOfficerScan({
       badgeId: badge?.id ?? parsedScanInput.value,
       type: 'Officer scan',
       actor: authUser.name,
-      detail: `${scanOutcomeForVerification(risk)} scan at ${scanLocation}. Action: ${scanEvidenceDraft.action}.`,
+      detail: `${scanOutcomeForVerification(risk)} scan at ${scanLocation}. Action: ${suggestedEvidence.action}.`,
     });
     if (badge) setSelectedBadgeId(badge.id);
     setOfficerNotice('');
@@ -197,6 +203,11 @@ export function useOfficerScan({
     }
     if (!lastScanResult) {
       setOfficerNotice('Run a scan before opening an enforcement case.');
+      return;
+    }
+    const evidenceError = validateScanEvidence(lastScanResult.evidence);
+    if (evidenceError) {
+      setOfficerNotice(evidenceError);
       return;
     }
     const badgeId = lastScanResult.badge?.id ?? lastScanResult.input;
@@ -254,6 +265,41 @@ export function useOfficerScan({
     recordBadgeScan,
     createCaseFromScan,
   };
+}
+
+function suggestScanEvidence({ currentEvidence, risk, failureReason }) {
+  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return initialScanEvidenceDraft;
+  const nextEvidence = { ...currentEvidence };
+  if (nextEvidence.contravention === 'No action') {
+    nextEvidence.contravention = suggestedContraventionForRisk(risk, failureReason);
+  }
+  if (nextEvidence.action === 'No action') {
+    nextEvidence.action =
+      risk.verificationStatus === VERIFICATION_STATUS.deactivated
+        ? 'Badge seized'
+        : 'Case review required';
+  }
+  return nextEvidence;
+}
+
+function suggestedContraventionForRisk(risk, failureReason) {
+  const explanation = [...risk.explanation, failureReason].join(' ').toLowerCase();
+  if (explanation.includes('stolen')) return 'Reported stolen badge';
+  if (explanation.includes('expired')) return 'Expired badge';
+  if (explanation.includes('unregistered vehicle')) return 'Badge mismatch';
+  if (explanation.includes('no matching') || explanation.includes('unknown')) return 'Badge mismatch';
+  if (explanation.includes('no active session')) return 'No active session';
+  return 'Suspected misuse';
+}
+
+function validateScanEvidence(evidence) {
+  if (!evidence || evidence.contravention === 'No action') {
+    return 'Choose a contravention before opening an enforcement case.';
+  }
+  if (evidence.action === 'No action') {
+    return 'Choose an enforcement action before opening an enforcement case.';
+  }
+  return '';
 }
 
 function describeScanInput(scanInput) {
