@@ -22,25 +22,23 @@ export function AdminOverviewTab({
             <thead><tr><th>Badge</th><th>Vehicle</th><th>Status</th><th>Risk</th></tr></thead>
             <tbody>
               {filteredBadges.map((badge) => (
-                <tr
-                  key={badge.id}
-                  onClick={() => selectBadge(badge.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      selectBadge(badge.id);
-                    }
-                  }}
-                  tabIndex="0"
-                  role="button"
-                  aria-label={`Select badge ${badge.id}`}
-                >
-                  <td data-label="Badge">{badge.id}<br /><small>{badge.holder}</small></td>
+                <tr key={badge.id}>
+                  <td data-label="Badge">
+                    <button type="button" className="risk-register-button" onClick={() => selectBadge(badge.id)}>
+                      <span>{badge.id}</span>
+                      <small>{badge.holder}</small>
+                    </button>
+                  </td>
                   <td data-label="Vehicle">{badge.vehicle}</td>
                   <td data-label="Status"><BadgeStatusPill status={badge.status} /></td>
                   <td data-label="Risk"><strong>{riskByBadge[badge.id].score}</strong><br /><small>{riskBandLabels[riskByBadge[badge.id].riskBand]}</small></td>
                 </tr>
               ))}
+              {!filteredBadges.length && (
+                <tr>
+                  <td colSpan="4">No badges match the current filters.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -48,7 +46,10 @@ export function AdminOverviewTab({
 
       <div className="app-panel active-sessions-panel">
         <div className="app-panel-heading"><h2>Active sessions</h2><Clock3 aria-hidden="true" /></div>
-        <div className="record-list constrained-list">{filteredActiveSessions.map((session) => <SessionCard key={session.id} session={session} />)}</div>
+        <div className="record-list constrained-list">
+          {filteredActiveSessions.map((session) => <SessionCard key={session.id} session={session} />)}
+          {!filteredActiveSessions.length && <p className="muted-text">No active sessions match the current filters.</p>}
+        </div>
       </div>
 
       <div className="app-panel recent-scans-panel">
@@ -61,6 +62,7 @@ export function AdminOverviewTab({
               <small>{scan.officer} - {formatTime(scan.time)} - {scan.scanOutcome}</small>
             </article>
           ))}
+          {!filteredScans.length && <p className="muted-text">No recent scans match the current filters.</p>}
         </div>
       </div>
 

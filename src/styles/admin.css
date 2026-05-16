@@ -146,6 +146,25 @@ th {
   text-transform: uppercase;
 }
 
-tr {
-  cursor: pointer;
+.risk-register-button {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  display: grid;
+  gap: 2px;
+  padding: 0;
+  text-align: left;
+}
+
+.risk-register-button span {
+  color: var(--blue-dark);
+  font-weight: 650;
+}
+
+.risk-register-button small {
+  color: var(--muted);
+}
+
+.risk-register-button:hover span {
+  text-decoration: underline;
 }

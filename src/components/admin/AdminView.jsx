@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AdminFilters } from './AdminFilters';
 import { AdminOverviewTab } from './AdminOverviewTab';
 import { AuditTab } from './AuditTab';
@@ -23,22 +23,59 @@ export function AdminView({
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('overview');
+  const tabRefs = useRef({});
+
+  const selectSection = (sectionId, shouldFocus = false) => {
+    setActiveSectionId(sectionId);
+    if (shouldFocus) {
+      requestAnimationFrame(() => tabRefs.current[sectionId]?.focus());
+    }
+  };
+
+  const handleTabKeyDown = (event, currentIndex) => {
+    const lastIndex = adminSections.length - 1;
+    let nextIndex;
+
+    if (event.key === 'ArrowRight') {
+      nextIndex = currentIndex === lastIndex ? 0 : currentIndex + 1;
+    } else if (event.key === 'ArrowLeft') {
+      nextIndex = currentIndex === 0 ? lastIndex : currentIndex - 1;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = lastIndex;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    selectSection(adminSections[nextIndex].id, true);
+  };
+
+  const selectBadgeForCaseReview = (badgeId) => {
+    caseActions.selectBadge(badgeId);
+    selectSection('cases', true);
+  };
 
   return (
     <div className="admin-layout">
       <div className="admin-controls">
         <div className="tab-list" role="tablist" aria-label="Admin sections">
-          {adminSections.map((section) => (
+          {adminSections.map((section, index) => (
             <button
               key={section.id}
               type="button"
               role="tab"
               id={`admin-tab-${section.id}`}
+              ref={(element) => {
+                tabRefs.current[section.id] = element;
+              }}
               aria-controls={`admin-panel-${section.id}`}
               aria-selected={activeSectionId === section.id}
               tabIndex={activeSectionId === section.id ? 0 : -1}
               className={activeSectionId === section.id ? 'active' : ''}
-              onClick={() => setActiveSectionId(section.id)}
+              onClick={() => selectSection(section.id)}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
             >
               {section.label}
             </button>
@@ -61,7 +98,7 @@ export function AdminView({
             reviewQueueCases={adminDashboard.reviewQueueCases}
             suspendedOrStolenBadges={adminDashboard.suspendedOrStolenBadges}
             riskByBadge={adminDashboard.riskByBadge}
-            selectBadge={caseActions.selectBadge}
+            selectBadge={selectBadgeForCaseReview}
           />
         )}
 
