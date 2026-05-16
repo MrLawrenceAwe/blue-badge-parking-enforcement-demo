@@ -123,15 +123,15 @@
     order: 20;
   }
 
-  .dashboard-grid > .risk-panel {
+  .dashboard-grid > .suspicious-cases-panel {
     order: 1;
   }
 
-  .dashboard-grid > .suspicious-cases-panel {
+  .dashboard-grid > .badge-status-panel {
     order: 2;
   }
 
-  .dashboard-grid > .badge-status-panel {
+  .dashboard-grid > .risk-panel {
     order: 3;
   }
 
