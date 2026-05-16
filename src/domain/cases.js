@@ -1,4 +1,4 @@
-import { riskLevelLabels } from './risk';
+import { riskBandLabels } from './risk';
 
 export const caseStatuses = ['Open', 'Officer review', 'High priority', 'Evidence requested', 'Resolved'];
 
@@ -23,20 +23,20 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
   };
 }
 
-export function createAdminCase({ id, badge, risk, form, addedBy, addedAt }) {
-  const status = risk.score >= 81 && form.status === 'Open' ? 'High priority' : form.status;
+export function createAdminCase({ id, badge, risk, caseDraft, addedBy, addedAt }) {
+  const status = risk.score >= 81 && caseDraft.status === 'Open' ? 'High priority' : caseDraft.status;
   return {
     id,
     badgeId: badge.id,
-    title: `${badge.holder} - ${riskLevelLabels[risk.level]}`,
+    title: `${badge.holder} - ${riskBandLabels[risk.riskBand]}`,
     status,
-    assignedTo: form.assignee,
-    dueDate: form.dueDate,
-    closureReason: form.closureReason,
-    notes: [form.note || 'Case opened from admin dashboard.'],
-    evidence: form.evidence || 'Evidence upload pending',
-    evidenceItems: form.evidence
-      ? [{ type: 'Admin evidence', reference: form.evidence, addedBy, addedAt }]
+    assignedTo: caseDraft.assignee,
+    dueDate: caseDraft.dueDate,
+    closureReason: caseDraft.closureReason,
+    notes: [caseDraft.note || 'Case opened from admin dashboard.'],
+    evidence: caseDraft.evidence || 'Evidence upload pending',
+    evidenceItems: caseDraft.evidence
+      ? [{ type: 'Admin evidence', reference: caseDraft.evidence, addedBy, addedAt }]
       : []
   };
 }
@@ -46,13 +46,13 @@ export function createOfficerScanCase({ id, badgeId, scanResult, addedAt, addedB
   return {
     id,
     badgeId,
-    title: `Officer scan escalation - ${riskLevelLabels[risk.level]}`,
+    title: `Officer scan escalation - ${riskBandLabels[risk.riskBand]}`,
     status: risk.score >= 81 ? 'High priority' : 'Officer review',
     assignedTo: risk.score >= 81 ? 'Risk Review Team A' : 'Duty review team',
     dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     closureReason: '',
     notes: [
-      `Officer scan at ${scanResult.location} for vehicle ${scanResult.vehicle}. Verdict: ${risk.verdict}. Action: ${scanResult.evidence.action}. Contravention: ${scanResult.evidence.contravention}. Alerts: ${risk.triggers.map((trigger) => trigger.label).join('; ')}.`
+      `Officer scan at ${scanResult.location} for vehicle ${scanResult.vehicle}. Verification status: ${risk.verificationStatus}. Action: ${scanResult.evidence.action}. Contravention: ${scanResult.evidence.contravention}. Alerts: ${risk.triggers.map((trigger) => trigger.label).join('; ')}.`
     ],
     evidence: `Officer scan log ${scanResult.scanId}`,
     evidenceItems: [

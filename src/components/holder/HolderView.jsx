@@ -1,10 +1,10 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { Clock3, ShieldCheck } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
-import { verificationTokenForBadge } from '../../domain/badgeTokens';
-import { VERIFICATION_VERDICT } from '../../domain/risk';
+import { issuedVerificationTokenForBadge } from '../../domain/badgeTokens';
+import { VERIFICATION_STATUS } from '../../domain/risk';
 import { formatDate } from '../../utils/date';
-import { StatusPill } from '../common/StatusPill';
+import { BadgeStatusPill } from '../ui/BadgeStatusPill';
 import { BadgeActions } from '../badges/BadgeActions';
 
 export function HolderView({
@@ -17,17 +17,17 @@ export function HolderView({
   endSession,
   reportStolen,
   requestReplacementBadge,
-  replacementForm,
+  replacementRequestForm,
   replacementRequests,
   notifications,
   risk,
   sessionMessage
 }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
-  const verificationToken = verificationTokenForBadge(badge.id);
-  const accountMessage = risk.verdict === VERIFICATION_VERDICT.valid
+  const verificationToken = issuedVerificationTokenForBadge(badge.id);
+  const accountMessage = risk.verificationStatus === VERIFICATION_STATUS.valid
     ? 'Badge ready for verification'
-    : risk.verdict === VERIFICATION_VERDICT.suspicious
+    : risk.verificationStatus === VERIFICATION_STATUS.suspicious
       ? 'Council review in progress'
       : 'Action required before use';
   return (
@@ -35,7 +35,7 @@ export function HolderView({
       <section className="app-panel badge-panel">
         <div className="app-panel-heading">
           <h2>Digital badge</h2>
-          <StatusPill status={badge.status} />
+          <BadgeStatusPill status={badge.status} />
         </div>
         <label className="field-label" htmlFor="badge-select">Badge profile</label>
         <select id="badge-select" value={badge.id} onChange={(event) => setSelectedBadgeId(event.target.value)}>
@@ -60,7 +60,7 @@ export function HolderView({
             aria-label={`Signed verification QR code for ${badge.id}`}
           />
         </div>
-        <div className={`account-status ${risk.severityClass}`}>
+        <div className={`account-status ${risk.riskToneClass}`}>
           <ShieldCheck aria-hidden="true" />
           <strong>{accountMessage}</strong>
         </div>
@@ -80,7 +80,7 @@ export function HolderView({
           endSession={endSession}
           reportStolen={reportStolen}
           requestReplacementBadge={requestReplacementBadge}
-          replacementForm={replacementForm}
+          replacementRequestForm={replacementRequestForm}
           replacementRequests={replacementRequests}
           notifications={notifications}
         />

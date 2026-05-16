@@ -13,7 +13,7 @@ export function BadgeActions({
   endSession,
   reportStolen,
   requestReplacementBadge,
-  replacementForm,
+  replacementRequestForm,
   replacementRequests,
   notifications,
   showActiveSession = true,
@@ -28,7 +28,7 @@ export function BadgeActions({
       <StolenReportForm reportStolen={reportStolen} />
       {badge.status === 'stolen' && (
         <ReplacementRequestForm
-          replacementForm={replacementForm}
+          replacementRequestForm={replacementRequestForm}
           replacementRequests={replacementRequests}
           requestReplacementBadge={requestReplacementBadge}
           showTemporaryPermit={showTemporaryPermit}

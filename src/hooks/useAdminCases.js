@@ -26,7 +26,7 @@ export function useAdminCases({
   const [newCaseDraft, setNewCaseDraft] = useState(initialCaseDraft);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
-  const [adminFilters, setAdminFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
+  const [dashboardFilters, setDashboardFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
   const { reserveCaseIdForBadge, releaseBadgeCaseSlot } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
 
   function updateNewCaseDraft(field, value) {
@@ -54,7 +54,7 @@ export function useAdminCases({
         id: caseId,
         badge: selectedBadge,
         risk,
-        form: newCaseDraft,
+        caseDraft: newCaseDraft,
         addedBy: authUser.name,
         addedAt: timestampNow()
       }),
@@ -146,8 +146,8 @@ export function useAdminCases({
     updateNewCaseDraft,
     noteDraftByCaseId,
     setNoteDraftByCaseId,
-    adminFilters,
-    setAdminFilters,
+    dashboardFilters,
+    setDashboardFilters,
     adminNotice,
     createCaseForSelectedBadge,
     reactivateBadgeAfterReview,

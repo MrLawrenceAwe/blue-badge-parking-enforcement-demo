@@ -11,14 +11,14 @@ import {
   initialReplacementRequests
 } from '../data/demoCases';
 import { evaluateBadgeRisk } from '../domain/risk';
-import { createDemoAttestedSession } from '../domain/sessionProofs';
+import { createSignedSessionRecord } from '../domain/sessionProofs';
 import { isCaseOpen } from '../domain/cases';
 import { isSessionActive } from '../domain/sessions';
 import { defaultRiskRules } from '../domain/risk';
 import { formatRecordId } from '../domain/ids';
 import { timestampNow } from '../utils/date';
 
-export function useDemoRecords(currentActor = 'System') {
+export function useEnforcementStore(currentActor = 'System') {
   const [badges, setBadges] = useState(initialBadges);
   const [sessions, setSessions] = useState(() => initialSessions.map((session) => ({ ...session, locked: true })));
   const [scans, setScans] = useState(initialScans);
@@ -30,7 +30,7 @@ export function useDemoRecords(currentActor = 'System') {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(initialSessions.map((session) => createDemoAttestedSession({ ...session, locked: true }))).then((signedSessions) => {
+    Promise.all(initialSessions.map((session) => createSignedSessionRecord({ ...session, locked: true }))).then((signedSessions) => {
       if (cancelled) return;
       setSessions((current) => {
         const signedById = new Map(signedSessions.map((session) => [session.id, session]));

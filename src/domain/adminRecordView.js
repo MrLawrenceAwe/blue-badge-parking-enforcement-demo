@@ -1,6 +1,6 @@
 import { isCaseOpen } from './cases';
 import { isSessionActive } from './sessions';
-import { riskLevelLabels } from './risk';
+import { riskBandLabels } from './risk';
 
 export function filterAdminBadges({ badges, sessions, scans, filters, riskByBadge }) {
   return badges.filter((badge) => {
@@ -13,14 +13,14 @@ export function filterAdminBadges({ badges, sessions, scans, filters, riskByBadg
       badge.vehicle,
       badge.council,
       badge.status,
-      riskLevelLabels[risk.level],
+      riskBandLabels[risk.riskBand],
       risk.score,
       ...relatedSessions.flatMap((session) => [session.location, session.startedAt]),
-      ...relatedScans.flatMap((scan) => [scan.location, scan.time, scan.outcome])
+      ...relatedScans.flatMap((scan) => [scan.location, scan.time, scan.scanOutcome])
     ].join(' ').toLowerCase();
     const activityRecords = [...relatedSessions, ...relatedScans];
     const matchesSearch = searchableText.includes(filters.search.toLowerCase());
-    const matchesRisk = filters.risk === 'all' || risk.level === filters.risk;
+    const matchesRisk = filters.risk === 'all' || risk.riskBand === filters.risk;
     const matchesLocation = !filters.location || activityRecords.some((activityRecord) => activityRecord.location?.toLowerCase().includes(filters.location.toLowerCase()));
     const matchesDate = !filters.date || activityRecords.some((activityRecord) => activityRecord.startedAt?.startsWith(filters.date) || activityRecord.time?.startsWith(filters.date));
     const matchesStatus = filters.badgeStatus === 'all' || badge.status === filters.badgeStatus;
@@ -43,6 +43,6 @@ export function buildAdminRecordView({ badges, sessions, scans, cases, filters, 
       const risk = riskByBadge[caseRecord.badgeId];
       return isCaseOpen(caseRecord) && (risk?.score >= 31 || ['Officer review', 'High priority', 'Evidence requested'].includes(caseRecord.status));
     }),
-    restrictedBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status))
+    suspendedOrStolenBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status))
   };
 }

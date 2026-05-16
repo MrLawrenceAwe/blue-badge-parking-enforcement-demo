@@ -43,7 +43,7 @@ export const initialScans = [
     officer: 'EO Malik',
     time: '2026-05-15T15:55:00+01:00',
     device: 'EO-TAB-07',
-    outcome: 'valid'
+    scanOutcome: 'valid'
   },
   {
     id: 'SC-90183',
@@ -54,7 +54,7 @@ export const initialScans = [
     officer: 'EO Chen',
     time: '2026-05-15T15:58:00+01:00',
     device: 'EO-TAB-11',
-    outcome: 'stolen'
+    scanOutcome: 'stolen'
   },
   {
     id: 'SC-90184',
@@ -65,7 +65,7 @@ export const initialScans = [
     officer: 'EO Malik',
     time: '2026-05-15T16:05:00+01:00',
     device: 'EO-TAB-07',
-    outcome: 'review'
+    scanOutcome: 'review'
   },
   {
     id: 'SC-90185',
@@ -76,7 +76,7 @@ export const initialScans = [
     officer: 'EO Ahmed',
     time: '2026-05-15T16:15:00+01:00',
     device: 'EO-TAB-15',
-    outcome: 'mismatch'
+    scanOutcome: 'mismatch'
   }
 ];
 

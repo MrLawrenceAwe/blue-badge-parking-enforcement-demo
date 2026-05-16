@@ -1,4 +1,4 @@
-export function Metric({ icon: Icon, label, value }) {
+export function SummaryMetric({ icon: Icon, label, value }) {
   return (
     <div className="metric">
       <Icon aria-hidden="true" size={23} />
