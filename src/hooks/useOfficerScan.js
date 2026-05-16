@@ -39,6 +39,13 @@ export function useOfficerScan({
   const [lastScanResult, setLastScanResult] = useState(null);
   const [officerNotice, setOfficerNotice] = useState('');
   const nextScanNumber = useRef(nextNumberFromRecords(initialScans, 'SC-', 90199));
+  const nextCaseNumber = useRef(nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
+  const openCaseBadgeIds = useRef(new Set(cases.filter(isCaseOpen).map((caseRecord) => caseRecord.badgeId)));
+
+  useEffect(() => {
+    openCaseBadgeIds.current = new Set(cases.filter(isCaseOpen).map((caseRecord) => caseRecord.badgeId));
+    nextCaseNumber.current = Math.max(nextCaseNumber.current, nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
+  }, [cases]);
 
   useEffect(() => {
     resetScanResult();
@@ -167,7 +174,13 @@ export function useOfficerScan({
       setOfficerNotice(`Open case ${duplicateOpenCase.id} already exists. The scan has been kept in the audit trail.`);
       return;
     }
-    const caseId = formatRecordId('CASE-', 4200 + cases.length);
+    if (openCaseBadgeIds.current.has(badgeId)) {
+      setOfficerNotice(`An open case is already being created for ${badgeId}. The scan has been kept in the audit trail.`);
+      return;
+    }
+    openCaseBadgeIds.current.add(badgeId);
+    const caseId = formatRecordId('CASE-', nextCaseNumber.current);
+    nextCaseNumber.current += 1;
     setCases((current) => [
       createOfficerScanCase({
         id: caseId,

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createAdminCase, isCaseOpen } from '../domain/cases';
-import { formatRecordId } from '../domain/ids';
+import { formatRecordId, nextNumberFromRecords } from '../domain/ids';
 import { timestampNow } from '../utils/date';
 
 const riskRuleLimits = {
@@ -40,6 +40,13 @@ export function useCaseManagement({
   const [caseNoteDraftsById, setCaseNoteDraftsById] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
   const [adminFilters, setAdminFilters] = useState({ search: '', risk: 'all', location: '', date: '', badgeStatus: 'all' });
+  const nextCaseNumber = useRef(nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
+  const openCaseBadgeIds = useRef(new Set(cases.filter(isCaseOpen).map((caseRecord) => caseRecord.badgeId)));
+
+  useEffect(() => {
+    openCaseBadgeIds.current = new Set(cases.filter(isCaseOpen).map((caseRecord) => caseRecord.badgeId));
+    nextCaseNumber.current = Math.max(nextCaseNumber.current, nextNumberFromRecords(cases, 'CASE-', 4200 + cases.length - 1));
+  }, [cases]);
 
   function updateDraftCase(field, value) {
     setDraftCase((current) => ({ ...current, [field]: value }));
@@ -63,7 +70,13 @@ export function useCaseManagement({
       setAdminNotice(`Open case ${duplicateOpenCase.id} already exists for ${selectedBadge.id}. Add evidence or notes to that case instead of creating a duplicate.`);
       return;
     }
-    const caseId = formatRecordId('CASE-', 4200 + cases.length);
+    if (openCaseBadgeIds.current.has(selectedBadge.id)) {
+      setAdminNotice(`An open case is already being created for ${selectedBadge.id}. Add evidence or notes to that case instead of creating a duplicate.`);
+      return;
+    }
+    openCaseBadgeIds.current.add(selectedBadge.id);
+    const caseId = formatRecordId('CASE-', nextCaseNumber.current);
+    nextCaseNumber.current += 1;
     setCases((current) => [
       createAdminCase({
         id: caseId,
@@ -107,6 +120,7 @@ export function useCaseManagement({
           : caseRecord
       )
     );
+    openCaseBadgeIds.current.delete(selectedBadge.id);
     appendAuditEvent({
       badgeId: selectedBadge.id,
       type: 'Badge reactivated',
@@ -125,6 +139,9 @@ export function useCaseManagement({
   function updateCase(caseId, caseUpdates) {
     const caseRecord = cases.find((record) => record.id === caseId);
     setCases((current) => current.map((record) => (record.id === caseId ? { ...record, ...caseUpdates } : record)));
+    if (caseRecord && caseUpdates.status === 'Resolved') {
+      openCaseBadgeIds.current.delete(caseRecord.badgeId);
+    }
     const auditedKeys = Object.keys(caseUpdates).filter((key) => ['status', 'dueDate', 'evidence', 'evidenceItems'].includes(key));
     if (caseRecord && auditedKeys.length) {
       appendAuditEvent({
