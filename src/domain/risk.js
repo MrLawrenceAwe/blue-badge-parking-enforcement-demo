@@ -1,5 +1,6 @@
 import { normaliseVehicle, vehicleSearchKey } from './badges';
 import { distanceInKm, demoGpsForLocation } from './locations';
+import { isSessionActive } from './sessions';
 import { minutesBetween } from '../utils/date';
 
 export const VERIFICATION_VERDICT = {
@@ -124,7 +125,8 @@ export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rule
   });
   if (recentDistantScanDetected) events.push(riskEvent('impossibleTravel', rules));
 
-  const activeSessions = sessions.filter((session) => session.badgeId === badge.id);
+  const activeSessionTime = scanContext.time ? new Date(scanContext.time) : new Date();
+  const activeSessions = sessions.filter((session) => session.badgeId === badge.id && isSessionActive(session, activeSessionTime));
   if (activeSessions.some((session) => session.durationMins > rules.longStayMinutes)) {
     events.push(riskEvent('longStay', rules));
   }
