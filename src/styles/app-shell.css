@@ -59,28 +59,10 @@ h1 {
   justify-items: end;
 }
 
-.header-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: end;
-  align-items: end;
-  gap: 10px;
-}
-
 .switcher-caption {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 650;
-}
-
-.theme-switcher {
-  display: grid;
-  gap: 5px;
-  min-width: 132px;
-}
-
-.theme-switcher select {
-  min-height: 40px;
 }
 
 h2 {

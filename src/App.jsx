@@ -13,7 +13,7 @@ import { useThemePreference } from './hooks/useThemePreference';
 
 export function App() {
   const enforcementStore = useDemoEnforcementStore();
-  const theme = useThemePreference();
+  useThemePreference();
   const auth = useDemoAuth({
     demoUsers,
     badges: enforcementStore.badges,
@@ -70,8 +70,6 @@ export function App() {
         demoUsers={demoUsers}
         setRole={auth.setRole}
         selectDemoUser={auth.demoAccountDrawer.selectDemoUser}
-        themePreference={theme.themePreference}
-        setThemePreference={theme.setThemePreference}
       />
 
       <AuthStrip
