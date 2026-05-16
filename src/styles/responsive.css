@@ -4,8 +4,8 @@
   }
 
   .app-header {
-    gap: 8px;
-    padding-top: 8px;
+    gap: 10px;
+    padding-top: 10px;
   }
 
   .title-block {
@@ -63,12 +63,12 @@
   }
 
   .summary-strip {
-    gap: 6px;
+    gap: 8px;
   }
 
   .metric {
-    min-height: 56px;
-    padding: 8px 10px;
+    min-height: 62px;
+    padding: 10px 12px;
   }
 
   .metric svg {
@@ -82,11 +82,38 @@
 
   .app-panel,
   .filter-toolbar {
-    padding: 10px;
+    padding: 14px;
   }
 
   .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
-    padding-top: 6px;
+    padding-top: 14px;
+  }
+
+  .badge-qr {
+    justify-items: start;
+  }
+
+  .digital-badge {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .badge-qr svg {
+    width: 96px;
+    height: 96px;
+  }
+
+  .admin-controls .tab-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .admin-controls .tab-list button {
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 0.82rem;
+    white-space: nowrap;
   }
 
   .admin-filters {
@@ -115,24 +142,28 @@
     order: 20;
   }
 
-  .dashboard-grid > .risk-panel {
+  .dashboard-grid > .operations-panel {
     order: 1;
   }
 
-  .dashboard-grid > .active-sessions-panel {
+  .dashboard-grid > .badge-status-panel {
     order: 2;
   }
 
-  .dashboard-grid > .recent-scans-panel {
+  .dashboard-grid > .risk-panel {
     order: 3;
   }
 
-  .dashboard-grid > .suspicious-cases-panel {
+  .dashboard-grid > .active-sessions-panel {
     order: 4;
   }
 
-  .dashboard-grid > .badge-status-panel {
+  .dashboard-grid > .recent-scans-panel {
     order: 5;
+  }
+
+  .dashboard-grid > .suspicious-cases-panel {
+    order: 1;
   }
 
   .dashboard-grid > .case-management-panel {
@@ -175,9 +206,9 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 12px;
     background: #fbfcfd;
-    padding: 9px 11px;
+    padding: 10px 12px;
   }
 
   td {
@@ -222,18 +253,18 @@ textarea:focus {
 }
 
 .role-switcher button.active:focus-visible {
-  outline: 3px solid #9bbbd1;
+  outline: 3px solid #ffdd00;
   outline-offset: 2px;
 }
 
 .tab-list button.active:focus-visible {
-  outline: 3px solid #9bbbd1;
+  outline: 3px solid #ffdd00;
   outline-offset: 2px;
 }
 
 @media (min-width: 720px) {
   main {
-    padding: 16px 26px;
+    padding: 22px 32px 34px;
   }
 
   .app-header {
@@ -290,7 +321,7 @@ textarea:focus {
 
   .admin-layout .app-panel,
   .admin-layout .filter-toolbar {
-    padding: 11px 13px;
+    padding: 16px;
   }
 
   .admin-layout .admin-filters {

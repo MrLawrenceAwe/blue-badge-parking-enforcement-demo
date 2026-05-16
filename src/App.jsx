@@ -77,6 +77,21 @@ export function App() {
     replacementRequests: records.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id),
     notifications: records.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id)
   };
+  const roleBadgeIds = new Set(auth.roleBadges.map((badge) => badge.id));
+  const isOperationalRole = auth.role === 'officer' || auth.role === 'admin';
+  const summaryMetrics = isOperationalRole
+    ? {
+      badgeCount: records.badges.length,
+      activeSessionCount: records.activeSessions.length,
+      highRiskCount: Object.values(records.riskByBadge).filter((risk) => risk.score >= 81).length,
+      openCaseCount: records.openCases.length
+    }
+    : {
+      badgeCount: auth.roleBadges.length,
+      activeSessionCount: records.activeSessions.filter((session) => roleBadgeIds.has(session.badgeId)).length,
+      highRiskCount: auth.roleBadges.filter((badge) => records.riskByBadge[badge.id]?.score >= 81).length,
+      openCaseCount: records.openCases.filter((caseRecord) => roleBadgeIds.has(caseRecord.badgeId)).length
+    };
   const replacementForm = {
     values: badgeActions.replacementDraft,
     setValues: badgeActions.setReplacementDraft
@@ -112,10 +127,11 @@ export function App() {
       />
 
       <SummaryStrip
-        badgeCount={records.badges.length}
-        activeSessionCount={records.activeSessions.length}
-        highRiskCount={Object.values(records.riskByBadge).filter((risk) => risk.score >= 81).length}
-        openCaseCount={records.openCases.length}
+        role={auth.role}
+        badgeCount={summaryMetrics.badgeCount}
+        activeSessionCount={summaryMetrics.activeSessionCount}
+        highRiskCount={summaryMetrics.highRiskCount}
+        openCaseCount={summaryMetrics.openCaseCount}
       />
 
       {auth.role === 'holder' && (

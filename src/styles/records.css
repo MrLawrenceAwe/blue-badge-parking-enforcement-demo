@@ -6,11 +6,12 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  background: #fff;
 }
 
 .badge-record-button.selected {
   border-color: var(--blue);
-  outline: 2px solid #cce1f2;
+  box-shadow: inset 0 0 0 2px var(--blue-soft);
 }
 
 .badge-record-button small,
@@ -38,15 +39,15 @@
 
 .record-list {
   display: grid;
-  gap: 7px;
+  gap: 10px;
 }
 
 .case-scope {
   display: grid;
   gap: 3px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: 12px;
   background: #f4f8fb;
 }
 
@@ -81,6 +82,7 @@
 .muted-text {
   color: var(--muted);
   line-height: 1.45;
+  margin-bottom: 12px;
 }
 
 .scan-panel {

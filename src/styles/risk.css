@@ -3,14 +3,15 @@
 .verification-result {
   border-radius: 8px;
   color: #fff;
-  padding: 14px;
+  padding: 18px;
   display: grid;
-  gap: 5px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
 }
 
 .verification-result {
-  min-height: 168px;
+  min-height: 148px;
   align-content: center;
 }
 
@@ -22,11 +23,12 @@
 }
 
 .verification-result h2 {
-  font-size: clamp(1.85rem, 5vw, 3.2rem);
+  font-size: clamp(1.9rem, 5vw, 3.1rem);
+  margin-bottom: 0;
 }
 
 .compact-verification-result h2 {
-  font-size: 2rem;
+  font-size: 2.1rem;
 }
 
 .compact-verification-result p {
@@ -85,8 +87,8 @@
 .status {
   display: inline-flex;
   width: fit-content;
-  border-radius: 4px;
-  padding: 5px 8px;
+  border-radius: 999px;
+  padding: 5px 10px;
   font-weight: 800;
   font-size: 0.82rem;
   border: 1px solid currentColor;
