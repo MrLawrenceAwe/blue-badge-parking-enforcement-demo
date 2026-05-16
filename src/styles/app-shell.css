@@ -77,6 +77,10 @@ h2 {
   align-items: center;
 }
 
+.auth-strip:has(.auth-controls[open]) {
+  align-items: start;
+}
+
 .auth-strip span {
   display: block;
   color: var(--muted);
@@ -125,12 +129,21 @@ h2 {
 }
 
 .auth-controls[open] {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  padding: 12px;
 }
 
 .auth-controls[open] > summary {
   margin-bottom: 0;
+}
+
+.auth-controls[open] > summary,
+.demo-account-drawer summary {
+  width: fit-content;
 }
 
 .demo-account-drawer[open] summary {

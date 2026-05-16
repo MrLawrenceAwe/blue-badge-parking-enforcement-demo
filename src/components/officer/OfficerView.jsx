@@ -27,18 +27,6 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
         <label>Observed vehicle<input value={scanInputForm.vehicle} onChange={(event) => scanCommands.setVehicle(event.target.value)} aria-label="Observed vehicle registration" /></label>
         <label>Scan location<input value={scanInputForm.location} onChange={(event) => scanCommands.setLocation(event.target.value)} aria-label="Scan location" /></label>
         <button className="primary-button" onClick={scanCommands.verifyBadge}><Search aria-hidden="true" size={21} /> Verify</button>
-        {scanResult && (
-          <div className="evidence-section">
-            <h3>Enforcement details</h3>
-            <div className="case-field-grid">
-              <label>Contravention<select value={scanEvidenceForm.values.contravention} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
-              <label>Enforcement action<select value={scanEvidenceForm.values.action} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
-            </div>
-            <label>Vehicle photo reference<input value={scanEvidenceForm.values.vehiclePhotoRef} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, vehiclePhotoRef: event.target.value }))} placeholder="Evidence reference" aria-label="Vehicle photo reference" /></label>
-            <label>Badge photo reference<input value={scanEvidenceForm.values.badgePhotoRef} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, badgePhotoRef: event.target.value }))} placeholder="Evidence reference" aria-label="Badge photo reference" /></label>
-            <label>Officer note<textarea value={scanEvidenceForm.values.officerNote} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, officerNote: event.target.value }))} placeholder="Observation or conversation summary" aria-label="Officer note" /></label>
-          </div>
-        )}
       </section>
 
       <div className="officer-decision-stack">
@@ -71,6 +59,19 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
           )}
           {officerMessage && <p className="result-message" role="status">{officerMessage}</p>}
         </section>
+
+        {scanResult && !isValid && (
+          <section className="app-panel evidence-section" aria-label="Enforcement details">
+            <h3>Enforcement details</h3>
+            <div className="case-field-grid">
+              <label>Contravention<select value={scanEvidenceForm.values.contravention} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, contravention: event.target.value }))}>{contraventionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+              <label>Enforcement action<select value={scanEvidenceForm.values.action} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, action: event.target.value }))}>{actionOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+            </div>
+            <label>Vehicle photo reference<input value={scanEvidenceForm.values.vehiclePhotoRef} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, vehiclePhotoRef: event.target.value }))} placeholder="Evidence reference" aria-label="Vehicle photo reference" /></label>
+            <label>Badge photo reference<input value={scanEvidenceForm.values.badgePhotoRef} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, badgePhotoRef: event.target.value }))} placeholder="Evidence reference" aria-label="Badge photo reference" /></label>
+            <label>Officer note<textarea value={scanEvidenceForm.values.officerNote} onChange={(event) => scanEvidenceForm.setValues((current) => ({ ...current, officerNote: event.target.value }))} placeholder="Observation or conversation summary" aria-label="Officer note" /></label>
+          </section>
+        )}
 
         <section className="app-panel">
           <div className="app-panel-heading">

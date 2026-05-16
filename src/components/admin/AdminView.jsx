@@ -81,7 +81,9 @@ export function AdminView({
             </button>
           ))}
         </div>
-        <AdminFilters filterForm={filterForm} filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
+        {activeSectionId !== 'riskRules' && (
+          <AdminFilters filterForm={filterForm} filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
+        )}
       </div>
 
       <section
