@@ -29,9 +29,9 @@ export function rolesForUser(user) {
 
 export function labelForRole(role) {
   return {
-    holder: 'Holder',
-    carer: 'Carer',
-    officer: 'Officer',
-    admin: 'Admin'
+    holder: 'Badge holder',
+    carer: 'Delegated carer',
+    officer: 'Enforcement officer',
+    admin: 'Council admin'
   }[role] ?? role;
 }

@@ -14,7 +14,7 @@
 
   .role-switcher button,
   .tab-list button {
-    min-height: 42px;
+    min-height: 44px;
     padding: 8px 11px;
   }
 
@@ -211,6 +211,7 @@
     border-radius: 6px;
     background: var(--surface-raised);
     padding: 9px 11px;
+    position: relative;
   }
 
   td {
@@ -221,6 +222,23 @@
 
   td:first-child {
     grid-column: 1 / -1;
+  }
+
+  .risk-register-button::after {
+    border-radius: 6px;
+    content: '';
+    display: block;
+    inset: 0;
+    position: absolute;
+  }
+
+  .risk-register-button:hover::after {
+    background: color-mix(in srgb, var(--blue) 6%, transparent);
+  }
+
+  .risk-register-button:focus-visible::after {
+    outline: 4px solid #ffdd00;
+    outline-offset: 2px;
   }
 
   th:nth-child(1),

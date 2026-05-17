@@ -4,10 +4,10 @@ import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
 
-const initialCaseForm = {
+const initialCaseDraft = {
   note: '',
   status: 'Open',
-  assignee: 'Unassigned',
+  assignedTeam: 'Unassigned',
   evidence: '',
   dueDate: '',
   closureReason: '',
@@ -20,11 +20,11 @@ export function useAdminCases({
   cases,
   setCases,
   setBadges,
-  riskByBadge,
+  verificationByBadge,
   appendAuditEvent,
   queueNotification,
 }) {
-  const [caseForm, setCaseForm] = useState(initialCaseForm);
+  const [caseDraft, setCaseDraft] = useState(initialCaseDraft);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
   const [dashboardFilters, setDashboardFilters] = useState({
@@ -37,11 +37,11 @@ export function useAdminCases({
   const { reserveCaseIdForBadge, releaseBadgeCaseSlot } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
 
   function updateCaseDraft(field, value) {
-    setCaseForm((current) => ({ ...current, [field]: value }));
+    setCaseDraft((current) => ({ ...current, [field]: value }));
   }
 
   function resetCaseDraft() {
-    setCaseForm(initialCaseForm);
+    setCaseDraft(initialCaseDraft);
   }
 
   function createCaseForSelectedBadge() {
@@ -49,12 +49,12 @@ export function useAdminCases({
       setAdminNotice('Only a council admin can create enforcement cases.');
       return;
     }
-    const validationError = validateCaseDraft(caseForm);
+    const validationError = validateCaseDraft(caseDraft);
     if (validationError) {
       setAdminNotice(validationError);
       return;
     }
-    const risk = riskByBadge[selectedBadge.id];
+    const risk = verificationByBadge[selectedBadge.id];
     const duplicateOpenCase = cases.find(
       (caseRecord) => caseRecord.badgeId === selectedBadge.id && isCaseOpen(caseRecord),
     );
@@ -76,7 +76,7 @@ export function useAdminCases({
         id: caseId,
         badge: selectedBadge,
         risk,
-        caseForm,
+        caseDraft,
         addedBy: authUser.name,
         addedAt: timestampNow(),
       }),
@@ -86,7 +86,7 @@ export function useAdminCases({
       badgeId: selectedBadge.id,
       type: 'Case opened',
       actor: authUser.name,
-      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && caseForm.status === 'Open' ? 'High priority' : caseForm.status}.`,
+      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && caseDraft.status === 'Open' ? 'High priority' : caseDraft.status}.`,
     });
     resetCaseDraft();
     setAdminNotice(`Case ${caseId} opened for ${selectedBadge.id}.`);
@@ -97,7 +97,7 @@ export function useAdminCases({
       setAdminNotice('Only a council admin can reactivate a badge after review.');
       return;
     }
-    const reviewNote = caseForm.note.trim();
+    const reviewNote = caseDraft.note.trim();
     if (!['stolen', 'suspended'].includes(selectedBadge.status)) {
       setAdminNotice('Only stolen or suspended badges can be reactivated from the review workflow.');
       return;
@@ -189,7 +189,7 @@ export function useAdminCases({
   }
 
   return {
-    caseForm,
+    caseDraft,
     updateCaseDraft,
     noteDraftByCaseId,
     setNoteDraftByCaseId,
@@ -203,11 +203,11 @@ export function useAdminCases({
   };
 }
 
-function validateCaseDraft(caseForm) {
-  if (caseForm.status === 'Resolved' && !caseForm.closureReason.trim()) {
+function validateCaseDraft(caseDraft) {
+  if (caseDraft.status === 'Resolved' && !caseDraft.closureReason.trim()) {
     return 'Add a closure reason before creating a resolved case.';
   }
-  if (caseForm.status !== 'Open' && !caseForm.note.trim() && !caseForm.evidence.trim()) {
+  if (caseDraft.status !== 'Open' && !caseDraft.note.trim() && !caseDraft.evidence.trim()) {
     return 'Add a note or evidence reference before creating a non-open case.';
   }
   return '';

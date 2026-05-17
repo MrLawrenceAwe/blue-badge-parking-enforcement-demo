@@ -5,17 +5,17 @@ import { SummaryStrip } from './components/app/SummaryStrip';
 import { demoUsers } from './data/demoUsers';
 import { useBadgeActions } from './hooks/useBadgeActions';
 import { useAdminCases } from './hooks/useAdminCases';
-import { useDemoAuth } from './hooks/useDemoAuth';
-import { useDemoEnforcementStore } from './hooks/useDemoEnforcementStore';
+import { useAuthSession } from './hooks/useAuthSession';
+import { useEnforcementStore } from './hooks/useEnforcementStore';
 import { useOfficerScan } from './hooks/useOfficerScan';
 import { useRiskRules } from './hooks/useRiskRules';
 import { useThemePreference } from './hooks/useThemePreference';
 
 export function App() {
-  const enforcementStore = useDemoEnforcementStore();
+  const enforcementStore = useEnforcementStore();
   useThemePreference();
-  const auth = useDemoAuth({
-    demoUsers,
+  const auth = useAuthSession({
+    roleUsers: demoUsers,
     badges: enforcementStore.badges,
   });
 
@@ -54,7 +54,7 @@ export function App() {
     cases: enforcementStore.cases,
     setCases: enforcementStore.setCases,
     setBadges: enforcementStore.setBadges,
-    riskByBadge: enforcementStore.riskByBadge,
+    verificationByBadge: enforcementStore.verificationByBadge,
     appendAuditEvent: enforcementStore.appendAuditEvent,
     queueNotification: enforcementStore.queueNotification,
   });
@@ -67,9 +67,9 @@ export function App() {
       <AppHeader
         role={auth.role}
         availableRoles={auth.availableRoles}
-        demoUsers={demoUsers}
+        roleUsers={demoUsers}
         setRole={auth.setRole}
-        selectDemoUser={auth.selectDemoUser}
+        selectRoleUser={auth.selectRoleUser}
       />
 
       <AuthStrip authUser={auth.authUser} />
@@ -84,7 +84,9 @@ export function App() {
             auth.roleBadges.some((badge) => badge.id === session.badgeId),
           ).length
         }
-        highRiskCount={Object.values(enforcementStore.riskByBadge).filter((risk) => risk.score >= 81).length}
+        highPriorityReviewCount={
+          Object.values(enforcementStore.verificationByBadge).filter((verification) => verification.score >= 81).length
+        }
         openCaseCount={enforcementStore.openCases.length}
       />
 

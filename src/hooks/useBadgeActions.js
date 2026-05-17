@@ -34,7 +34,7 @@ export function useBadgeActions({
 
   async function startSession(formData) {
     if (!canManageSelectedBadge()) {
-      setBadgeNotice('Only the holder or delegated carer for this badge can start a parking session in the demo.');
+      setBadgeNotice('Only the holder or delegated carer for this badge can start a parking session.');
       return false;
     }
     if (!canStartSessionForBadge(selectedBadge.status)) {
@@ -75,7 +75,7 @@ export function useBadgeActions({
     if (
       !hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.manageOwnBadge, badgeId: selectedBadge.id })
     ) {
-      setBadgeNotice('Only the holder or delegated carer can extend a parking session in the demo.');
+      setBadgeNotice('Only the holder or delegated carer can extend a parking session.');
       return;
     }
     const session = sessions.find((sessionRecord) => sessionRecord.id === sessionId);
@@ -107,7 +107,7 @@ export function useBadgeActions({
     if (
       !hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.manageOwnBadge, badgeId: selectedBadge.id })
     ) {
-      setBadgeNotice('Only the holder or delegated carer can end a parking session in the demo.');
+      setBadgeNotice('Only the holder or delegated carer can end a parking session.');
       return;
     }
     const session = sessions.find((sessionRecord) => sessionRecord.id === sessionId);
@@ -130,7 +130,7 @@ export function useBadgeActions({
 
   function reportStolen(formData) {
     if (!canManageSelectedBadge()) {
-      setBadgeNotice('Only the holder or delegated carer for this badge can report it stolen in the demo.');
+      setBadgeNotice('Only the holder or delegated carer for this badge can report it stolen.');
       return false;
     }
     if (selectedBadge.status === 'stolen') {
@@ -178,7 +178,7 @@ export function useBadgeActions({
 
   function requestReplacementBadge(formData) {
     if (!canManageSelectedBadge()) {
-      setBadgeNotice('Only the holder or delegated carer for this badge can request a replacement in the demo.');
+      setBadgeNotice('Only the holder or delegated carer for this badge can request a replacement.');
       return false;
     }
     if (selectedBadge.status !== 'stolen') {

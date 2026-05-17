@@ -43,6 +43,27 @@
   margin-top: 2px;
 }
 
+.session-gps-status {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  min-height: 44px;
+  padding: 9px 10px;
+}
+
+.session-gps-status span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.session-gps-status strong {
+  font-weight: 650;
+}
+
 .stolen-report-form {
   border: 1px solid color-mix(in srgb, var(--red) 50%, var(--surface));
   border-left: 4px solid var(--red);
@@ -110,17 +131,6 @@
 
 .risk-explanation small {
   display: block;
-}
-
-.session-card,
-.scan-card,
-.case-card,
-.badge-record-button,
-.timeline-item {
-  border: 1px solid var(--panel-border);
-  border-radius: 5px;
-  padding: 9px 10px;
-  background: var(--surface-raised);
 }
 
 .session-card {

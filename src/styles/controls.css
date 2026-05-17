@@ -82,12 +82,12 @@
 }
 
 .small-button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 12px;
 }
 
 .danger-button {
-  min-height: 40px;
+  min-height: 44px;
   border-color: var(--red);
   background: var(--red);
   color: #fff;

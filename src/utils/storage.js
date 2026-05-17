@@ -11,7 +11,7 @@ export function writeStoredJson(key, value) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Demo persistence should never block the main workflow.
+    // Local persistence should never block the main workflow.
   }
 }
 

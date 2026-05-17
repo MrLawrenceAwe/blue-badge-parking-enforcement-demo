@@ -10,7 +10,7 @@ export function AdminOverviewTab({
   filteredScans,
   reviewQueueCases,
   suspendedOrStolenBadges,
-  riskByBadge,
+  verificationByBadge,
   selectBadge,
 }) {
   return (
@@ -33,7 +33,7 @@ export function AdminOverviewTab({
               <span>
                 {caseRecord.badgeId} - {caseRecord.status}
               </span>
-              <small>{caseRecord.assignedTo}</small>
+              <small>{caseRecord.assignedTeam}</small>
             </button>
           ))}
           {!reviewQueueCases.length && <p className="muted-text">No review cases match the current filters.</p>}
@@ -65,7 +65,7 @@ export function AdminOverviewTab({
 
       <div className="app-panel risk-panel">
         <div className="app-panel-heading">
-          <h2>Badge risk register</h2>
+          <h2>Verification register</h2>
           <Gauge aria-hidden="true" />
         </div>
         <div className="table-wrap">
@@ -75,7 +75,7 @@ export function AdminOverviewTab({
                 <th>Badge</th>
                 <th>Vehicle</th>
                 <th>Status</th>
-                <th>Risk</th>
+                <th>Score</th>
               </tr>
             </thead>
             <tbody>
@@ -91,10 +91,10 @@ export function AdminOverviewTab({
                   <td data-label="Status">
                     <BadgeStatusPill status={badge.status} />
                   </td>
-                  <td data-label="Risk">
-                    <strong>{riskByBadge[badge.id].score}</strong>
+                  <td data-label="Score">
+                    <strong>{verificationByBadge[badge.id].score}</strong>
                     <br />
-                    <small>{riskBandLabels[riskByBadge[badge.id].riskBand]}</small>
+                    <small>{riskBandLabels[verificationByBadge[badge.id].riskBand]}</small>
                   </td>
                 </tr>
               ))}

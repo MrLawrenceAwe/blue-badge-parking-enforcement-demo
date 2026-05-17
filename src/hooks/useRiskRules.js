@@ -9,7 +9,7 @@ const riskRuleLimits = {
 };
 
 const riskRuleLabels = {
-  highRiskThreshold: 'high risk threshold',
+  highRiskThreshold: 'high-priority threshold',
   reviewThreshold: 'review threshold',
   monitorThreshold: 'monitor threshold',
   impossibleTravelWindowMins: 'impossible travel window'
@@ -22,7 +22,7 @@ export function useRiskRules({ setRiskRules }) {
     const limits = riskRuleLimits[field];
     const numericValue = Number(value);
     if (!limits || !Number.isFinite(numericValue)) {
-      setRiskRuleNotice('Enter a valid number before updating this risk rule.');
+      setRiskRuleNotice('Enter a valid number before updating this verification rule.');
       return;
     }
     const clampedValue = Math.min(limits.max, Math.max(limits.min, numericValue));
@@ -30,10 +30,10 @@ export function useRiskRules({ setRiskRules }) {
       const nextRules = { ...current, [field]: clampedValue };
       const validation = validateRiskRules(nextRules);
       if (!validation.valid) {
-        setRiskRuleNotice(`Risk rule not updated: ${validation.issues[0]}.`);
+        setRiskRuleNotice(`Verification rule not updated: ${validation.issues[0]}.`);
         return current;
       }
-      setRiskRuleNotice(`Risk rule updated: ${riskRuleLabels[field]} is now ${clampedValue}.`);
+      setRiskRuleNotice(`Verification rule updated: ${riskRuleLabels[field]} is now ${clampedValue}.`);
       return nextRules;
     });
   }

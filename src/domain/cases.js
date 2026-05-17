@@ -12,7 +12,7 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
     badgeId: badge.id,
     title: 'Badge reported stolen by holder',
     status: 'High priority',
-    assignedTo: 'Risk Review Team A',
+    assignedTeam: 'Risk Review Team A',
     dueDate,
     closureReason: '',
     notes: [`Immediate digital deactivation triggered from holder portal. Details: ${details}. Contact: ${contact}.`],
@@ -23,20 +23,20 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
   };
 }
 
-export function createAdminCase({ id, badge, risk, caseForm, addedBy, addedAt }) {
-  const status = risk.score >= 81 && caseForm.status === 'Open' ? 'High priority' : caseForm.status;
+export function createAdminCase({ id, badge, risk, caseDraft, addedBy, addedAt }) {
+  const status = risk.score >= 81 && caseDraft.status === 'Open' ? 'High priority' : caseDraft.status;
   return {
     id,
     badgeId: badge.id,
     title: `${badge.holder} - ${riskBandLabels[risk.riskBand]}`,
     status,
-    assignedTo: caseForm.assignee,
-    dueDate: caseForm.dueDate,
-    closureReason: caseForm.closureReason,
-    notes: [caseForm.note || 'Case opened from admin dashboard.'],
-    evidence: caseForm.evidence || 'Evidence upload pending',
-    evidenceItems: caseForm.evidence
-      ? [{ type: 'Admin evidence', reference: caseForm.evidence, addedBy, addedAt }]
+    assignedTeam: caseDraft.assignedTeam,
+    dueDate: caseDraft.dueDate,
+    closureReason: caseDraft.closureReason,
+    notes: [caseDraft.note || 'Case opened from admin dashboard.'],
+    evidence: caseDraft.evidence || 'Evidence upload pending',
+    evidenceItems: caseDraft.evidence
+      ? [{ type: 'Admin evidence', reference: caseDraft.evidence, addedBy, addedAt }]
       : []
   };
 }
@@ -48,7 +48,7 @@ export function createOfficerScanCase({ id, badgeId, scanResult, addedAt, addedB
     badgeId,
     title: `Officer scan escalation - ${riskBandLabels[risk.riskBand]}`,
     status: risk.score >= 81 ? 'High priority' : 'Officer review',
-    assignedTo: risk.score >= 81 ? 'Risk Review Team A' : 'Duty review team',
+    assignedTeam: risk.score >= 81 ? 'Risk Review Team A' : 'Duty review team',
     dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     closureReason: '',
     notes: [

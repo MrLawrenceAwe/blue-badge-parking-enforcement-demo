@@ -3,6 +3,6 @@ import { App } from './App';
 import './styles.css';
 
 const rootElement = document.getElementById('root');
-const root = globalThis.blueBadgeDemoRoot ?? createRoot(rootElement);
-globalThis.blueBadgeDemoRoot = root;
+const root = globalThis.blueBadgeRoot ?? createRoot(rootElement);
+globalThis.blueBadgeRoot = root;
 root.render(<App />);
