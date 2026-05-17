@@ -2,7 +2,7 @@ import { AppHeader } from './components/app/AppHeader';
 import { AuthStrip } from './components/app/AuthStrip';
 import { RoleViews } from './components/app/RoleViews';
 import { SummaryStrip } from './components/app/SummaryStrip';
-import { demoAccountOrder, demoUsers } from './data/demoUsers';
+import { demoUsers } from './data/demoUsers';
 import { useBadgeActions } from './hooks/useBadgeActions';
 import { useAdminCases } from './hooks/useAdminCases';
 import { useDemoAuth } from './hooks/useDemoAuth';
@@ -69,24 +69,10 @@ export function App() {
         availableRoles={auth.availableRoles}
         demoUsers={demoUsers}
         setRole={auth.setRole}
-        selectDemoUser={auth.demoAccountDrawer.selectDemoUser}
+        selectDemoUser={auth.selectDemoUser}
       />
 
-      <AuthStrip
-        authUser={auth.authUser}
-        demoAccountOrder={demoAccountOrder}
-        demoUsers={demoUsers}
-        demoDrawerOpen={auth.demoAccountDrawer.open}
-        loginEmail={auth.login.email}
-        loginPassword={auth.login.password}
-        loginError={auth.login.error}
-        setDemoDrawerOpen={auth.demoAccountDrawer.setOpen}
-        setLoginEmail={auth.login.setEmail}
-        setLoginPassword={auth.login.setPassword}
-        selectDemoUser={auth.demoAccountDrawer.selectDemoUser}
-        signIn={auth.login.signIn}
-        resetDemoState={enforcementStore.resetDemoState}
-      />
+      <AuthStrip authUser={auth.authUser} />
 
       <SummaryStrip
         role={auth.role}

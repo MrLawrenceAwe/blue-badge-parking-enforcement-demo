@@ -89,10 +89,6 @@ h2 {
   align-items: center;
 }
 
-.auth-strip:has(.auth-controls[open]) {
-  align-items: start;
-}
-
 .auth-strip span {
   display: block;
   color: var(--muted);
@@ -108,126 +104,11 @@ h2 {
   flex-wrap: wrap;
 }
 
-.demo-note {
-  margin: 0;
-  color: var(--muted);
-}
-
-.demo-security-note,
 .input-hint {
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.35;
-}
-
-.demo-account-drawer {
-  min-width: 0;
-}
-
-.auth-controls summary,
-.demo-account-drawer summary {
-  min-height: 40px;
-  border: 1px solid var(--interactive-border-muted);
-  border-radius: 5px;
-  background: var(--surface);
-  color: var(--blue-dark);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 12px;
-  font-weight: 650;
-}
-
-.auth-controls {
-  min-width: 0;
-}
-
-.auth-controls[open] {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  display: grid;
-  gap: 14px;
-  padding: 12px;
-}
-
-.auth-controls[open] > summary {
-  margin-bottom: 0;
-}
-
-.auth-controls[open] > summary,
-.demo-account-drawer summary {
-  width: fit-content;
-}
-
-.demo-account-drawer[open] summary {
-  margin-bottom: 10px;
-}
-
-.demo-account-drawer:not([open]) {
-  margin-bottom: 12px;
-}
-
-.demo-account-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 10px;
-}
-
-.demo-account-button {
-  min-height: 72px;
-  border: 1px solid var(--interactive-border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--ink);
-  padding: 12px;
-  text-align: left;
-  display: grid;
-  gap: 4px;
-}
-
-.demo-account-button span,
-.demo-account-button small {
-  display: block;
-}
-
-.demo-account-button span {
-  font-weight: 650;
-}
-
-.demo-account-button small {
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-
-.demo-account-button.active {
-  border-color: var(--blue);
-  box-shadow: inset 0 0 0 2px var(--blue);
-  background: var(--surface-tint);
-}
-
-.auth-controls form {
-  display: grid;
-  grid-template-columns: 1fr;
-  column-gap: 16px;
-  row-gap: 14px;
-  min-width: 0;
-}
-
-.reset-demo-button {
-  margin-top: 12px;
-  justify-self: start;
-}
-
-.auth-strip label {
-  margin-bottom: 0;
-}
-
-.login-error {
-  margin: 0;
-  color: var(--red);
-  font-weight: 700;
 }
 
 .form-message {

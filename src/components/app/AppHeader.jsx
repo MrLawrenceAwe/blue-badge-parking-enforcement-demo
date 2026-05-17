@@ -26,8 +26,8 @@ export function AppHeader({ role, availableRoles, demoUsers, setRole, selectDemo
         <p className="hero-note">{roleHeroNotes[role]}</p>
       </div>
       <div className="role-switcher-wrap">
-        <span className="switcher-caption">Choose demo account or role</span>
-        <div className="role-switcher" aria-label="Choose demo account or role">
+        <span className="switcher-caption">Choose demo role</span>
+        <div className="role-switcher" aria-label="Choose demo role">
           {roleOptions.map(([value, Icon, label]) => {
             const demoUser = demoUsers.find((user) => user.role === value);
             const canAccess = availableRoles.includes(value);

@@ -176,10 +176,6 @@
     line-height: 1.1;
   }
 
-  .role-officer .demo-security-note {
-    display: none;
-  }
-
   .table-wrap {
     overflow-x: visible;
   }
@@ -260,26 +256,6 @@
 
   .summary-strip {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .auth-strip {
-    grid-template-columns: minmax(220px, 1fr) auto;
-    align-items: center;
-  }
-
-  .auth-controls form {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) auto;
-    align-items: end;
-  }
-
-  .auth-controls[open] {
-    justify-self: end;
-    max-width: min(780px, 100%);
-    width: min(780px, 100%);
-  }
-
-  .login-error {
-    grid-column: 1 / -1;
   }
 
   .page-grid,
