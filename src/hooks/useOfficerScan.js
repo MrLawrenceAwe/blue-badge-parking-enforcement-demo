@@ -1,14 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { normaliseVehicle } from '../domain/badges';
-import { prepareOpenCaseForBadge } from '../domain/caseWorkflow';
+import { validateAndReserveOpenCase } from '../domain/caseReservation';
 import { createOfficerScanCase } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { nextRecordId } from '../domain/ids';
-import {
-  initialScanEvidenceDraft,
-  suggestScanEvidence,
-  validateScanEvidence,
-} from '../domain/officerEvidence';
+import { initialEnforcementDetailsDraft, suggestScanEvidence, validateScanEvidence } from '../domain/officerEvidence';
 import {
   buildOfficerScanContext,
   buildOfficerScanRecord,
@@ -46,7 +42,7 @@ export function useOfficerScan({
   const [scanInput, setScanInput] = useState('BB-WCC-104928');
   const [scanLocation, setScanLocation] = useState('Oxford Street W1C');
   const [scanVehicle, setScanVehicle] = useState('LS24 HRT');
-  const [scanEvidenceDraft, setScanEvidenceDraft] = useState(initialScanEvidenceDraft);
+  const [enforcementDetailsDraft, setEnforcementDetailsDraft] = useState(initialEnforcementDetailsDraft);
   const [lastScanResult, setLastScanResult] = useState(null);
   const [officerNotice, setOfficerNotice] = useState('');
   const { reserveCaseIdForBadge } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
@@ -56,7 +52,7 @@ export function useOfficerScan({
     resetScanResult();
   }, [authUser.email]);
 
-  const displayedRisk =
+  const visibleVerificationRisk =
     lastScanResult?.risk ??
     assessBadgeVerification(
       selectedBadge,
@@ -75,10 +71,12 @@ export function useOfficerScan({
     setOfficerNotice('');
   }
 
-  function updateScanEvidenceDraft(evidenceDraftUpdater) {
-    setScanEvidenceDraft((currentEvidence) => {
+  function updateEnforcementDetailsDraft(enforcementDetailsUpdater) {
+    setEnforcementDetailsDraft((currentEvidence) => {
       const nextEvidence =
-        typeof evidenceDraftUpdater === 'function' ? evidenceDraftUpdater(currentEvidence) : evidenceDraftUpdater;
+        typeof enforcementDetailsUpdater === 'function'
+          ? enforcementDetailsUpdater(currentEvidence)
+          : enforcementDetailsUpdater;
       setLastScanResult((currentResult) => {
         if (!currentResult) return currentResult;
         setScans((currentScans) =>
@@ -158,11 +156,11 @@ export function useOfficerScan({
       verifiedBadge: badge,
     });
     const suggestedEvidence = suggestScanEvidence({
-      currentEvidence: scanEvidenceDraft,
+      currentEvidence: enforcementDetailsDraft,
       risk,
       failureReason,
     });
-    setScanEvidenceDraft(suggestedEvidence);
+    setEnforcementDetailsDraft(suggestedEvidence);
     setScans((current) => [
       buildOfficerScanRecord({
         id: scanId,
@@ -212,7 +210,7 @@ export function useOfficerScan({
       return;
     }
     const badgeId = lastScanResult.badge?.id ?? lastScanResult.input;
-    const { caseId, error } = prepareOpenCaseForBadge({
+    const { caseId, error } = validateAndReserveOpenCase({
       badgeId,
       cases,
       reserveCaseIdForBadge,
@@ -257,10 +255,10 @@ export function useOfficerScan({
     setScanLocation,
     scanVehicle,
     setScanVehicle,
-    scanEvidenceDraft,
-    updateScanEvidenceDraft,
+    enforcementDetailsDraft,
+    updateEnforcementDetailsDraft,
     lastScanResult,
-    displayedRisk,
+    visibleVerificationRisk,
     officerNotice,
     inputDescription,
     resetScanResult,

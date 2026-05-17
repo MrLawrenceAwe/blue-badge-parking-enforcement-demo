@@ -15,7 +15,7 @@ export function AdminOverviewTab({
 }) {
   return (
     <>
-      <div className="app-panel suspicious-cases-panel">
+      <div className="app-panel review-cases-panel">
         <div className="app-panel-heading">
           <h2>Cases needing review</h2>
           <ShieldAlert aria-hidden="true" />
@@ -47,7 +47,12 @@ export function AdminOverviewTab({
         </div>
         <div className="record-list constrained-list">
           {suspendedOrStolenBadges.map((badge) => (
-            <button key={badge.id} type="button" className="badge-record-button" onClick={() => selectCase({ badgeId: badge.id })}>
+            <button
+              key={badge.id}
+              type="button"
+              className="badge-record-button"
+              onClick={() => selectCase({ badgeId: badge.id })}
+            >
               <span>
                 <strong>{badge.id}</strong>
                 <small>
@@ -65,7 +70,7 @@ export function AdminOverviewTab({
 
       <div className="app-panel risk-panel">
         <div className="app-panel-heading">
-          <h2>Verification register</h2>
+          <h2>Badge verification scores</h2>
           <Gauge aria-hidden="true" />
         </div>
         <div className="table-wrap">
@@ -82,7 +87,11 @@ export function AdminOverviewTab({
               {filteredBadges.map((badge) => (
                 <tr key={badge.id}>
                   <td data-label="Badge">
-                    <button type="button" className="risk-register-button" onClick={() => selectCase({ badgeId: badge.id })}>
+                    <button
+                      type="button"
+                      className="risk-register-button"
+                      onClick={() => selectCase({ badgeId: badge.id })}
+                    >
                       <span>{badge.id}</span>
                       <small>{badge.holder}</small>
                     </button>

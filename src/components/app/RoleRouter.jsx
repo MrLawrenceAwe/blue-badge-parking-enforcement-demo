@@ -2,16 +2,20 @@ import { AdminView } from '../admin/AdminView';
 import { CarerView } from '../carer/CarerView';
 import { HolderView } from '../holder/HolderView';
 import { OfficerView } from '../officer/OfficerView';
-import { buildAdminDashboard } from '../../domain/adminDashboardSelectors';
+import { selectAdminDashboardData } from '../../domain/adminViewSelectors';
 
-export function RoleViews({ auth, enforcementStore, badgeActions, officerScan, adminCases, riskRuleActions }) {
+export function RoleRouter({ auth, enforcementStore, badgeActions, officerScan, adminCases, riskRuleActions }) {
   const selectedBadgeActivity = {
-    replacementRequests: enforcementStore.replacementRequests.filter((request) => request.badgeId === auth.selectedBadge.id),
-    notifications: enforcementStore.notifications.filter((notification) => notification.badgeId === auth.selectedBadge.id)
+    replacementRequests: enforcementStore.replacementRequests.filter(
+      (request) => request.badgeId === auth.selectedBadge.id,
+    ),
+    notifications: enforcementStore.notifications.filter(
+      (notification) => notification.badgeId === auth.selectedBadge.id,
+    ),
   };
   const replacementForm = {
     values: badgeActions.replacementDraft,
-    setValues: badgeActions.setReplacementDraft
+    setValues: badgeActions.setReplacementDraft,
   };
 
   if (auth.role === 'holder') {
@@ -91,22 +95,25 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
   return (
     <OfficerView
       badge={officerScan.lastScanResult ? officerScan.lastScanResult.badge : auth.selectedBadge}
-      risk={officerScan.displayedRisk}
+      risk={officerScan.visibleVerificationRisk}
       scanResult={officerScan.lastScanResult}
       sessions={enforcementStore.activeSessions}
       scanFields={{
         input: officerScan.scanInput,
         inputDescription: officerScan.inputDescription,
         location: officerScan.scanLocation,
-        vehicle: officerScan.scanVehicle
+        vehicle: officerScan.scanVehicle,
       }}
-      scanEvidenceDraft={{ values: officerScan.scanEvidenceDraft, setValues: officerScan.updateScanEvidenceDraft }}
+      enforcementDetailsDraft={{
+        values: officerScan.enforcementDetailsDraft,
+        setValues: officerScan.updateEnforcementDetailsDraft,
+      }}
       officerScanActions={{
         setInput: officerScan.setScanInput,
         setLocation: officerScan.setScanLocation,
         setVehicle: officerScan.setScanVehicle,
         verifyBadge: officerScan.recordBadgeScan,
-        createCaseFromScan: officerScan.createCaseFromScan
+        createCaseFromScan: officerScan.createCaseFromScan,
       }}
       officerMessage={officerScan.officerNotice}
     />
@@ -115,20 +122,20 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
 
 function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
   const selectedAdminBadge = auth.roleBadges.find((badge) => badge.id === auth.selectedBadgeId) ?? null;
-  const adminDashboardData = buildAdminDashboard({
+  const adminViewData = selectAdminDashboardData({
     badges: enforcementStore.badges,
     sessions: enforcementStore.sessions,
     scans: enforcementStore.scans,
     cases: enforcementStore.cases,
-    filters: adminCases.dashboardFilters,
+    filters: adminCases.adminRecordFilters,
     verificationByBadge: enforcementStore.verificationByBadge,
-    selectedBadgeId: auth.selectedBadgeId
+    selectedBadgeId: auth.selectedBadgeId,
   });
   const filterForm = {
-    values: adminCases.dashboardFilters,
-    setValues: adminCases.setDashboardFilters
+    values: adminCases.adminRecordFilters,
+    setValues: adminCases.setAdminRecordFilters,
   };
-  const caseWorkflowActions = {
+  const caseActions = {
     selectBadge: (badgeId) => {
       adminCases.setFocusedCaseId(null);
       auth.setSelectedBadgeId(badgeId);
@@ -137,26 +144,26 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
     createCaseForSelectedBadge: adminCases.createCaseForSelectedBadge,
     updateCase: adminCases.updateCase,
     appendCaseNote: adminCases.appendCaseNote,
-    reactivateBadge: adminCases.reactivateBadgeAfterReview
+    reactivateBadge: adminCases.reactivateBadgeAfterReview,
   };
   const selectedCaseRecords = selectedAdminBadge
-    ? adminDashboardData.selectedBadgeCases
+    ? adminViewData.selectedBadgeCases
     : enforcementStore.cases.filter((caseRecord) => caseRecord.id === adminCases.focusedCaseId);
 
   return (
     <AdminView
-      adminDashboardData={{
+      adminViewData={{
         allBadges: enforcementStore.badges,
-        filteredBadges: adminDashboardData.filteredBadges,
-        filteredActiveSessions: adminDashboardData.filteredActiveSessions,
-        filteredScans: adminDashboardData.filteredScans,
+        filteredBadges: adminViewData.filteredBadges,
+        filteredActiveSessions: adminViewData.filteredActiveSessions,
+        filteredScans: adminViewData.filteredScans,
         selectedBadgeCases: selectedCaseRecords,
-        reviewQueueCases: adminDashboardData.reviewQueueCases,
-        suspendedOrStolenBadges: adminDashboardData.suspendedOrStolenBadges,
+        reviewQueueCases: adminViewData.reviewQueueCases,
+        suspendedOrStolenBadges: adminViewData.suspendedOrStolenBadges,
         auditEvents: enforcementStore.auditEvents,
         notifications: enforcementStore.notifications,
         replacementRequests: enforcementStore.replacementRequests,
-        verificationByBadge: enforcementStore.verificationByBadge
+        verificationByBadge: enforcementStore.verificationByBadge,
       }}
       filterForm={filterForm}
       selectedBadgeId={auth.selectedBadgeId}
@@ -165,13 +172,13 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
         values: adminCases.caseDraft,
         update: adminCases.updateCaseDraft,
         noteDraftByCaseId: adminCases.noteDraftByCaseId,
-        setNoteDraftByCaseId: adminCases.setNoteDraftByCaseId
+        setNoteDraftByCaseId: adminCases.setNoteDraftByCaseId,
       }}
-      caseWorkflowActions={caseWorkflowActions}
+      caseActions={caseActions}
       riskRules={{
         values: enforcementStore.riskRules,
         update: riskRuleActions.updateRiskRule,
-        notice: riskRuleActions.riskRuleNotice
+        notice: riskRuleActions.riskRuleNotice,
       }}
       adminMessage={adminCases.adminNotice}
     />

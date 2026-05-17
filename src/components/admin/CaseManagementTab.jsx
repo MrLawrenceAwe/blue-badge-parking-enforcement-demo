@@ -12,20 +12,27 @@ export function CaseManagementTab({
   noteDraftByCaseId,
   setNoteDraftByCaseId,
   adminMessage,
-  caseWorkflowActions
+  caseActions,
 }) {
   return (
     <div className="app-panel case-management-panel full-span">
-      <div className="app-panel-heading"><h2>Case management</h2><FileText aria-hidden="true" /></div>
+      <div className="app-panel-heading">
+        <h2>Case management</h2>
+        <FileText aria-hidden="true" />
+      </div>
       <CaseDraftForm
         allBadges={allBadges}
         selectedBadgeId={selectedBadgeId}
         selectedBadge={selectedBadge}
         caseDraft={caseDraft}
         updateCaseDraft={updateCaseDraft}
-        caseWorkflowActions={caseWorkflowActions}
+        caseActions={caseActions}
       />
-      {adminMessage && <p className="form-message" role="status">{adminMessage}</p>}
+      {adminMessage && (
+        <p className="form-message" role="status">
+          {adminMessage}
+        </p>
+      )}
       <div className="record-list constrained-list">
         {!selectedBadgeCases.length && <p className="muted-text">No case records for this selection.</p>}
         {selectedBadgeCases.map((caseRecord) => (
@@ -34,7 +41,7 @@ export function CaseManagementTab({
             caseRecord={caseRecord}
             noteDraft={noteDraftByCaseId[caseRecord.id]}
             setNoteDraftByCaseId={setNoteDraftByCaseId}
-            caseWorkflowActions={caseWorkflowActions}
+            caseActions={caseActions}
           />
         ))}
       </div>

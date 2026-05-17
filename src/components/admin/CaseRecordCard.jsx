@@ -1,35 +1,38 @@
-import { CaseFields, CaseNoteEditor, EvidenceUploadField } from './CaseFields';
+import { CaseEvidenceUpload, CaseNoteComposer, CaseStatusFields } from './CaseStatusFields';
 
-export function CaseRecordCard({
-  caseRecord,
-  noteDraft,
-  setNoteDraftByCaseId,
-  caseWorkflowActions,
-}) {
-  const updateCaseFields = (updates) => caseWorkflowActions.updateCase(caseRecord.id, updates);
+export function CaseRecordCard({ caseRecord, noteDraft, setNoteDraftByCaseId, caseActions }) {
+  const updateCaseFields = (updates) => caseActions.updateCase(caseRecord.id, updates);
 
   return (
     <article className="case-card">
-      <strong>{caseRecord.id}: {caseRecord.title}</strong>
+      <strong>
+        {caseRecord.id}: {caseRecord.title}
+      </strong>
       <small>{caseRecord.badgeId}</small>
-      <CaseFields values={caseRecord} onChange={updateCaseFields} idPrefix={caseRecord.id} />
+      <CaseStatusFields values={caseRecord} onChange={updateCaseFields} idPrefix={caseRecord.id} />
       <div className="case-notes">
         <strong>Notes</strong>
-        {caseRecord.notes.map((note, index) => <small key={`${caseRecord.id}-note-${index}`}>{note}</small>)}
+        {caseRecord.notes.map((note, index) => (
+          <small key={`${caseRecord.id}-note-${index}`}>{note}</small>
+        ))}
       </div>
       <div className="case-notes">
         <strong>Evidence details</strong>
-        {(caseRecord.evidenceItems ?? []).map((item, index) => <small key={`${caseRecord.id}-evidence-${index}`}>{item.type}: {item.reference} - {item.addedBy}</small>)}
+        {(caseRecord.evidenceItems ?? []).map((item, index) => (
+          <small key={`${caseRecord.id}-evidence-${index}`}>
+            {item.type}: {item.reference} - {item.addedBy}
+          </small>
+        ))}
         {!(caseRecord.evidenceItems ?? []).length && <small>No structured evidence metadata yet.</small>}
       </div>
-      <CaseNoteEditor
+      <CaseNoteComposer
         caseRecord={caseRecord}
         noteDraft={noteDraft}
         setNoteDraftByCaseId={setNoteDraftByCaseId}
-        appendCaseNote={caseWorkflowActions.appendCaseNote}
+        appendCaseNote={caseActions.appendCaseNote}
       />
       <small>{caseRecord.evidence}</small>
-      <EvidenceUploadField caseRecord={caseRecord} caseWorkflowActions={caseWorkflowActions} />
+      <CaseEvidenceUpload caseRecord={caseRecord} caseActions={caseActions} />
     </article>
   );
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { buildAdminDashboard } from './adminDashboardSelectors';
+import { selectAdminDashboardData } from './adminViewSelectors';
 
-describe('buildAdminDashboard', () => {
+describe('selectAdminDashboardData', () => {
   it('filters admin records by risk and selected badge', () => {
     const badges = [
       { id: 'BB-1', holder: 'One', vehicle: 'AA11 AAA', council: 'Council', status: 'valid' },
@@ -16,7 +16,7 @@ describe('buildAdminDashboard', () => {
       'BB-2': { score: 90, riskBand: 'high' },
     };
 
-    const dashboard = buildAdminDashboard({
+    const dashboard = selectAdminDashboardData({
       badges,
       sessions: [],
       scans: [],
