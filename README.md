@@ -28,7 +28,7 @@ Recommended: use the included GitHub Pages workflow for a stable URL.
 2. GitHub Actions will build and deploy automatically from `main`
 3. Share the GitHub Pages URL
 
-For a one-off share without a repo, run `npm run build` and upload the `dist/` folder to [Netlify Drop](https://app.netlify.com/drop).
+For manual publishing, run `npm run build` and deploy the generated `dist/` folder to your static host of choice.
 
 ## What is included
 
