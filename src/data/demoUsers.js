@@ -4,5 +4,3 @@ export const demoUsers = [
   { email: 'officer@example.test', password: 'demo123', role: 'officer', name: 'EO Current User', badgeIds: [] },
   { email: 'admin@westminster.gov.uk', password: 'demo123', role: 'admin', name: 'Council Admin', badgeIds: [] }
 ];
-
-export const demoAccountOrder = ['holder', 'officer', 'admin', 'carer'];
