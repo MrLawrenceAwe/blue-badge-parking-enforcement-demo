@@ -55,15 +55,22 @@ export function OfficerView({ badge, risk, scanResult, sessions, scanInputForm, 
             )}
           </div>
           {canOpenCaseFromScan && (
-            <button
-              className="secondary-button result-action"
-              onClick={scanCommands.createCaseFromScan}
-              disabled={!evidenceReady}
-              title={evidenceReady ? 'Open enforcement case' : 'Choose a contravention and enforcement action first'}
-            >
-              <FileText aria-hidden="true" size={20} />
-              Open case
-            </button>
+            <>
+              <button
+                className="secondary-button result-action"
+                onClick={scanCommands.createCaseFromScan}
+                disabled={!evidenceReady}
+                aria-describedby={!evidenceReady ? 'open-case-requirements' : undefined}
+              >
+                <FileText aria-hidden="true" size={20} />
+                Open case
+              </button>
+              {!evidenceReady && (
+                <p id="open-case-requirements" className="result-helper">
+                  Choose a contravention and enforcement action to open a case.
+                </p>
+              )}
+            </>
           )}
           {officerMessage && <p className="result-message" role="status">{officerMessage}</p>}
         </section>
