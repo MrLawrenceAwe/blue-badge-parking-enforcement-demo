@@ -4,14 +4,14 @@ import { initialBadges } from '../data/demoBadges';
 import { initialCases, initialNotifications, initialReplacementRequests } from '../data/demoCases';
 import { createSignedSessionRecord } from '../domain/sessionProofs';
 import { defaultRiskRules } from '../domain/risk';
-import { buildRiskByBadge, selectActiveSessions, selectOpenCases } from '../domain/enforcementSelectors';
+import { buildVerificationByBadge, selectActiveSessions, selectOpenCases } from '../domain/enforcementSelectors';
 import { nextRecordId } from '../domain/ids';
 import { createBrowserEnforcementRepository } from '../services/enforcementRepository';
 import { timestampNow } from '../utils/date';
 
 const STORE_KEY = 'blue-badge-enforcement-demo-state-v1';
 
-function initialDemoState() {
+function initialEnforcementState() {
   return {
     badges: initialBadges,
     sessions: initialSessions.map((session) => ({ ...session, locked: true })),
@@ -26,10 +26,10 @@ function initialDemoState() {
 
 const enforcementRepository = createBrowserEnforcementRepository({
   storageKey: STORE_KEY,
-  initialState: initialDemoState,
+  initialState: initialEnforcementState,
 });
 
-export function useDemoEnforcementStore(currentActor = 'System') {
+export function useEnforcementStore(currentActor = 'System') {
   const storedState = useMemo(() => enforcementRepository.load(), []);
   const [badges, setBadges] = useState(storedState.badges);
   const [sessions, setSessions] = useState(storedState.sessions);
@@ -76,8 +76,8 @@ export function useDemoEnforcementStore(currentActor = 'System') {
 
   const activeSessions = selectActiveSessions(sessions);
   const openCases = selectOpenCases(cases);
-  const riskByBadge = useMemo(() => {
-    return buildRiskByBadge({ badges, sessions, scans, riskRules });
+  const verificationByBadge = useMemo(() => {
+    return buildVerificationByBadge({ badges, sessions, scans, riskRules });
   }, [badges, sessions, scans, riskRules]);
 
   function appendAuditEvent({ badgeId, type, actor = currentActor, detail }) {
@@ -108,7 +108,7 @@ export function useDemoEnforcementStore(currentActor = 'System') {
     ]);
   }
 
-  async function resetDemoState() {
+  async function resetEnforcementState() {
     const nextState = enforcementRepository.reset();
     const signedSessions = await Promise.all(
       nextState.sessions.map((session) => createSignedSessionRecord({ ...session, locked: true })),
@@ -141,8 +141,8 @@ export function useDemoEnforcementStore(currentActor = 'System') {
     setReplacementRequests,
     riskRules,
     setRiskRules,
-    riskByBadge,
+    verificationByBadge,
     appendAuditEvent,
-    resetDemoState,
+    resetEnforcementState,
   };
 }

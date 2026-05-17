@@ -13,11 +13,11 @@ const adminSections = [
 ];
 
 export function AdminView({
-  adminDashboard,
+  adminDashboardData,
   filterForm,
   selectedBadge,
-  caseForm,
-  caseActions,
+  caseDraft,
+  caseWorkflowActions,
   riskRules,
   adminMessage
 }) {
@@ -53,7 +53,7 @@ export function AdminView({
   };
 
   const selectBadgeForCaseReview = (badgeId) => {
-    caseActions.selectBadge(badgeId);
+    caseWorkflowActions.selectBadge(badgeId);
     selectSection('cases', true);
   };
 
@@ -85,7 +85,7 @@ export function AdminView({
           <AdminFilters
             filterForm={filterForm}
             filtersOpen={filtersOpen}
-            resultCount={adminDashboard.filteredBadges.length}
+            resultCount={adminDashboardData.filteredBadges.length}
             setFiltersOpen={setFiltersOpen}
           />
         )}
@@ -99,27 +99,27 @@ export function AdminView({
       >
         {activeSectionId === 'overview' && (
           <AdminOverviewTab
-            filteredBadges={adminDashboard.filteredBadges}
-            filteredActiveSessions={adminDashboard.filteredActiveSessions}
-            filteredScans={adminDashboard.filteredScans}
-            reviewQueueCases={adminDashboard.reviewQueueCases}
-            suspendedOrStolenBadges={adminDashboard.suspendedOrStolenBadges}
-            riskByBadge={adminDashboard.riskByBadge}
+            filteredBadges={adminDashboardData.filteredBadges}
+            filteredActiveSessions={adminDashboardData.filteredActiveSessions}
+            filteredScans={adminDashboardData.filteredScans}
+            reviewQueueCases={adminDashboardData.reviewQueueCases}
+            suspendedOrStolenBadges={adminDashboardData.suspendedOrStolenBadges}
+            verificationByBadge={adminDashboardData.verificationByBadge}
             selectBadge={selectBadgeForCaseReview}
           />
         )}
 
         {activeSectionId === 'cases' && (
           <CaseManagementTab
-            allBadges={adminDashboard.allBadges}
+            allBadges={adminDashboardData.allBadges}
             selectedBadge={selectedBadge}
-            selectedBadgeCases={adminDashboard.selectedBadgeCases}
-            caseForm={caseForm.values}
-            updateCaseForm={caseForm.update}
-            noteDraftByCaseId={caseForm.noteDraftByCaseId}
-            setNoteDraftByCaseId={caseForm.setNoteDraftByCaseId}
+            selectedBadgeCases={adminDashboardData.selectedBadgeCases}
+            caseDraft={caseDraft.values}
+            updateCaseDraft={caseDraft.update}
+            noteDraftByCaseId={caseDraft.noteDraftByCaseId}
+            setNoteDraftByCaseId={caseDraft.setNoteDraftByCaseId}
             adminMessage={adminMessage}
-            caseActions={caseActions}
+            caseWorkflowActions={caseWorkflowActions}
           />
         )}
 
@@ -127,9 +127,9 @@ export function AdminView({
 
         {activeSectionId === 'audit' && (
           <AuditTab
-            auditEvents={adminDashboard.auditEvents}
-            notifications={adminDashboard.notifications}
-            replacementRequests={adminDashboard.replacementRequests}
+            auditEvents={adminDashboardData.auditEvents}
+            notifications={adminDashboardData.notifications}
+            replacementRequests={adminDashboardData.replacementRequests}
           />
         )}
       </section>

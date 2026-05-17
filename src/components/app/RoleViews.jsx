@@ -67,7 +67,7 @@ function HolderRoute({ auth, enforcementStore, badgeActions, replacementForm, se
       replacementForm={replacementForm}
       replacementRequests={selectedBadgeActivity.replacementRequests}
       notifications={selectedBadgeActivity.notifications}
-      risk={enforcementStore.riskByBadge[auth.selectedBadge.id]}
+      risk={enforcementStore.verificationByBadge[auth.selectedBadge.id]}
     />
   );
 }
@@ -94,14 +94,14 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
       risk={officerScan.displayedRisk}
       scanResult={officerScan.lastScanResult}
       sessions={enforcementStore.activeSessions}
-      scanInputForm={{
+      scanFields={{
         input: officerScan.scanInput,
         inputDescription: officerScan.inputDescription,
         location: officerScan.scanLocation,
         vehicle: officerScan.scanVehicle
       }}
-      scanEvidenceForm={{ values: officerScan.scanEvidenceDraft, setValues: officerScan.updateScanEvidenceDraft }}
-      scanCommands={{
+      scanEvidenceDraft={{ values: officerScan.scanEvidenceDraft, setValues: officerScan.updateScanEvidenceDraft }}
+      officerScanActions={{
         setInput: officerScan.setScanInput,
         setLocation: officerScan.setScanLocation,
         setVehicle: officerScan.setScanVehicle,
@@ -114,20 +114,20 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
 }
 
 function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
-  const adminDashboard = buildAdminDashboard({
+  const adminDashboardData = buildAdminDashboard({
     badges: enforcementStore.badges,
     sessions: enforcementStore.sessions,
     scans: enforcementStore.scans,
     cases: enforcementStore.cases,
     filters: adminCases.dashboardFilters,
-    riskByBadge: enforcementStore.riskByBadge,
+    verificationByBadge: enforcementStore.verificationByBadge,
     selectedBadgeId: auth.selectedBadge.id
   });
   const filterForm = {
     values: adminCases.dashboardFilters,
     setValues: adminCases.setDashboardFilters
   };
-  const caseActions = {
+  const caseWorkflowActions = {
     selectBadge: auth.setSelectedBadgeId,
     createCaseForSelectedBadge: adminCases.createCaseForSelectedBadge,
     updateCase: adminCases.updateCase,
@@ -137,28 +137,28 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
 
   return (
     <AdminView
-      adminDashboard={{
+      adminDashboardData={{
         allBadges: enforcementStore.badges,
-        filteredBadges: adminDashboard.filteredBadges,
-        filteredActiveSessions: adminDashboard.filteredActiveSessions,
-        filteredScans: adminDashboard.filteredScans,
-        selectedBadgeCases: adminDashboard.selectedBadgeCases,
-        reviewQueueCases: adminDashboard.reviewQueueCases,
-        suspendedOrStolenBadges: adminDashboard.suspendedOrStolenBadges,
+        filteredBadges: adminDashboardData.filteredBadges,
+        filteredActiveSessions: adminDashboardData.filteredActiveSessions,
+        filteredScans: adminDashboardData.filteredScans,
+        selectedBadgeCases: adminDashboardData.selectedBadgeCases,
+        reviewQueueCases: adminDashboardData.reviewQueueCases,
+        suspendedOrStolenBadges: adminDashboardData.suspendedOrStolenBadges,
         auditEvents: enforcementStore.auditEvents,
         notifications: enforcementStore.notifications,
         replacementRequests: enforcementStore.replacementRequests,
-        riskByBadge: enforcementStore.riskByBadge
+        verificationByBadge: enforcementStore.verificationByBadge
       }}
       filterForm={filterForm}
       selectedBadge={auth.selectedBadge}
-      caseForm={{
-        values: adminCases.caseForm,
+      caseDraft={{
+        values: adminCases.caseDraft,
         update: adminCases.updateCaseDraft,
         noteDraftByCaseId: adminCases.noteDraftByCaseId,
         setNoteDraftByCaseId: adminCases.setNoteDraftByCaseId
       }}
-      caseActions={caseActions}
+      caseWorkflowActions={caseWorkflowActions}
       riskRules={{
         values: enforcementStore.riskRules,
         update: riskRuleActions.updateRiskRule,

@@ -6,7 +6,7 @@ import { nextRecordId } from '../domain/ids';
 import { gpsForKnownLocation } from '../domain/locations';
 import {
   VERIFICATION_STATUS,
-  evaluateBadgeRisk,
+  assessBadgeVerification,
   riskFromPermissionError,
   scanOutcomeForVerification,
 } from '../domain/risk';
@@ -53,7 +53,7 @@ export function useOfficerScan({
 
   const displayedRisk =
     lastScanResult?.risk ??
-    evaluateBadgeRisk(
+    assessBadgeVerification(
       selectedBadge,
       sessions,
       scans,
@@ -124,7 +124,7 @@ export function useOfficerScan({
         ? await verifyBadgeBackedToken(parsedScanInput.value, candidateBadge, scannedAt)
         : candidateBadge;
     const preFailureVerdict = badge
-      ? evaluateBadgeRisk(
+      ? assessBadgeVerification(
           badge,
           sessions,
           scans,
@@ -134,7 +134,7 @@ export function useOfficerScan({
           riskRules,
         ).verificationStatus
       : VERIFICATION_STATUS.invalid;
-    const risk = evaluateBadgeRisk(
+    const risk = assessBadgeVerification(
       badge,
       sessions,
       scans,

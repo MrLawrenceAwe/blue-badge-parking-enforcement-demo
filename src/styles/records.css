@@ -1,3 +1,14 @@
+.session-card,
+.scan-card,
+.case-card,
+.badge-record-button,
+.timeline-item {
+  background: var(--surface-raised);
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  padding: 9px 10px;
+}
+
 .badge-record-button {
   width: 100%;
   min-height: 62px;

@@ -157,7 +157,7 @@ export function validateRiskRules(rules = defaultRiskRules) {
   };
 }
 
-export function evaluateBadgeRisk(badge, sessions, scans, scanContext = {}, rules = defaultRiskRules) {
+export function assessBadgeVerification(badge, sessions, scans, scanContext = {}, rules = defaultRiskRules) {
   rules = normaliseRiskRules(rules);
   const triggeredRules = [];
   if (!badge) {

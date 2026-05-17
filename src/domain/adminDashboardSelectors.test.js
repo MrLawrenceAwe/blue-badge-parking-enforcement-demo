@@ -11,7 +11,7 @@ describe('buildAdminDashboard', () => {
       { id: 'CASE-1', badgeId: 'BB-2', status: 'High priority' },
       { id: 'CASE-2', badgeId: 'UNKNOWN', status: 'Officer review' },
     ];
-    const riskByBadge = {
+    const verificationByBadge = {
       'BB-1': { score: 0, riskBand: 'normal' },
       'BB-2': { score: 90, riskBand: 'high' },
     };
@@ -22,7 +22,7 @@ describe('buildAdminDashboard', () => {
       scans: [],
       cases,
       filters: { search: '', risk: 'high', location: '', date: '', badgeStatus: 'all' },
-      riskByBadge,
+      verificationByBadge,
       selectedBadgeId: 'BB-2',
     });
 

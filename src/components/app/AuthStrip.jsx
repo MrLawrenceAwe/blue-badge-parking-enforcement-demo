@@ -1,6 +1,6 @@
 export function AuthStrip({ authUser }) {
   return (
-    <section className="auth-strip" aria-label="Current demo account">
+    <section className="auth-strip" aria-label="Current account">
       <div className="auth-strip-copy">
         <strong>Signed in as {authUser.name}</strong>
         <span>

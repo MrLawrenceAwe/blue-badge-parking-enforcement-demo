@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateBadgeRisk, normaliseRiskRules, validateRiskRules, VERIFICATION_STATUS } from './risk';
+import { assessBadgeVerification, normaliseRiskRules, validateRiskRules, VERIFICATION_STATUS } from './risk';
 
 const validBadge = {
   id: 'BB-WCC-104928',
@@ -8,9 +8,9 @@ const validBadge = {
   usualLocations: ['Oxford Street'],
 };
 
-describe('evaluateBadgeRisk', () => {
+describe('assessBadgeVerification', () => {
   it('marks unknown badge scans as invalid high risk', () => {
-    const risk = evaluateBadgeRisk(null, [], []);
+    const risk = assessBadgeVerification(null, [], []);
 
     expect(risk.score).toBe(100);
     expect(risk.verificationStatus).toBe(VERIFICATION_STATUS.invalid);
@@ -18,7 +18,7 @@ describe('evaluateBadgeRisk', () => {
   });
 
   it('marks stolen badges as deactivated critical risk', () => {
-    const risk = evaluateBadgeRisk({ ...validBadge, status: 'stolen' }, [], []);
+    const risk = assessBadgeVerification({ ...validBadge, status: 'stolen' }, [], []);
 
     expect(risk.score).toBeGreaterThanOrEqual(85);
     expect(risk.verificationStatus).toBe(VERIFICATION_STATUS.deactivated);
@@ -26,14 +26,14 @@ describe('evaluateBadgeRisk', () => {
   });
 
   it('flags unregistered vehicle use', () => {
-    const risk = evaluateBadgeRisk(validBadge, [], [], { vehicle: 'WR64 BAD' });
+    const risk = assessBadgeVerification(validBadge, [], [], { vehicle: 'WR64 BAD' });
 
     expect(risk.verificationStatus).toBe(VERIFICATION_STATUS.suspicious);
     expect(risk.triggers.some((trigger) => trigger.type === 'unregisteredVehicle')).toBe(true);
   });
 
   it('flags impossible travel between nearby scans in time but distant locations', () => {
-    const risk = evaluateBadgeRisk(
+    const risk = assessBadgeVerification(
       validBadge,
       [],
       [
@@ -54,7 +54,7 @@ describe('evaluateBadgeRisk', () => {
   });
 
   it('normalises malformed persisted risk rules before scoring', () => {
-    const risk = evaluateBadgeRisk(validBadge, [], [], { vehicle: 'WR64 BAD' }, {
+    const risk = assessBadgeVerification(validBadge, [], [], { vehicle: 'WR64 BAD' }, {
       highRiskThreshold: 200,
       reviewThreshold: 150,
       monitorThreshold: 120,

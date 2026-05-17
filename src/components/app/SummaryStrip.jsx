@@ -7,7 +7,7 @@ export function SummaryStrip({
   activeSessionCount,
   roleBadgeCount,
   roleActiveSessionCount,
-  highRiskCount,
+  highPriorityReviewCount,
   openCaseCount,
 }) {
   if (role === 'holder' || role === 'carer') {
@@ -27,7 +27,7 @@ export function SummaryStrip({
     <section className="summary-strip" aria-label="System summary">
       <SummaryMetric icon={BadgeCheck} label="Badges" value={badgeCount} />
       <SummaryMetric icon={Clock3} label="Sessions" value={activeSessionCount} />
-      <SummaryMetric icon={ShieldAlert} label="High risk" value={highRiskCount} />
+      <SummaryMetric icon={ShieldAlert} label="High priority" value={highPriorityReviewCount} />
       <SummaryMetric icon={FileText} label="Open cases" value={openCaseCount} />
     </section>
   );

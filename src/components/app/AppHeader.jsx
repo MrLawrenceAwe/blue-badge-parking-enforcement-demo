@@ -1,20 +1,20 @@
 import { LayoutDashboard, ShieldCheck, UserRound, UsersRound } from 'lucide-react';
 
 const roleOptions = [
-  ['holder', UserRound, 'Holder'],
-  ['carer', UsersRound, 'Carer'],
-  ['officer', ShieldCheck, 'Officer'],
-  ['admin', LayoutDashboard, 'Admin'],
+  ['holder', UserRound, 'Badge holder'],
+  ['carer', UsersRound, 'Delegated carer'],
+  ['officer', ShieldCheck, 'Enforcement officer'],
+  ['admin', LayoutDashboard, 'Council admin'],
 ];
 
 const roleHeroNotes = {
   holder: 'Show your badge, manage parking sessions, and report problems quickly.',
   carer: 'Manage badges and parking sessions for the people you support.',
   officer: 'Verify badges, check vehicle matches, and record enforcement evidence.',
-  admin: 'Review risk, manage cases, and monitor badge activity across the demo.',
+  admin: 'Review priority, manage cases, and monitor badge activity across the service.',
 };
 
-export function AppHeader({ role, availableRoles, demoUsers, setRole, selectDemoUser }) {
+export function AppHeader({ role, availableRoles, roleUsers, setRole, selectRoleUser }) {
   return (
     <header className="app-header">
       <div className="title-block">
@@ -26,21 +26,21 @@ export function AppHeader({ role, availableRoles, demoUsers, setRole, selectDemo
         <p className="hero-note">{roleHeroNotes[role]}</p>
       </div>
       <div className="role-switcher-wrap">
-        <span className="switcher-caption">Choose demo role</span>
-        <div className="role-switcher" aria-label="Choose demo role">
+        <span className="switcher-caption">Choose role</span>
+        <div className="role-switcher" aria-label="Choose role">
           {roleOptions.map(([value, Icon, label]) => {
-            const demoUser = demoUsers.find((user) => user.role === value);
+            const roleUser = roleUsers.find((user) => user.role === value);
             const canAccess = availableRoles.includes(value);
             const buttonTitle = canAccess
-              ? `Show the ${label.toLowerCase()} view for this demo account`
-              : `Sign in as the ${label.toLowerCase()} demo account`;
+              ? `Show the ${label.toLowerCase()} view`
+              : `Sign in as the ${label.toLowerCase()}`;
             return (
               <button
                 key={value}
                 className={role === value ? 'active' : ''}
-                onClick={() => (canAccess ? setRole(value) : selectDemoUser(demoUser))}
+                onClick={() => (canAccess ? setRole(value) : selectRoleUser(roleUser))}
                 aria-pressed={role === value}
-                aria-label={canAccess ? `Show ${label} role` : `Sign in as ${label} demo account`}
+                aria-label={canAccess ? `Show ${label} role` : `Sign in as ${label}`}
                 title={buttonTitle}
               >
                 <Icon aria-hidden="true" size={19} />
