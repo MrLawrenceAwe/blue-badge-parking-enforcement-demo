@@ -1,26 +1,11 @@
 import { Car, FileText, QrCode, Search } from 'lucide-react';
 import { statusLabel } from '../../domain/badges';
+import { actionOptions, contraventionOptions, NO_ENFORCEMENT_ACTION } from '../../domain/officerEvidence';
 import { VERIFICATION_STATUS, verificationStatusLabels } from '../../domain/risk';
 import { isSessionActive } from '../../domain/sessions';
 import { formatDate } from '../../utils/date';
 import { RiskAlerts } from '../risk/RiskAlerts';
 import { SessionCard } from '../sessions/SessionCard';
-
-const contraventionOptions = [
-  'No action',
-  'Badge mismatch',
-  'Expired badge',
-  'Reported stolen badge',
-  'Suspected misuse',
-  'No active session',
-];
-const actionOptions = [
-  'No action',
-  'Warning issued',
-  'Penalty charge notice recommended',
-  'Case review required',
-  'Badge seized',
-];
 
 export function OfficerView({
   badge,
@@ -41,8 +26,8 @@ export function OfficerView({
   const isValid = risk.verificationStatus === VERIFICATION_STATUS.valid;
   const evidenceReady =
     !canOpenCaseFromScan ||
-    (scanEvidenceDraft.values.contravention !== 'No action' &&
-      scanEvidenceDraft.values.action !== 'No action' &&
+    (scanEvidenceDraft.values.contravention !== NO_ENFORCEMENT_ACTION &&
+      scanEvidenceDraft.values.action !== NO_ENFORCEMENT_ACTION &&
       scanEvidenceDraft.values.officerNote.trim() &&
       (scanEvidenceDraft.values.vehiclePhotoRef.trim() || scanEvidenceDraft.values.badgePhotoRef.trim()));
   return (

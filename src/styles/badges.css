@@ -31,3 +31,9 @@ dd {
   margin: 0;
   font-weight: 600;
 }
+
+@media (min-width: 720px) {
+  .digital-badge {
+    grid-template-columns: 1fr auto;
+  }
+}

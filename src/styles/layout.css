@@ -46,3 +46,21 @@ textarea {
   min-height: 120px;
   resize: vertical;
 }
+
+@media (max-width: 719px) {
+  .app-panel,
+  .filter-toolbar {
+    padding: 10px;
+  }
+}
+
+@media (min-width: 720px) {
+  .page-grid,
+  .officer-layout {
+    grid-template-columns: minmax(320px, 0.95fr) minmax(380px, 1.25fr);
+  }
+
+  .officer-layout .app-panel:last-child {
+    grid-column: auto;
+  }
+}
