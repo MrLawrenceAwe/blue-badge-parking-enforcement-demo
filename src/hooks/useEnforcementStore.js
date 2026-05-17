@@ -9,7 +9,8 @@ import { nextRecordId } from '../domain/ids';
 import { createBrowserEnforcementRepository } from '../services/enforcementRepository';
 import { timestampNow } from '../utils/date';
 
-const STORE_KEY = 'blue-badge-enforcement-demo-state-v1';
+const STORE_KEY = 'blue-badge-enforcement-demo-state-v2';
+const LEGACY_STORE_KEYS = ['blue-badge-enforcement-demo-state-v1'];
 
 function initialEnforcementState() {
   return {
@@ -24,9 +25,28 @@ function initialEnforcementState() {
   };
 }
 
+export function migratePersistedEnforcementState(storedState) {
+  const initialState = initialEnforcementState();
+  const nextState = {
+    ...initialState,
+    ...storedState,
+    riskRules: {
+      ...initialState.riskRules,
+      ...(storedState?.riskRules ?? {}),
+    },
+  };
+  nextState.cases = (storedState?.cases ?? initialState.cases).map((caseRecord) => ({
+    ...caseRecord,
+    assignedTeam: caseRecord.assignedTeam ?? caseRecord.assignedTo ?? caseRecord.assignee ?? 'Unassigned',
+  }));
+  return nextState;
+}
+
 const enforcementRepository = createBrowserEnforcementRepository({
   storageKey: STORE_KEY,
   initialState: initialEnforcementState,
+  legacyStorageKeys: LEGACY_STORE_KEYS,
+  migrateState: migratePersistedEnforcementState,
 });
 
 export function useEnforcementStore(currentActor = 'System') {

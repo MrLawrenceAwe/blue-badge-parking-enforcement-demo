@@ -114,6 +114,7 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
 }
 
 function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
+  const selectedAdminBadge = auth.roleBadges.find((badge) => badge.id === auth.selectedBadgeId) ?? null;
   const adminDashboardData = buildAdminDashboard({
     badges: enforcementStore.badges,
     sessions: enforcementStore.sessions,
@@ -121,19 +122,26 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
     cases: enforcementStore.cases,
     filters: adminCases.dashboardFilters,
     verificationByBadge: enforcementStore.verificationByBadge,
-    selectedBadgeId: auth.selectedBadge.id
+    selectedBadgeId: auth.selectedBadgeId
   });
   const filterForm = {
     values: adminCases.dashboardFilters,
     setValues: adminCases.setDashboardFilters
   };
   const caseWorkflowActions = {
-    selectBadge: auth.setSelectedBadgeId,
+    selectBadge: (badgeId) => {
+      adminCases.setFocusedCaseId(null);
+      auth.setSelectedBadgeId(badgeId);
+    },
+    focusCase: adminCases.setFocusedCaseId,
     createCaseForSelectedBadge: adminCases.createCaseForSelectedBadge,
     updateCase: adminCases.updateCase,
     appendCaseNote: adminCases.appendCaseNote,
     reactivateBadge: adminCases.reactivateBadgeAfterReview
   };
+  const selectedCaseRecords = selectedAdminBadge
+    ? adminDashboardData.selectedBadgeCases
+    : enforcementStore.cases.filter((caseRecord) => caseRecord.id === adminCases.focusedCaseId);
 
   return (
     <AdminView
@@ -142,7 +150,7 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
         filteredBadges: adminDashboardData.filteredBadges,
         filteredActiveSessions: adminDashboardData.filteredActiveSessions,
         filteredScans: adminDashboardData.filteredScans,
-        selectedBadgeCases: adminDashboardData.selectedBadgeCases,
+        selectedBadgeCases: selectedCaseRecords,
         reviewQueueCases: adminDashboardData.reviewQueueCases,
         suspendedOrStolenBadges: adminDashboardData.suspendedOrStolenBadges,
         auditEvents: enforcementStore.auditEvents,
@@ -151,7 +159,8 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
         verificationByBadge: enforcementStore.verificationByBadge
       }}
       filterForm={filterForm}
-      selectedBadge={auth.selectedBadge}
+      selectedBadgeId={auth.selectedBadgeId}
+      selectedBadge={selectedAdminBadge}
       caseDraft={{
         values: adminCases.caseDraft,
         update: adminCases.updateCaseDraft,

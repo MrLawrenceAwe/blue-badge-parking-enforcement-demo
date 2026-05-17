@@ -25,6 +25,7 @@ export function useAdminCases({
   queueNotification,
 }) {
   const [caseDraft, setCaseDraft] = useState(initialCaseDraft);
+  const [focusedCaseId, setFocusedCaseId] = useState(null);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
   const [dashboardFilters, setDashboardFilters] = useState({
@@ -82,6 +83,7 @@ export function useAdminCases({
       }),
       ...current,
     ]);
+    setFocusedCaseId(caseId);
     appendAuditEvent({
       badgeId: selectedBadge.id,
       type: 'Case opened',
@@ -191,6 +193,8 @@ export function useAdminCases({
   return {
     caseDraft,
     updateCaseDraft,
+    focusedCaseId,
+    setFocusedCaseId,
     noteDraftByCaseId,
     setNoteDraftByCaseId,
     dashboardFilters,

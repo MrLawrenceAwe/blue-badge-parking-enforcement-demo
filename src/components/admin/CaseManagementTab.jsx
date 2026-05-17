@@ -4,6 +4,7 @@ import { CaseRecordCard } from './CaseRecordCard';
 
 export function CaseManagementTab({
   allBadges,
+  selectedBadgeId,
   selectedBadge,
   selectedBadgeCases,
   caseDraft,
@@ -18,6 +19,7 @@ export function CaseManagementTab({
       <div className="app-panel-heading"><h2>Case management</h2><FileText aria-hidden="true" /></div>
       <CaseDraftForm
         allBadges={allBadges}
+        selectedBadgeId={selectedBadgeId}
         selectedBadge={selectedBadge}
         caseDraft={caseDraft}
         updateCaseDraft={updateCaseDraft}
@@ -25,7 +27,7 @@ export function CaseManagementTab({
       />
       {adminMessage && <p className="form-message" role="status">{adminMessage}</p>}
       <div className="record-list constrained-list">
-        {!selectedBadgeCases.length && <p className="muted-text">No case records for this badge.</p>}
+        {!selectedBadgeCases.length && <p className="muted-text">No case records for this selection.</p>}
         {selectedBadgeCases.map((caseRecord) => (
           <CaseRecordCard
             key={caseRecord.id}

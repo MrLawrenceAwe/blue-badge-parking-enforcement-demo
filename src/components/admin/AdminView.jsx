@@ -15,6 +15,7 @@ const adminSections = [
 export function AdminView({
   adminDashboardData,
   filterForm,
+  selectedBadgeId,
   selectedBadge,
   caseDraft,
   caseWorkflowActions,
@@ -52,8 +53,14 @@ export function AdminView({
     selectSection(adminSections[nextIndex].id, true);
   };
 
-  const selectBadgeForCaseReview = (badgeId) => {
-    caseWorkflowActions.selectBadge(badgeId);
+  const selectCaseForReview = (caseRecord) => {
+    const hasKnownBadge = adminDashboardData.allBadges.some((badge) => badge.id === caseRecord.badgeId);
+    if (hasKnownBadge) {
+      caseWorkflowActions.selectBadge(caseRecord.badgeId);
+    }
+    if (caseRecord.id) {
+      caseWorkflowActions.focusCase(caseRecord.id);
+    }
     selectSection('cases', true);
   };
 
@@ -105,13 +112,14 @@ export function AdminView({
             reviewQueueCases={adminDashboardData.reviewQueueCases}
             suspendedOrStolenBadges={adminDashboardData.suspendedOrStolenBadges}
             verificationByBadge={adminDashboardData.verificationByBadge}
-            selectBadge={selectBadgeForCaseReview}
+            selectCase={selectCaseForReview}
           />
         )}
 
         {activeSectionId === 'cases' && (
           <CaseManagementTab
             allBadges={adminDashboardData.allBadges}
+            selectedBadgeId={selectedBadgeId}
             selectedBadge={selectedBadge}
             selectedBadgeCases={adminDashboardData.selectedBadgeCases}
             caseDraft={caseDraft.values}
