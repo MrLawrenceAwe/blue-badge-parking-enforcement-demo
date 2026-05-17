@@ -16,7 +16,7 @@ test('core demo workflows render and navigate without accessibility violations',
   await resetDemo(page);
 
   await expect(page.getByRole('heading', { name: /Blue Badge/i })).toBeVisible();
-  await expect(page.getByText(/Demo data is stored in this browser/i)).toBeVisible();
+  await expect(page.getByText(/Signed in as/i)).toBeVisible();
   await expectNoA11yViolations(page);
 
   await page.getByRole('button', { name: /Officer/i }).click();
@@ -59,6 +59,10 @@ test('officer can scan a mismatch and open an enforcement case', async ({ page }
   await expect(page.getByText(/Suspicious|Invalid/i)).toBeVisible();
   await expect(page.getByText('Badge used with unregistered vehicle: +45 points')).toBeVisible();
 
+  await page.getByLabel(/Contravention/i).selectOption('Badge mismatch');
+  await page.getByLabel(/Enforcement action/i).selectOption('Case review required');
+  await page.getByLabel(/Vehicle photo reference/i).fill('IMG-1001');
+  await page.getByLabel(/Officer note/i).fill('Vehicle registration did not match the linked badge.');
   await page.getByRole('button', { name: /Open case/i }).click();
   await expect(page.getByText(/Enforcement case CASE-/i)).toBeVisible();
 });
@@ -81,5 +85,5 @@ test('admin risk rule validation rejects inverted thresholds', async ({ page }) 
   await page.getByRole('tab', { name: /Risk rules/i }).click();
   await page.getByLabel(/Review threshold/i).fill('95');
 
-  await expect(page.getByText(/Risk rule not updated/i)).toBeVisible();
+  await expect(page.getByText(/Verification rule not updated/i)).toBeVisible();
 });

@@ -20,6 +20,7 @@ export function useAuthSession({ roleUsers, badges }) {
     setRole,
     authUser,
     availableRoles: rolesForUser(authUser),
+    selectedBadgeId,
     roleBadges,
     selectedBadge,
     setSelectedBadgeId,
