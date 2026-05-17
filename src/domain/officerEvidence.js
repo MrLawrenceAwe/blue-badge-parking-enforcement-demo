@@ -19,7 +19,7 @@ export const actionOptions = [
   'Badge seized',
 ];
 
-export const initialScanEvidenceDraft = {
+export const initialEnforcementDetailsDraft = {
   contravention: NO_ENFORCEMENT_ACTION,
   action: NO_ENFORCEMENT_ACTION,
   officerNote: '',
@@ -28,7 +28,7 @@ export const initialScanEvidenceDraft = {
 };
 
 export function suggestScanEvidence({ currentEvidence, risk, failureReason }) {
-  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return initialScanEvidenceDraft;
+  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return initialEnforcementDetailsDraft;
   const nextEvidence = { ...currentEvidence };
   if (nextEvidence.contravention === NO_ENFORCEMENT_ACTION) {
     nextEvidence.contravention = suggestedContraventionForRisk(risk, failureReason);

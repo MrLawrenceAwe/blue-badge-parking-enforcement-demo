@@ -1,7 +1,7 @@
 import { FileText } from 'lucide-react';
 import { caseStatuses } from '../../domain/cases';
 
-export function CaseFields({ values, onChange, idPrefix = 'case', showAssignedTeam = true }) {
+export function CaseStatusFields({ values, onChange, idPrefix = 'case', showAssignedTeam = true }) {
   return (
     <div className="case-field-grid">
       <label>
@@ -32,19 +32,19 @@ export function CaseFields({ values, onChange, idPrefix = 'case', showAssignedTe
         />
       </label>
       <label>
-        Closure reason
+        Resolution reason
         <input
           value={values.closureReason ?? ''}
           onChange={(event) => onChange({ closureReason: event.target.value })}
           placeholder="Required when resolving"
-          aria-label={`Closure reason for ${idPrefix}`}
+          aria-label={`Resolution reason for ${idPrefix}`}
         />
       </label>
     </div>
   );
 }
 
-export function EvidenceUploadField({ caseRecord, caseWorkflowActions }) {
+export function CaseEvidenceUpload({ caseRecord, caseActions }) {
   return (
     <label>
       Upload evidence
@@ -53,11 +53,16 @@ export function EvidenceUploadField({ caseRecord, caseWorkflowActions }) {
         onChange={(event) => {
           const fileName = event.target.files?.[0]?.name;
           if (!fileName) return;
-          caseWorkflowActions.updateCase(caseRecord.id, {
+          caseActions.updateCase(caseRecord.id, {
             evidence: fileName,
             evidenceItems: [
               ...(caseRecord.evidenceItems ?? []),
-              { type: 'Uploaded file', reference: fileName, addedBy: 'Council Admin', addedAt: new Date().toISOString() },
+              {
+                type: 'Uploaded file',
+                reference: fileName,
+                addedBy: 'Council Admin',
+                addedAt: new Date().toISOString(),
+              },
             ],
           });
         }}
@@ -67,16 +72,14 @@ export function EvidenceUploadField({ caseRecord, caseWorkflowActions }) {
   );
 }
 
-export function CaseNoteEditor({ caseRecord, noteDraft, setNoteDraftByCaseId, appendCaseNote }) {
+export function CaseNoteComposer({ caseRecord, noteDraft, setNoteDraftByCaseId, appendCaseNote }) {
   return (
     <>
       <label>
         Add note
         <textarea
           value={noteDraft ?? ''}
-          onChange={(event) =>
-            setNoteDraftByCaseId((current) => ({ ...current, [caseRecord.id]: event.target.value }))
-          }
+          onChange={(event) => setNoteDraftByCaseId((current) => ({ ...current, [caseRecord.id]: event.target.value }))}
           aria-label={`Add note to ${caseRecord.id}`}
           placeholder="Officer update, holder contact, evidence summary"
         />

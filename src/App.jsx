@@ -1,6 +1,6 @@
 import { AppHeader } from './components/app/AppHeader';
 import { AuthStrip } from './components/app/AuthStrip';
-import { RoleViews } from './components/app/RoleViews';
+import { RoleRouter } from './components/app/RoleRouter';
 import { SummaryStrip } from './components/app/SummaryStrip';
 import { demoUsers } from './data/demoUsers';
 import { useBadgeActions } from './hooks/useBadgeActions';
@@ -90,7 +90,7 @@ export function App() {
         openCaseCount={enforcementStore.openCases.length}
       />
 
-      <RoleViews
+      <RoleRouter
         auth={auth}
         enforcementStore={enforcementStore}
         badgeActions={badgeActions}

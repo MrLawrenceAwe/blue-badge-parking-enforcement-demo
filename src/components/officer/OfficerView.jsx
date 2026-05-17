@@ -13,7 +13,7 @@ export function OfficerView({
   scanResult,
   sessions,
   scanFields,
-  scanEvidenceDraft,
+  enforcementDetailsDraft,
   officerScanActions,
   officerMessage,
 }) {
@@ -26,10 +26,10 @@ export function OfficerView({
   const isValid = risk.verificationStatus === VERIFICATION_STATUS.valid;
   const evidenceReady =
     !canOpenCaseFromScan ||
-    (scanEvidenceDraft.values.contravention !== NO_ENFORCEMENT_ACTION &&
-      scanEvidenceDraft.values.action !== NO_ENFORCEMENT_ACTION &&
-      scanEvidenceDraft.values.officerNote.trim() &&
-      (scanEvidenceDraft.values.vehiclePhotoRef.trim() || scanEvidenceDraft.values.badgePhotoRef.trim()));
+    (enforcementDetailsDraft.values.contravention !== NO_ENFORCEMENT_ACTION &&
+      enforcementDetailsDraft.values.action !== NO_ENFORCEMENT_ACTION &&
+      enforcementDetailsDraft.values.officerNote.trim() &&
+      (enforcementDetailsDraft.values.vehiclePhotoRef.trim() || enforcementDetailsDraft.values.badgePhotoRef.trim()));
   return (
     <div className="officer-layout">
       <section className="app-panel scan-panel">
@@ -42,7 +42,7 @@ export function OfficerView({
           <input
             value={scanFields.input}
             onChange={(event) => officerScanActions.setInput(event.target.value)}
-            aria-label="QR code badge ID or vehicle registration"
+            aria-label="Badge ID, QR code, or vehicle registration"
           />
         </label>
         <p className="input-hint" aria-live="polite">
@@ -75,7 +75,7 @@ export function OfficerView({
           aria-live="polite"
         >
           <div>
-            <p>{hasScanResult ? 'Verification result' : 'Scan status'}</p>
+            <p>{hasScanResult ? 'Verification result' : 'Verification status'}</p>
             <h2>{hasScanResult ? verificationStatusLabels[risk.verificationStatus] : 'Awaiting check'}</h2>
           </div>
           <div className="result-detail">
@@ -107,9 +107,9 @@ export function OfficerView({
               <label>
                 Contravention
                 <select
-                  value={scanEvidenceDraft.values.contravention}
+                  value={enforcementDetailsDraft.values.contravention}
                   onChange={(event) =>
-                    scanEvidenceDraft.setValues((current) => ({ ...current, contravention: event.target.value }))
+                    enforcementDetailsDraft.setValues((current) => ({ ...current, contravention: event.target.value }))
                   }
                 >
                   {contraventionOptions.map((option) => (
@@ -120,9 +120,9 @@ export function OfficerView({
               <label>
                 Enforcement action
                 <select
-                  value={scanEvidenceDraft.values.action}
+                  value={enforcementDetailsDraft.values.action}
                   onChange={(event) =>
-                    scanEvidenceDraft.setValues((current) => ({ ...current, action: event.target.value }))
+                    enforcementDetailsDraft.setValues((current) => ({ ...current, action: event.target.value }))
                   }
                 >
                   {actionOptions.map((option) => (
@@ -134,9 +134,9 @@ export function OfficerView({
             <label>
               Vehicle photo reference
               <input
-                value={scanEvidenceDraft.values.vehiclePhotoRef}
+                value={enforcementDetailsDraft.values.vehiclePhotoRef}
                 onChange={(event) =>
-                  scanEvidenceDraft.setValues((current) => ({ ...current, vehiclePhotoRef: event.target.value }))
+                  enforcementDetailsDraft.setValues((current) => ({ ...current, vehiclePhotoRef: event.target.value }))
                 }
                 placeholder="Evidence reference"
                 aria-label="Vehicle photo reference"
@@ -145,9 +145,9 @@ export function OfficerView({
             <label>
               Badge photo reference
               <input
-                value={scanEvidenceDraft.values.badgePhotoRef}
+                value={enforcementDetailsDraft.values.badgePhotoRef}
                 onChange={(event) =>
-                  scanEvidenceDraft.setValues((current) => ({ ...current, badgePhotoRef: event.target.value }))
+                  enforcementDetailsDraft.setValues((current) => ({ ...current, badgePhotoRef: event.target.value }))
                 }
                 placeholder="Evidence reference"
                 aria-label="Badge photo reference"
@@ -156,9 +156,9 @@ export function OfficerView({
             <label>
               Officer note
               <textarea
-                value={scanEvidenceDraft.values.officerNote}
+                value={enforcementDetailsDraft.values.officerNote}
                 onChange={(event) =>
-                  scanEvidenceDraft.setValues((current) => ({ ...current, officerNote: event.target.value }))
+                  enforcementDetailsDraft.setValues((current) => ({ ...current, officerNote: event.target.value }))
                 }
                 placeholder="Observation or conversation summary"
                 aria-label="Officer note"
@@ -190,7 +190,7 @@ export function OfficerView({
           {isUnknown ? (
             <dl className="detail-list detail-list-grid">
               <div>
-                <dt>Scan input</dt>
+                <dt>Checked value</dt>
                 <dd>{scanResult?.input ?? scanFields.input}</dd>
               </div>
               <div>

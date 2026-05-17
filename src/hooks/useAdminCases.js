@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareOpenCaseForBadge } from '../domain/caseWorkflow';
+import { validateAndReserveOpenCase } from '../domain/caseReservation';
 import { createAdminCase, isCaseOpen } from '../domain/cases';
 import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
@@ -29,7 +29,7 @@ export function useAdminCases({
   const [focusedCaseId, setFocusedCaseId] = useState(null);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
-  const [dashboardFilters, setDashboardFilters] = useState({
+  const [adminRecordFilters, setAdminRecordFilters] = useState({
     search: '',
     risk: 'all',
     location: '',
@@ -57,7 +57,7 @@ export function useAdminCases({
       return;
     }
     const risk = verificationByBadge[selectedBadge.id];
-    const { caseId, error } = prepareOpenCaseForBadge({
+    const { caseId, error } = validateAndReserveOpenCase({
       badgeId: selectedBadge.id,
       cases,
       reserveCaseIdForBadge,
@@ -195,8 +195,8 @@ export function useAdminCases({
     setFocusedCaseId,
     noteDraftByCaseId,
     setNoteDraftByCaseId,
-    dashboardFilters,
-    setDashboardFilters,
+    adminRecordFilters,
+    setAdminRecordFilters,
     adminNotice,
     createCaseForSelectedBadge,
     reactivateBadgeAfterReview,

@@ -71,7 +71,7 @@ test('officer gets a specific reason for an untrusted QR token', async ({ page }
   await resetDemo(page);
 
   await page.getByRole('button', { name: /Officer/i }).click();
-  await page.getByLabel(/QR code badge ID or vehicle registration/i).fill('bluebadge://verify/not-a-real-token');
+  await page.getByLabel(/Badge ID, QR code, or vehicle registration/i).fill('bluebadge://verify/not-a-real-token');
   await expect(page.getByText(/Detected signed QR verification token/i)).toBeVisible();
   await page.getByRole('button', { name: /Verify/i }).click();
 

@@ -9,18 +9,18 @@ const adminSections = [
   { id: 'overview', label: 'Overview' },
   { id: 'cases', label: 'Cases' },
   { id: 'riskRules', label: 'Risk rules' },
-  { id: 'audit', label: 'Audit' }
+  { id: 'audit', label: 'Audit' },
 ];
 
 export function AdminView({
-  adminDashboardData,
+  adminViewData,
   filterForm,
   selectedBadgeId,
   selectedBadge,
   caseDraft,
-  caseWorkflowActions,
+  caseActions,
   riskRules,
-  adminMessage
+  adminMessage,
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('overview');
@@ -54,12 +54,12 @@ export function AdminView({
   };
 
   const selectCaseForReview = (caseRecord) => {
-    const hasKnownBadge = adminDashboardData.allBadges.some((badge) => badge.id === caseRecord.badgeId);
+    const hasKnownBadge = adminViewData.allBadges.some((badge) => badge.id === caseRecord.badgeId);
     if (hasKnownBadge) {
-      caseWorkflowActions.selectBadge(caseRecord.badgeId);
+      caseActions.selectBadge(caseRecord.badgeId);
     }
     if (caseRecord.id) {
-      caseWorkflowActions.focusCase(caseRecord.id);
+      caseActions.focusCase(caseRecord.id);
     }
     selectSection('cases', true);
   };
@@ -92,7 +92,7 @@ export function AdminView({
           <AdminFilters
             filterForm={filterForm}
             filtersOpen={filtersOpen}
-            resultCount={adminDashboardData.filteredBadges.length}
+            resultCount={adminViewData.filteredBadges.length}
             setFiltersOpen={setFiltersOpen}
           />
         )}
@@ -106,38 +106,44 @@ export function AdminView({
       >
         {activeSectionId === 'overview' && (
           <AdminOverviewTab
-            filteredBadges={adminDashboardData.filteredBadges}
-            filteredActiveSessions={adminDashboardData.filteredActiveSessions}
-            filteredScans={adminDashboardData.filteredScans}
-            reviewQueueCases={adminDashboardData.reviewQueueCases}
-            suspendedOrStolenBadges={adminDashboardData.suspendedOrStolenBadges}
-            verificationByBadge={adminDashboardData.verificationByBadge}
+            filteredBadges={adminViewData.filteredBadges}
+            filteredActiveSessions={adminViewData.filteredActiveSessions}
+            filteredScans={adminViewData.filteredScans}
+            reviewQueueCases={adminViewData.reviewQueueCases}
+            suspendedOrStolenBadges={adminViewData.suspendedOrStolenBadges}
+            verificationByBadge={adminViewData.verificationByBadge}
             selectCase={selectCaseForReview}
           />
         )}
 
         {activeSectionId === 'cases' && (
           <CaseManagementTab
-            allBadges={adminDashboardData.allBadges}
+            allBadges={adminViewData.allBadges}
             selectedBadgeId={selectedBadgeId}
             selectedBadge={selectedBadge}
-            selectedBadgeCases={adminDashboardData.selectedBadgeCases}
+            selectedBadgeCases={adminViewData.selectedBadgeCases}
             caseDraft={caseDraft.values}
             updateCaseDraft={caseDraft.update}
             noteDraftByCaseId={caseDraft.noteDraftByCaseId}
             setNoteDraftByCaseId={caseDraft.setNoteDraftByCaseId}
             adminMessage={adminMessage}
-            caseWorkflowActions={caseWorkflowActions}
+            caseActions={caseActions}
           />
         )}
 
-        {activeSectionId === 'riskRules' && <RiskRulesTab riskRules={riskRules.values} updateRiskRule={riskRules.update} riskRuleNotice={riskRules.notice} />}
+        {activeSectionId === 'riskRules' && (
+          <RiskRulesTab
+            riskRules={riskRules.values}
+            updateRiskRule={riskRules.update}
+            riskRuleNotice={riskRules.notice}
+          />
+        )}
 
         {activeSectionId === 'audit' && (
           <AuditTab
-            auditEvents={adminDashboardData.auditEvents}
-            notifications={adminDashboardData.notifications}
-            replacementRequests={adminDashboardData.replacementRequests}
+            auditEvents={adminViewData.auditEvents}
+            notifications={adminViewData.notifications}
+            replacementRequests={adminViewData.replacementRequests}
           />
         )}
       </section>
