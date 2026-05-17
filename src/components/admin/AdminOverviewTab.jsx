@@ -22,13 +22,19 @@ export function AdminOverviewTab({
         </div>
         <div className="record-list constrained-list">
           {reviewQueueCases.map((caseRecord) => (
-            <article key={caseRecord.id} className="case-card">
+            <button
+              key={caseRecord.id}
+              type="button"
+              className="case-card case-review-button"
+              onClick={() => selectBadge(caseRecord.badgeId)}
+              aria-label={`Review ${caseRecord.id} for badge ${caseRecord.badgeId}`}
+            >
               <strong>{caseRecord.id}</strong>
               <span>
                 {caseRecord.badgeId} - {caseRecord.status}
               </span>
               <small>{caseRecord.assignedTo}</small>
-            </article>
+            </button>
           ))}
           {!reviewQueueCases.length && <p className="muted-text">No review cases match the current filters.</p>}
         </div>

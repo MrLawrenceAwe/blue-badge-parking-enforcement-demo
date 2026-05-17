@@ -93,6 +93,11 @@
   font-weight: 700;
 }
 
+.result-helper {
+  margin: 0;
+  font-weight: 650;
+}
+
 .risk-explanation,
 .timeline-list {
   display: grid;

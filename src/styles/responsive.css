@@ -151,13 +151,29 @@
     order: 7;
   }
 
-  .role-officer .summary-strip {
-    display: none;
-  }
-
   .role-officer .auth-strip {
     margin-bottom: 7px;
     padding: 6px 0;
+  }
+
+  .role-officer .summary-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .role-officer .metric {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    justify-items: start;
+    min-height: 64px;
+  }
+
+  .role-officer .metric svg {
+    display: none;
+  }
+
+  .role-officer .metric span {
+    font-size: 0.78rem;
+    line-height: 1.1;
   }
 
   .role-officer .demo-security-note {
