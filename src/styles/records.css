@@ -124,3 +124,9 @@
   background: var(--surface-warning-strong);
   padding: 10px;
 }
+
+@media (min-width: 720px) {
+  .case-field-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

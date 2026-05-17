@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { prepareOpenCaseForBadge } from '../domain/caseWorkflow';
 import { createAdminCase, isCaseOpen } from '../domain/cases';
 import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
@@ -56,20 +57,17 @@ export function useAdminCases({
       return;
     }
     const risk = verificationByBadge[selectedBadge.id];
-    const duplicateOpenCase = cases.find(
-      (caseRecord) => caseRecord.badgeId === selectedBadge.id && isCaseOpen(caseRecord),
-    );
-    if (duplicateOpenCase) {
-      setAdminNotice(
+    const { caseId, error } = prepareOpenCaseForBadge({
+      badgeId: selectedBadge.id,
+      cases,
+      reserveCaseIdForBadge,
+      duplicateMessage: (duplicateOpenCase) =>
         `Open case ${duplicateOpenCase.id} already exists for ${selectedBadge.id}. Add evidence or notes to that case instead of creating a duplicate.`,
-      );
-      return;
-    }
-    const caseId = reserveCaseIdForBadge(selectedBadge.id);
-    if (!caseId) {
-      setAdminNotice(
+      reservedMessage: () =>
         `An open case is already being created for ${selectedBadge.id}. Add evidence or notes to that case instead of creating a duplicate.`,
-      );
+    });
+    if (error) {
+      setAdminNotice(error);
       return;
     }
     setCases((current) => [

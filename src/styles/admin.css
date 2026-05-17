@@ -193,3 +193,175 @@ th {
 .risk-register-button:hover span {
   text-decoration: underline;
 }
+
+@media (max-width: 719px) {
+  .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
+    padding-top: 6px;
+  }
+
+  .admin-filters {
+    padding: 0;
+  }
+
+  .admin-filters[open] {
+    padding: 11px;
+  }
+
+  .dashboard-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-controls {
+    align-items: stretch;
+  }
+
+  .dashboard-grid > .app-panel {
+    order: 20;
+  }
+
+  .dashboard-grid > .suspicious-cases-panel {
+    order: 1;
+  }
+
+  .dashboard-grid > .badge-status-panel {
+    order: 2;
+  }
+
+  .dashboard-grid > .risk-panel {
+    order: 3;
+  }
+
+  .dashboard-grid > .active-sessions-panel {
+    order: 4;
+  }
+
+  .dashboard-grid > .recent-scans-panel {
+    order: 5;
+  }
+
+  .dashboard-grid > .case-management-panel {
+    order: 6;
+  }
+
+  .dashboard-grid > .risk-rules-panel {
+    order: 7;
+  }
+
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-raised);
+    padding: 9px 11px;
+    position: relative;
+  }
+
+  td {
+    border-bottom: 0;
+    padding: 6px 0;
+    width: 100%;
+  }
+
+  td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .risk-register-button::after {
+    border-radius: 6px;
+    content: '';
+    display: block;
+    inset: 0;
+    position: absolute;
+  }
+
+  .risk-register-button:hover::after {
+    background: color-mix(in srgb, var(--blue) 6%, transparent);
+  }
+
+  .risk-register-button:focus-visible::after {
+    outline: 4px solid #ffdd00;
+    outline-offset: 2px;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1),
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3),
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 100%;
+  }
+
+  td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+}
+
+@media (min-width: 720px) {
+  .filter-toolbar-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-layout .app-panel,
+  .admin-layout .filter-toolbar {
+    padding: 11px 13px;
+  }
+
+  .admin-layout .admin-filters {
+    padding: 0;
+  }
+
+  .admin-layout .admin-filters[open] {
+    padding: 11px 13px;
+  }
+
+  .admin-layout {
+    font-size: 0.95rem;
+  }
+
+  .admin-layout input,
+  .admin-layout select {
+    min-height: 40px;
+  }
+}

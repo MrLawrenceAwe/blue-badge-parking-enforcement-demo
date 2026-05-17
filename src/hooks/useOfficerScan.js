@@ -1,9 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
-import { normaliseVehicle, vehicleSearchKey } from '../domain/badges';
-import { createOfficerScanCase, isCaseOpen } from '../domain/cases';
+import { normaliseVehicle } from '../domain/badges';
+import { prepareOpenCaseForBadge } from '../domain/caseWorkflow';
+import { createOfficerScanCase } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { nextRecordId } from '../domain/ids';
-import { gpsForKnownLocation } from '../domain/locations';
+import {
+  initialScanEvidenceDraft,
+  suggestScanEvidence,
+  validateScanEvidence,
+} from '../domain/officerEvidence';
+import {
+  buildOfficerScanContext,
+  buildOfficerScanRecord,
+  describeParsedScanInput,
+  describeScanInput,
+  explainScanFailure,
+  resolveScannedBadge,
+} from '../domain/officerScan';
 import {
   VERIFICATION_STATUS,
   assessBadgeVerification,
@@ -15,14 +28,6 @@ import { verifyBadgeToken } from '../domain/badgeTokens';
 import { hasPermission, PERMISSIONS } from '../domain/permissions';
 import { useCaseCreationGuard } from './useCaseCreationGuard';
 import { timestampNow } from '../utils/date';
-
-const initialScanEvidenceDraft = {
-  contravention: 'No action',
-  action: 'No action',
-  officerNote: '',
-  vehiclePhotoRef: '',
-  badgePhotoRef: '',
-};
 
 export function useOfficerScan({
   authUser,
@@ -118,7 +123,7 @@ export function useOfficerScan({
     });
     const verifiedQrPayload =
       parsedScanInput.kind === 'qr-token' ? await verifyBadgeToken(parsedScanInput.value) : null;
-    const candidateBadge = resolveScannedBadge(parsedScanInput, verifiedQrPayload);
+    const candidateBadge = resolveScannedBadge({ badges, parsedScanInput, verifiedQrPayload });
     const badge =
       parsedScanInput.kind === 'qr-token'
         ? await verifyBadgeBackedToken(parsedScanInput.value, candidateBadge, scannedAt)
@@ -146,7 +151,12 @@ export function useOfficerScan({
     );
 
     const scanId = nextRecordId(scans, 'SC-', 90199);
-    const failureReason = explainScanFailure(parsedScanInput, verifiedQrPayload, candidateBadge, badge);
+    const failureReason = explainScanFailure({
+      parsedScanInput,
+      verifiedQrPayload,
+      candidateBadge,
+      verifiedBadge: badge,
+    });
     const suggestedEvidence = suggestScanEvidence({
       currentEvidence: scanEvidenceDraft,
       risk,
@@ -187,15 +197,6 @@ export function useOfficerScan({
     setOfficerNotice('');
   }
 
-  function resolveScannedBadge(parsedScanInput, verifiedQrPayload) {
-    if (parsedScanInput.kind === 'badge-id')
-      return badges.find((badge) => badge.id.toUpperCase() === parsedScanInput.value);
-    if (parsedScanInput.kind === 'qr-token') return badges.find((badge) => badge.id === verifiedQrPayload?.badgeId);
-    if (parsedScanInput.kind === 'vehicle')
-      return badges.find((badge) => vehicleSearchKey(badge.vehicle) === vehicleSearchKey(parsedScanInput.value));
-    return null;
-  }
-
   function createCaseFromScan() {
     if (!hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.verifyBadge })) {
       setOfficerNotice('Only an enforcement officer can open an enforcement case from a scan.');
@@ -211,16 +212,17 @@ export function useOfficerScan({
       return;
     }
     const badgeId = lastScanResult.badge?.id ?? lastScanResult.input;
-    const duplicateOpenCase = cases.find((caseRecord) => caseRecord.badgeId === badgeId && isCaseOpen(caseRecord));
-    if (duplicateOpenCase) {
-      setOfficerNotice(`Open case ${duplicateOpenCase.id} already exists. The scan has been kept in the audit trail.`);
-      return;
-    }
-    const caseId = reserveCaseIdForBadge(badgeId);
-    if (!caseId) {
-      setOfficerNotice(
+    const { caseId, error } = prepareOpenCaseForBadge({
+      badgeId,
+      cases,
+      reserveCaseIdForBadge,
+      duplicateMessage: (duplicateOpenCase) =>
+        `Open case ${duplicateOpenCase.id} already exists. The scan has been kept in the audit trail.`,
+      reservedMessage: () =>
         `An open case is already being created for ${badgeId}. The scan has been kept in the audit trail.`,
-      );
+    });
+    if (error) {
+      setOfficerNotice(error);
       return;
     }
     setCases((current) => [
@@ -264,93 +266,5 @@ export function useOfficerScan({
     resetScanResult,
     recordBadgeScan,
     createCaseFromScan,
-  };
-}
-
-function suggestScanEvidence({ currentEvidence, risk, failureReason }) {
-  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return initialScanEvidenceDraft;
-  const nextEvidence = { ...currentEvidence };
-  if (nextEvidence.contravention === 'No action') {
-    nextEvidence.contravention = suggestedContraventionForRisk(risk, failureReason);
-  }
-  if (nextEvidence.action === 'No action') {
-    nextEvidence.action =
-      risk.verificationStatus === VERIFICATION_STATUS.deactivated
-        ? 'Badge seized'
-        : 'Case review required';
-  }
-  return nextEvidence;
-}
-
-function suggestedContraventionForRisk(risk, failureReason) {
-  const explanation = [...risk.explanation, failureReason].join(' ').toLowerCase();
-  if (explanation.includes('stolen')) return 'Reported stolen badge';
-  if (explanation.includes('expired')) return 'Expired badge';
-  if (explanation.includes('unregistered vehicle')) return 'Badge mismatch';
-  if (explanation.includes('no matching') || explanation.includes('unknown')) return 'Badge mismatch';
-  if (explanation.includes('no active session')) return 'No active session';
-  return 'Suspected misuse';
-}
-
-function validateScanEvidence(evidence) {
-  if (!evidence || evidence.contravention === 'No action') {
-    return 'Choose a contravention before opening an enforcement case.';
-  }
-  if (evidence.action === 'No action') {
-    return 'Choose an enforcement action before opening an enforcement case.';
-  }
-  return '';
-}
-
-function describeScanInput(scanInput) {
-  return describeParsedScanInput(parseScanInput(scanInput));
-}
-
-function describeParsedScanInput(parsedScanInput) {
-  if (parsedScanInput.kind === 'qr-token') return 'Detected signed QR verification token';
-  if (parsedScanInput.kind === 'vehicle') return 'Detected vehicle registration lookup';
-  return 'Detected badge ID lookup';
-}
-
-function explainScanFailure(parsedScanInput, verifiedQrPayload, candidateBadge, verifiedBadge) {
-  if (verifiedBadge) return '';
-  if (parsedScanInput.kind === 'qr-token' && !verifiedQrPayload) {
-    return 'QR token could not be trusted. It may be expired, malformed, or signed for a different verification audience.';
-  }
-  if (parsedScanInput.kind === 'qr-token' && verifiedQrPayload && !candidateBadge) {
-    return `QR token is trusted, but no badge record exists for ${verifiedQrPayload.badgeId}.`;
-  }
-  if (parsedScanInput.kind === 'qr-token' && candidateBadge && !verifiedBadge) {
-    return 'QR token does not match the stored badge record or council.';
-  }
-  if (parsedScanInput.kind === 'vehicle') return 'No badge is linked to that vehicle registration.';
-  return 'No badge record matches that badge ID.';
-}
-
-function buildOfficerScanContext({ vehicle, location, scannedAt }) {
-  return {
-    vehicle,
-    location,
-    gps: gpsForKnownLocation(location),
-    time: scannedAt,
-    device: location.includes('Heathrow') ? 'NEW-DEVICE' : 'EO-TAB-07',
-  };
-}
-
-function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, risk, evidence, officerName }) {
-  return {
-    id,
-    badgeId,
-    vehicle: scanContext.vehicle,
-    location: scanContext.location,
-    gps: scanContext.gps,
-    officer: officerName,
-    time: scannedAt,
-    device: scanContext.device,
-    scanOutcome: scanOutcomeForVerification(risk),
-    contravention: evidence.contravention,
-    action: evidence.action,
-    officerNote: evidence.officerNote,
-    evidenceItems: scanEvidenceItems(evidence, scannedAt, officerName),
   };
 }

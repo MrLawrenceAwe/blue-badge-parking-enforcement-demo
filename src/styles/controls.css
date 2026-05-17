@@ -110,3 +110,11 @@ textarea:focus {
   outline: 3px solid var(--interactive-border);
   outline-offset: 2px;
 }
+
+@media (max-width: 719px) {
+  .role-switcher button,
+  .tab-list button {
+    min-height: 44px;
+    padding: 8px 11px;
+  }
+}
