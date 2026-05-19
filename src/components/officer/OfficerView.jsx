@@ -1,19 +1,19 @@
 import { Car, FileText, QrCode, Search } from 'lucide-react';
 import { statusLabel } from '../../domain/badges';
 import { actionOptions, contraventionOptions, NO_ENFORCEMENT_ACTION } from '../../domain/officerEvidence';
-import { VERIFICATION_STATUS, verificationStatusLabels } from '../../domain/risk';
+import { VERIFICATION_STATUS, verificationStatusLabels } from '../../domain/verification';
 import { isSessionActive } from '../../domain/sessions';
 import { formatDate } from '../../utils/date';
-import { RiskAlerts } from '../risk/RiskAlerts';
+import { VerificationChecks } from '../verification/VerificationChecks';
 import { SessionCard } from '../sessions/SessionCard';
 
 export function OfficerView({
   badge,
-  risk,
+  verification,
   scanResult,
   sessions,
   scanFields,
-  enforcementDetailsDraft,
+  scanCaseDraft,
   officerScanActions,
   officerMessage,
 }) {
@@ -22,14 +22,14 @@ export function OfficerView({
     : null;
   const isUnknown = !badge;
   const hasScanResult = Boolean(scanResult);
-  const canOpenCaseFromScan = scanResult && risk.verificationStatus !== VERIFICATION_STATUS.valid;
-  const isValid = risk.verificationStatus === VERIFICATION_STATUS.valid;
+  const canOpenCaseFromScan = scanResult && verification.verificationStatus !== VERIFICATION_STATUS.valid;
+  const isValid = verification.verificationStatus === VERIFICATION_STATUS.valid;
   const evidenceReady =
     !canOpenCaseFromScan ||
-    (enforcementDetailsDraft.values.contravention !== NO_ENFORCEMENT_ACTION &&
-      enforcementDetailsDraft.values.action !== NO_ENFORCEMENT_ACTION &&
-      enforcementDetailsDraft.values.officerNote.trim() &&
-      (enforcementDetailsDraft.values.vehiclePhotoRef.trim() || enforcementDetailsDraft.values.badgePhotoRef.trim()));
+    (scanCaseDraft.values.contravention !== NO_ENFORCEMENT_ACTION &&
+      scanCaseDraft.values.action !== NO_ENFORCEMENT_ACTION &&
+      scanCaseDraft.values.officerNote.trim() &&
+      (scanCaseDraft.values.vehiclePhotoRef.trim() || scanCaseDraft.values.badgePhotoRef.trim()));
   return (
     <div className="officer-layout">
       <section className="app-panel scan-panel">
@@ -71,19 +71,19 @@ export function OfficerView({
 
       <div className="officer-decision-stack">
         <section
-          className={`verification-result ${hasScanResult ? risk.severityClass : 'verification-pending'}${hasScanResult && isValid ? ' compact-verification-result' : ''}`}
+          className={`verification-result ${hasScanResult ? verification.severityClass : 'verification-pending'}${hasScanResult && isValid ? ' compact-verification-result' : ''}`}
           aria-live="polite"
         >
           <div>
             <p>{hasScanResult ? 'Verification result' : 'Verification status'}</p>
-            <h2>{hasScanResult ? verificationStatusLabels[risk.verificationStatus] : 'Awaiting check'}</h2>
+            <h2>{hasScanResult ? verificationStatusLabels[verification.verificationStatus] : 'Awaiting check'}</h2>
           </div>
           <div className="result-detail">
             {hasScanResult ? (
               <>
-                <strong>Verification score {risk.score}</strong>
-                <div className="risk-explanation">
-                  {risk.explanation.map((item) => (
+                <strong>Review score {verification.reviewScore}</strong>
+                <div className="verification-explanation">
+                  {verification.explanation.map((item) => (
                     <small key={item}>{item}</small>
                   ))}
                   {scanResult?.failureReason && <small>{scanResult.failureReason}</small>}
@@ -107,9 +107,9 @@ export function OfficerView({
               <label>
                 Contravention
                 <select
-                  value={enforcementDetailsDraft.values.contravention}
+                  value={scanCaseDraft.values.contravention}
                   onChange={(event) =>
-                    enforcementDetailsDraft.setValues((current) => ({ ...current, contravention: event.target.value }))
+                    scanCaseDraft.setValues((current) => ({ ...current, contravention: event.target.value }))
                   }
                 >
                   {contraventionOptions.map((option) => (
@@ -120,9 +120,9 @@ export function OfficerView({
               <label>
                 Enforcement action
                 <select
-                  value={enforcementDetailsDraft.values.action}
+                  value={scanCaseDraft.values.action}
                   onChange={(event) =>
-                    enforcementDetailsDraft.setValues((current) => ({ ...current, action: event.target.value }))
+                    scanCaseDraft.setValues((current) => ({ ...current, action: event.target.value }))
                   }
                 >
                   {actionOptions.map((option) => (
@@ -134,31 +134,31 @@ export function OfficerView({
             <label>
               Vehicle photo reference
               <input
-                value={enforcementDetailsDraft.values.vehiclePhotoRef}
+                value={scanCaseDraft.values.vehiclePhotoRef}
                 onChange={(event) =>
-                  enforcementDetailsDraft.setValues((current) => ({ ...current, vehiclePhotoRef: event.target.value }))
+                  scanCaseDraft.setValues((current) => ({ ...current, vehiclePhotoRef: event.target.value }))
                 }
-                placeholder="Evidence reference"
+                placeholder="Vehicle photo ID or file reference"
                 aria-label="Vehicle photo reference"
               />
             </label>
             <label>
               Badge photo reference
               <input
-                value={enforcementDetailsDraft.values.badgePhotoRef}
+                value={scanCaseDraft.values.badgePhotoRef}
                 onChange={(event) =>
-                  enforcementDetailsDraft.setValues((current) => ({ ...current, badgePhotoRef: event.target.value }))
+                  scanCaseDraft.setValues((current) => ({ ...current, badgePhotoRef: event.target.value }))
                 }
-                placeholder="Evidence reference"
+                placeholder="Badge photo ID or file reference"
                 aria-label="Badge photo reference"
               />
             </label>
             <label>
               Officer note
               <textarea
-                value={enforcementDetailsDraft.values.officerNote}
+                value={scanCaseDraft.values.officerNote}
                 onChange={(event) =>
-                  enforcementDetailsDraft.setValues((current) => ({ ...current, officerNote: event.target.value }))
+                  scanCaseDraft.setValues((current) => ({ ...current, officerNote: event.target.value }))
                 }
                 placeholder="Observation or conversation summary"
                 aria-label="Officer note"
@@ -231,7 +231,7 @@ export function OfficerView({
             </dl>
           )}
           {activeSession && <SessionCard session={activeSession} />}
-          <RiskAlerts risk={risk} />
+          <VerificationChecks verification={verification} />
         </section>
       </div>
     </div>

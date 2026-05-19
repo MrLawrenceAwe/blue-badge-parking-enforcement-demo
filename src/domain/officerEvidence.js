@@ -1,4 +1,4 @@
-import { VERIFICATION_STATUS } from './risk';
+import { VERIFICATION_STATUS } from './verification';
 
 export const NO_ENFORCEMENT_ACTION = 'No action';
 
@@ -19,7 +19,7 @@ export const actionOptions = [
   'Badge seized',
 ];
 
-export const initialEnforcementDetailsDraft = {
+export const initialScanCaseDraft = {
   contravention: NO_ENFORCEMENT_ACTION,
   action: NO_ENFORCEMENT_ACTION,
   officerNote: '',
@@ -27,15 +27,15 @@ export const initialEnforcementDetailsDraft = {
   badgePhotoRef: '',
 };
 
-export function suggestScanEvidence({ currentEvidence, risk, failureReason }) {
-  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return initialEnforcementDetailsDraft;
+export function suggestScanEvidence({ currentEvidence, verification, failureReason }) {
+  if (verification.verificationStatus === VERIFICATION_STATUS.valid) return initialScanCaseDraft;
   const nextEvidence = { ...currentEvidence };
   if (nextEvidence.contravention === NO_ENFORCEMENT_ACTION) {
-    nextEvidence.contravention = suggestedContraventionForRisk(risk, failureReason);
+    nextEvidence.contravention = suggestedContraventionForVerification(verification, failureReason);
   }
   if (nextEvidence.action === NO_ENFORCEMENT_ACTION) {
     nextEvidence.action =
-      risk.verificationStatus === VERIFICATION_STATUS.deactivated ? 'Badge seized' : 'Case review required';
+      verification.verificationStatus === VERIFICATION_STATUS.deactivated ? 'Badge seized' : 'Case review required';
   }
   return nextEvidence;
 }
@@ -50,8 +50,8 @@ export function validateScanEvidence(evidence) {
   return '';
 }
 
-function suggestedContraventionForRisk(risk, failureReason) {
-  const explanation = [...risk.explanation, failureReason].join(' ').toLowerCase();
+function suggestedContraventionForVerification(verification, failureReason) {
+  const explanation = [...verification.explanation, failureReason].join(' ').toLowerCase();
   if (explanation.includes('stolen')) return 'Reported stolen badge';
   if (explanation.includes('expired')) return 'Expired badge';
   if (explanation.includes('unregistered vehicle')) return 'Badge mismatch';

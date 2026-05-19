@@ -1,6 +1,6 @@
 import { isCaseOpen } from './cases';
 import { isSessionActive } from './sessions';
-import { riskBandLabels } from './risk';
+import { verificationPriorityLabels } from './verification';
 
 export function selectFilteredAdminBadges({ badges, sessions, scans, filters, verificationByBadge }) {
   return badges.filter((badge) => {
@@ -13,8 +13,8 @@ export function selectFilteredAdminBadges({ badges, sessions, scans, filters, ve
       badge.vehicle,
       badge.council,
       badge.status,
-      riskBandLabels[verification.riskBand],
-      verification.score,
+      verificationPriorityLabels[verification.reviewPriority],
+      verification.reviewScore,
       ...relatedSessions.flatMap((session) => [session.location, session.startedAt]),
       ...relatedScans.flatMap((scan) => [scan.location, scan.time, scan.scanOutcome]),
     ]
@@ -22,7 +22,8 @@ export function selectFilteredAdminBadges({ badges, sessions, scans, filters, ve
       .toLowerCase();
     const activityRecords = [...relatedSessions, ...relatedScans];
     const matchesSearch = searchableText.includes(filters.search.toLowerCase());
-    const matchesRisk = filters.risk === 'all' || verification.riskBand === filters.risk;
+    const matchesReviewPriority =
+      filters.reviewPriority === 'all' || verification.reviewPriority === filters.reviewPriority;
     const matchesLocation =
       !filters.location ||
       activityRecords.some((activityRecord) =>
@@ -35,7 +36,7 @@ export function selectFilteredAdminBadges({ badges, sessions, scans, filters, ve
           activityRecord.startedAt?.startsWith(filters.date) || activityRecord.time?.startsWith(filters.date),
       );
     const matchesStatus = filters.badgeStatus === 'all' || badge.status === filters.badgeStatus;
-    return matchesSearch && matchesRisk && matchesLocation && matchesDate && matchesStatus;
+    return matchesSearch && matchesReviewPriority && matchesLocation && matchesDate && matchesStatus;
   });
 }
 
@@ -66,8 +67,8 @@ export function selectAdminDashboardData({
       const verification = verificationByBadge[caseRecord.badgeId];
       return (
         isCaseOpen(caseRecord) &&
-        (verification?.score >= 31 ||
-          ['Officer review', 'High priority', 'Evidence requested'].includes(caseRecord.status))
+        (verification?.reviewScore >= 31 ||
+          ['Needs review', 'High-priority', 'Evidence requested'].includes(caseRecord.status))
       );
     }),
     suspendedOrStolenBadges: filteredBadges.filter((badge) => ['stolen', 'suspended'].includes(badge.status)),

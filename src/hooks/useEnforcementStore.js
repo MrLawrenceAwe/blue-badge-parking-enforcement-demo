@@ -3,7 +3,7 @@ import { initialAuditEvents, initialScans, initialSessions } from '../data/demoA
 import { initialBadges } from '../data/demoBadges';
 import { initialCases, initialNotifications, initialReplacementRequests } from '../data/demoCases';
 import { createSignedSessionRecord } from '../domain/sessionProofs';
-import { defaultRiskRules } from '../domain/risk';
+import { defaultVerificationScoringRules } from '../domain/verification';
 import { buildVerificationByBadge, selectActiveSessions, selectOpenCases } from '../domain/enforcementSelectors';
 import { nextRecordId } from '../domain/ids';
 import { createBrowserEnforcementRepository } from '../services/enforcementRepository';
@@ -21,7 +21,7 @@ function initialEnforcementState() {
     auditEvents: initialAuditEvents,
     notifications: initialNotifications,
     replacementRequests: initialReplacementRequests,
-    riskRules: defaultRiskRules,
+    verificationRules: defaultVerificationScoringRules,
   };
 }
 
@@ -30,16 +30,25 @@ export function migratePersistedEnforcementState(storedState) {
   const nextState = {
     ...initialState,
     ...storedState,
-    riskRules: {
-      ...initialState.riskRules,
+    verificationRules: {
+      ...initialState.verificationRules,
       ...(storedState?.riskRules ?? {}),
+      ...(storedState?.verificationRules ?? {}),
     },
   };
   nextState.cases = (storedState?.cases ?? initialState.cases).map((caseRecord) => ({
     ...caseRecord,
+    status: normaliseCaseStatus(caseRecord.status),
     assignedTeam: caseRecord.assignedTeam ?? caseRecord.assignedTo ?? caseRecord.assignee ?? 'Unassigned',
   }));
+  delete nextState.riskRules;
   return nextState;
+}
+
+function normaliseCaseStatus(status) {
+  if (status === 'Officer review') return 'Needs review';
+  if (status === 'High priority') return 'High-priority';
+  return status;
 }
 
 const enforcementRepository = createBrowserEnforcementRepository({
@@ -58,7 +67,7 @@ export function useEnforcementStore(currentActor = 'System') {
   const [auditEvents, setAuditEvents] = useState(storedState.auditEvents);
   const [notifications, setNotifications] = useState(storedState.notifications);
   const [replacementRequests, setReplacementRequests] = useState(storedState.replacementRequests);
-  const [riskRules, setRiskRules] = useState(storedState.riskRules);
+  const [verificationRules, setVerificationRules] = useState(storedState.verificationRules);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,15 +99,15 @@ export function useEnforcementStore(currentActor = 'System') {
       auditEvents,
       notifications,
       replacementRequests,
-      riskRules,
+      verificationRules,
     });
-  }, [badges, sessions, scans, cases, auditEvents, notifications, replacementRequests, riskRules]);
+  }, [badges, sessions, scans, cases, auditEvents, notifications, replacementRequests, verificationRules]);
 
   const activeSessions = selectActiveSessions(sessions);
   const openCases = selectOpenCases(cases);
   const verificationByBadge = useMemo(() => {
-    return buildVerificationByBadge({ badges, sessions, scans, riskRules });
-  }, [badges, sessions, scans, riskRules]);
+    return buildVerificationByBadge({ badges, sessions, scans, verificationRules });
+  }, [badges, sessions, scans, verificationRules]);
 
   function appendAuditEvent({ badgeId, type, actor = currentActor, detail }) {
     setAuditEvents((current) => [
@@ -140,7 +149,7 @@ export function useEnforcementStore(currentActor = 'System') {
     setAuditEvents(nextState.auditEvents);
     setNotifications(nextState.notifications);
     setReplacementRequests(nextState.replacementRequests);
-    setRiskRules(nextState.riskRules);
+    setVerificationRules(nextState.verificationRules);
   }
 
   return {
@@ -159,8 +168,8 @@ export function useEnforcementStore(currentActor = 'System') {
     queueNotification,
     replacementRequests,
     setReplacementRequests,
-    riskRules,
-    setRiskRules,
+    verificationRules,
+    setVerificationRules,
     verificationByBadge,
     appendAuditEvent,
     resetEnforcementState,

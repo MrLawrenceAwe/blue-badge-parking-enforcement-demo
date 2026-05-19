@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { selectAdminDashboardData } from './adminViewSelectors';
+import { selectAdminDashboardData } from './adminDashboardSelectors';
 
 describe('selectAdminDashboardData', () => {
-  it('filters admin records by risk and selected badge', () => {
+  it('filters admin records by review priority and selected badge', () => {
     const badges = [
       { id: 'BB-1', holder: 'One', vehicle: 'AA11 AAA', council: 'Council', status: 'valid' },
       { id: 'BB-2', holder: 'Two', vehicle: 'BB22 BBB', council: 'Council', status: 'stolen' },
     ];
     const cases = [
-      { id: 'CASE-1', badgeId: 'BB-2', status: 'High priority' },
-      { id: 'CASE-2', badgeId: 'UNKNOWN', status: 'Officer review' },
+      { id: 'CASE-1', badgeId: 'BB-2', status: 'High-priority' },
+      { id: 'CASE-2', badgeId: 'UNKNOWN', status: 'Needs review' },
     ];
     const verificationByBadge = {
-      'BB-1': { score: 0, riskBand: 'normal' },
-      'BB-2': { score: 90, riskBand: 'high' },
+      'BB-1': { reviewScore: 0, reviewPriority: 'normal' },
+      'BB-2': { reviewScore: 90, reviewPriority: 'high' },
     };
 
     const dashboard = selectAdminDashboardData({
@@ -21,7 +21,7 @@ describe('selectAdminDashboardData', () => {
       sessions: [],
       scans: [],
       cases,
-      filters: { search: '', risk: 'high', location: '', date: '', badgeStatus: 'all' },
+      filters: { search: '', reviewPriority: 'high', location: '', date: '', badgeStatus: 'all' },
       verificationByBadge,
       selectedBadgeId: 'BB-2',
     });

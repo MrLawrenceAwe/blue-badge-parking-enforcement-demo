@@ -87,7 +87,7 @@
   grid-column: 1 / -1;
 }
 
-.risk-panel {
+.review-score-panel {
   grid-column: 1 / -1;
 }
 
@@ -95,13 +95,13 @@
   box-shadow: none;
 }
 
-.admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
+.admin-layout .dashboard-grid > .app-panel:not(.review-score-panel) {
   background: transparent;
   border-color: transparent;
   padding: 8px 0 0;
 }
 
-.admin-layout .dashboard-grid > .app-panel:not(.risk-panel) .app-panel-heading {
+.admin-layout .dashboard-grid > .app-panel:not(.review-score-panel) .app-panel-heading {
   border-bottom: 1px solid var(--line);
   padding-bottom: 7px;
 }
@@ -165,7 +165,7 @@ th {
   text-transform: uppercase;
 }
 
-.risk-register-button {
+.verification-register-button {
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -176,26 +176,26 @@ th {
   text-align: left;
 }
 
-.risk-register-button::after {
+.verification-register-button::after {
   content: '';
   display: none;
 }
 
-.risk-register-button span {
+.verification-register-button span {
   color: var(--blue-dark);
   font-weight: 650;
 }
 
-.risk-register-button small {
+.verification-register-button small {
   color: var(--muted);
 }
 
-.risk-register-button:hover span {
+.verification-register-button:hover span {
   text-decoration: underline;
 }
 
 @media (max-width: 719px) {
-  .admin-layout .dashboard-grid > .app-panel:not(.risk-panel) {
+  .admin-layout .dashboard-grid > .app-panel:not(.review-score-panel) {
     padding-top: 6px;
   }
 
@@ -228,7 +228,7 @@ th {
     order: 2;
   }
 
-  .dashboard-grid > .risk-panel {
+  .dashboard-grid > .review-score-panel {
     order: 3;
   }
 
@@ -244,7 +244,7 @@ th {
     order: 6;
   }
 
-  .dashboard-grid > .risk-rules-panel {
+  .dashboard-grid > .verification-rules-panel {
     order: 7;
   }
 
@@ -296,7 +296,7 @@ th {
     grid-column: 1 / -1;
   }
 
-  .risk-register-button::after {
+  .verification-register-button::after {
     border-radius: 6px;
     content: '';
     display: block;
@@ -304,11 +304,11 @@ th {
     position: absolute;
   }
 
-  .risk-register-button:hover::after {
+  .verification-register-button:hover::after {
     background: color-mix(in srgb, var(--blue) 6%, transparent);
   }
 
-  .risk-register-button:focus-visible::after {
+  .verification-register-button:focus-visible::after {
     outline: 4px solid #ffdd00;
     outline-offset: 2px;
   }

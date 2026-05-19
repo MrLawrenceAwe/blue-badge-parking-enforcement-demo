@@ -4,7 +4,7 @@ import { validateAndReserveOpenCase } from '../domain/caseReservation';
 import { createOfficerScanCase } from '../domain/cases';
 import { scanEvidenceItems } from '../domain/evidence';
 import { nextRecordId } from '../domain/ids';
-import { initialEnforcementDetailsDraft, suggestScanEvidence, validateScanEvidence } from '../domain/officerEvidence';
+import { initialScanCaseDraft, suggestScanEvidence, validateScanEvidence } from '../domain/officerEvidence';
 import {
   buildOfficerScanContext,
   buildOfficerScanRecord,
@@ -15,10 +15,10 @@ import {
 } from '../domain/officerScan';
 import {
   VERIFICATION_STATUS,
-  assessBadgeVerification,
-  riskFromPermissionError,
+  assessBadgeVerificationRisk,
+  verificationAssessmentFromPermissionError,
   scanOutcomeForVerification,
-} from '../domain/risk';
+} from '../domain/verification';
 import { parseScanInput } from '../domain/scanInput';
 import { verifyBadgeToken } from '../domain/badgeTokens';
 import { hasPermission, PERMISSIONS } from '../domain/permissions';
@@ -36,13 +36,13 @@ export function useOfficerScan({
   cases,
   setCases,
   setSelectedBadgeId,
-  riskRules,
+  verificationRules,
   appendAuditEvent,
 }) {
   const [scanInput, setScanInput] = useState('BB-WCC-104928');
   const [scanLocation, setScanLocation] = useState('Oxford Street W1C');
   const [scanVehicle, setScanVehicle] = useState('LS24 HRT');
-  const [enforcementDetailsDraft, setEnforcementDetailsDraft] = useState(initialEnforcementDetailsDraft);
+  const [scanCaseDraft, setScanCaseDraft] = useState(initialScanCaseDraft);
   const [lastScanResult, setLastScanResult] = useState(null);
   const [officerNotice, setOfficerNotice] = useState('');
   const { reserveCaseIdForBadge } = useCaseCreationGuard(cases, 4200 + cases.length - 1);
@@ -52,9 +52,9 @@ export function useOfficerScan({
     resetScanResult();
   }, [authUser.email]);
 
-  const visibleVerificationRisk =
-    lastScanResult?.risk ??
-    assessBadgeVerification(
+  const visibleVerificationAssessment =
+    lastScanResult?.verification ??
+    assessBadgeVerificationRisk(
       selectedBadge,
       sessions,
       scans,
@@ -63,7 +63,7 @@ export function useOfficerScan({
         location: scanLocation,
         time: timestampNow(),
       },
-      riskRules,
+      verificationRules,
     );
 
   function resetScanResult() {
@@ -71,12 +71,12 @@ export function useOfficerScan({
     setOfficerNotice('');
   }
 
-  function updateEnforcementDetailsDraft(enforcementDetailsUpdater) {
-    setEnforcementDetailsDraft((currentEvidence) => {
+  function updateScanCaseDraft(scanCaseDraftUpdater) {
+    setScanCaseDraft((currentEvidence) => {
       const nextEvidence =
-        typeof enforcementDetailsUpdater === 'function'
-          ? enforcementDetailsUpdater(currentEvidence)
-          : enforcementDetailsUpdater;
+        typeof scanCaseDraftUpdater === 'function'
+          ? scanCaseDraftUpdater(currentEvidence)
+          : scanCaseDraftUpdater;
       setLastScanResult((currentResult) => {
         if (!currentResult) return currentResult;
         setScans((currentScans) =>
@@ -102,7 +102,7 @@ export function useOfficerScan({
     if (!hasPermission({ authUser, activeRole: role, permission: PERMISSIONS.verifyBadge })) {
       setLastScanResult({
         badge: null,
-        risk: riskFromPermissionError('Only an enforcement officer can run badge verification'),
+        verification: verificationAssessmentFromPermissionError('Only an enforcement officer can run badge verification'),
         input: scanInput,
         vehicle: normaliseVehicle(scanVehicle),
         location: scanLocation,
@@ -126,26 +126,26 @@ export function useOfficerScan({
       parsedScanInput.kind === 'qr-token'
         ? await verifyBadgeBackedToken(parsedScanInput.value, candidateBadge, scannedAt)
         : candidateBadge;
-    const preFailureVerdict = badge
-      ? assessBadgeVerification(
+    const statusBeforeCurrentFailure = badge
+      ? assessBadgeVerificationRisk(
           badge,
           sessions,
           scans,
           {
             ...scanContext,
           },
-          riskRules,
+          verificationRules,
         ).verificationStatus
       : VERIFICATION_STATUS.invalid;
-    const risk = assessBadgeVerification(
+    const verification = assessBadgeVerificationRisk(
       badge,
       sessions,
       scans,
       {
         ...scanContext,
-        includeCurrentFailure: preFailureVerdict !== VERIFICATION_STATUS.valid,
+        includeCurrentFailure: statusBeforeCurrentFailure !== VERIFICATION_STATUS.valid,
       },
-      riskRules,
+      verificationRules,
     );
 
     const scanId = nextRecordId(scans, 'SC-', 90199);
@@ -156,18 +156,18 @@ export function useOfficerScan({
       verifiedBadge: badge,
     });
     const suggestedEvidence = suggestScanEvidence({
-      currentEvidence: enforcementDetailsDraft,
-      risk,
+      currentEvidence: scanCaseDraft,
+      verification,
       failureReason,
     });
-    setEnforcementDetailsDraft(suggestedEvidence);
+    setScanCaseDraft(suggestedEvidence);
     setScans((current) => [
       buildOfficerScanRecord({
         id: scanId,
         badgeId: badge?.id ?? parsedScanInput.value,
         scanContext,
         scannedAt,
-        risk,
+        verification,
         evidence: suggestedEvidence,
         officerName: authUser.name,
       }),
@@ -175,7 +175,7 @@ export function useOfficerScan({
     ]);
     setLastScanResult({
       badge,
-      risk,
+      verification,
       input: verifiedQrPayload?.badgeId ?? parsedScanInput.value,
       vehicle: observedVehicle,
       location: scanLocation,
@@ -189,7 +189,7 @@ export function useOfficerScan({
       badgeId: badge?.id ?? parsedScanInput.value,
       type: 'Officer scan',
       actor: authUser.name,
-      detail: `${scanOutcomeForVerification(risk)} scan at ${scanLocation}. Action: ${suggestedEvidence.action}.`,
+      detail: `${scanOutcomeForVerification(verification)} scan at ${scanLocation}. Action: ${suggestedEvidence.action}.`,
     });
     if (badge) setSelectedBadgeId(badge.id);
     setOfficerNotice('');
@@ -255,10 +255,10 @@ export function useOfficerScan({
     setScanLocation,
     scanVehicle,
     setScanVehicle,
-    enforcementDetailsDraft,
-    updateEnforcementDetailsDraft,
+    scanCaseDraft,
+    updateScanCaseDraft,
     lastScanResult,
-    visibleVerificationRisk,
+    visibleVerificationAssessment,
     officerNotice,
     inputDescription,
     resetScanResult,

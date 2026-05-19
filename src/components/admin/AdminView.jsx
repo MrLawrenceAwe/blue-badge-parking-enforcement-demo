@@ -3,23 +3,23 @@ import { AdminFilters } from './AdminFilters';
 import { AdminOverviewTab } from './AdminOverviewTab';
 import { AuditTab } from './AuditTab';
 import { CaseManagementTab } from './CaseManagementTab';
-import { RiskRulesTab } from './RiskRulesTab';
+import { VerificationRulesTab } from './VerificationRulesTab';
 
 const adminSections = [
   { id: 'overview', label: 'Overview' },
   { id: 'cases', label: 'Cases' },
-  { id: 'riskRules', label: 'Risk rules' },
+  { id: 'verificationRules', label: 'Verification rules' },
   { id: 'audit', label: 'Audit' },
 ];
 
 export function AdminView({
-  adminViewData,
+  adminDashboardData,
   filterForm,
   selectedBadgeId,
   selectedBadge,
   caseDraft,
   caseActions,
-  riskRules,
+  verificationRules,
   adminMessage,
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -54,7 +54,7 @@ export function AdminView({
   };
 
   const selectCaseForReview = (caseRecord) => {
-    const hasKnownBadge = adminViewData.allBadges.some((badge) => badge.id === caseRecord.badgeId);
+    const hasKnownBadge = adminDashboardData.allBadges.some((badge) => badge.id === caseRecord.badgeId);
     if (hasKnownBadge) {
       caseActions.selectBadge(caseRecord.badgeId);
     }
@@ -88,11 +88,11 @@ export function AdminView({
             </button>
           ))}
         </div>
-        {activeSectionId !== 'riskRules' && (
+        {activeSectionId !== 'verificationRules' && (
           <AdminFilters
             filterForm={filterForm}
             filtersOpen={filtersOpen}
-            resultCount={adminViewData.filteredBadges.length}
+            resultCount={adminDashboardData.filteredBadges.length}
             setFiltersOpen={setFiltersOpen}
           />
         )}
@@ -106,22 +106,22 @@ export function AdminView({
       >
         {activeSectionId === 'overview' && (
           <AdminOverviewTab
-            filteredBadges={adminViewData.filteredBadges}
-            filteredActiveSessions={adminViewData.filteredActiveSessions}
-            filteredScans={adminViewData.filteredScans}
-            reviewQueueCases={adminViewData.reviewQueueCases}
-            suspendedOrStolenBadges={adminViewData.suspendedOrStolenBadges}
-            verificationByBadge={adminViewData.verificationByBadge}
+            filteredBadges={adminDashboardData.filteredBadges}
+            filteredActiveSessions={adminDashboardData.filteredActiveSessions}
+            filteredScans={adminDashboardData.filteredScans}
+            reviewQueueCases={adminDashboardData.reviewQueueCases}
+            suspendedOrStolenBadges={adminDashboardData.suspendedOrStolenBadges}
+            verificationByBadge={adminDashboardData.verificationByBadge}
             selectCase={selectCaseForReview}
           />
         )}
 
         {activeSectionId === 'cases' && (
           <CaseManagementTab
-            allBadges={adminViewData.allBadges}
+            allBadges={adminDashboardData.allBadges}
             selectedBadgeId={selectedBadgeId}
             selectedBadge={selectedBadge}
-            selectedBadgeCases={adminViewData.selectedBadgeCases}
+            selectedBadgeCases={adminDashboardData.selectedBadgeCases}
             caseDraft={caseDraft.values}
             updateCaseDraft={caseDraft.update}
             noteDraftByCaseId={caseDraft.noteDraftByCaseId}
@@ -131,19 +131,19 @@ export function AdminView({
           />
         )}
 
-        {activeSectionId === 'riskRules' && (
-          <RiskRulesTab
-            riskRules={riskRules.values}
-            updateRiskRule={riskRules.update}
-            riskRuleNotice={riskRules.notice}
+        {activeSectionId === 'verificationRules' && (
+          <VerificationRulesTab
+            verificationRules={verificationRules.values}
+            updateVerificationRule={verificationRules.update}
+            verificationRuleNotice={verificationRules.notice}
           />
         )}
 
         {activeSectionId === 'audit' && (
           <AuditTab
-            auditEvents={adminViewData.auditEvents}
-            notifications={adminViewData.notifications}
-            replacementRequests={adminViewData.replacementRequests}
+            auditEvents={adminDashboardData.auditEvents}
+            notifications={adminDashboardData.notifications}
+            replacementRequests={adminDashboardData.replacementRequests}
           />
         )}
       </section>

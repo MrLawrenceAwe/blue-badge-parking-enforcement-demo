@@ -2,9 +2,9 @@ import { AdminView } from '../admin/AdminView';
 import { CarerView } from '../carer/CarerView';
 import { HolderView } from '../holder/HolderView';
 import { OfficerView } from '../officer/OfficerView';
-import { selectAdminDashboardData } from '../../domain/adminViewSelectors';
+import { selectAdminDashboardData } from '../../domain/adminDashboardSelectors';
 
-export function RoleRouter({ auth, enforcementStore, badgeActions, officerScan, adminCases, riskRuleActions }) {
+export function RoleViewSwitch({ auth, enforcementStore, badgeActions, officerScan, adminCases, verificationRuleActions }) {
   const selectedBadgeActivity = {
     replacementRequests: enforcementStore.replacementRequests.filter(
       (request) => request.badgeId === auth.selectedBadge.id,
@@ -52,7 +52,7 @@ export function RoleRouter({ auth, enforcementStore, badgeActions, officerScan, 
         auth={auth}
         enforcementStore={enforcementStore}
         adminCases={adminCases}
-        riskRuleActions={riskRuleActions}
+        verificationRuleActions={verificationRuleActions}
       />
     );
   }
@@ -71,7 +71,7 @@ function HolderRoute({ auth, enforcementStore, badgeActions, replacementForm, se
       replacementForm={replacementForm}
       replacementRequests={selectedBadgeActivity.replacementRequests}
       notifications={selectedBadgeActivity.notifications}
-      risk={enforcementStore.verificationByBadge[auth.selectedBadge.id]}
+      verification={enforcementStore.verificationByBadge[auth.selectedBadge.id]}
     />
   );
 }
@@ -95,7 +95,7 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
   return (
     <OfficerView
       badge={officerScan.lastScanResult ? officerScan.lastScanResult.badge : auth.selectedBadge}
-      risk={officerScan.visibleVerificationRisk}
+      verification={officerScan.visibleVerificationAssessment}
       scanResult={officerScan.lastScanResult}
       sessions={enforcementStore.activeSessions}
       scanFields={{
@@ -104,9 +104,9 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
         location: officerScan.scanLocation,
         vehicle: officerScan.scanVehicle,
       }}
-      enforcementDetailsDraft={{
-        values: officerScan.enforcementDetailsDraft,
-        setValues: officerScan.updateEnforcementDetailsDraft,
+      scanCaseDraft={{
+        values: officerScan.scanCaseDraft,
+        setValues: officerScan.updateScanCaseDraft,
       }}
       officerScanActions={{
         setInput: officerScan.setScanInput,
@@ -120,20 +120,20 @@ function OfficerRoute({ auth, enforcementStore, officerScan }) {
   );
 }
 
-function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
+function AdminRoute({ auth, enforcementStore, adminCases, verificationRuleActions }) {
   const selectedAdminBadge = auth.roleBadges.find((badge) => badge.id === auth.selectedBadgeId) ?? null;
-  const adminViewData = selectAdminDashboardData({
+  const adminDashboardData = selectAdminDashboardData({
     badges: enforcementStore.badges,
     sessions: enforcementStore.sessions,
     scans: enforcementStore.scans,
     cases: enforcementStore.cases,
-    filters: adminCases.adminRecordFilters,
+    filters: adminCases.adminDashboardFilters,
     verificationByBadge: enforcementStore.verificationByBadge,
     selectedBadgeId: auth.selectedBadgeId,
   });
   const filterForm = {
-    values: adminCases.adminRecordFilters,
-    setValues: adminCases.setAdminRecordFilters,
+    values: adminCases.adminDashboardFilters,
+    setValues: adminCases.setAdminDashboardFilters,
   };
   const caseActions = {
     selectBadge: (badgeId) => {
@@ -147,19 +147,19 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
     reactivateBadge: adminCases.reactivateBadgeAfterReview,
   };
   const selectedCaseRecords = selectedAdminBadge
-    ? adminViewData.selectedBadgeCases
+    ? adminDashboardData.selectedBadgeCases
     : enforcementStore.cases.filter((caseRecord) => caseRecord.id === adminCases.focusedCaseId);
 
   return (
     <AdminView
-      adminViewData={{
+      adminDashboardData={{
         allBadges: enforcementStore.badges,
-        filteredBadges: adminViewData.filteredBadges,
-        filteredActiveSessions: adminViewData.filteredActiveSessions,
-        filteredScans: adminViewData.filteredScans,
+        filteredBadges: adminDashboardData.filteredBadges,
+        filteredActiveSessions: adminDashboardData.filteredActiveSessions,
+        filteredScans: adminDashboardData.filteredScans,
         selectedBadgeCases: selectedCaseRecords,
-        reviewQueueCases: adminViewData.reviewQueueCases,
-        suspendedOrStolenBadges: adminViewData.suspendedOrStolenBadges,
+        reviewQueueCases: adminDashboardData.reviewQueueCases,
+        suspendedOrStolenBadges: adminDashboardData.suspendedOrStolenBadges,
         auditEvents: enforcementStore.auditEvents,
         notifications: enforcementStore.notifications,
         replacementRequests: enforcementStore.replacementRequests,
@@ -175,10 +175,10 @@ function AdminRoute({ auth, enforcementStore, adminCases, riskRuleActions }) {
         setNoteDraftByCaseId: adminCases.setNoteDraftByCaseId,
       }}
       caseActions={caseActions}
-      riskRules={{
-        values: enforcementStore.riskRules,
-        update: riskRuleActions.updateRiskRule,
-        notice: riskRuleActions.riskRuleNotice,
+      verificationRules={{
+        values: enforcementStore.verificationRules,
+        update: verificationRuleActions.updateVerificationRule,
+        notice: verificationRuleActions.verificationRuleNotice,
       }}
       adminMessage={adminCases.adminNotice}
     />

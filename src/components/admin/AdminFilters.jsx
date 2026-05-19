@@ -2,7 +2,7 @@ import { Search } from 'lucide-react';
 
 const defaultFilters = {
   search: '',
-  risk: 'all',
+  reviewPriority: 'all',
   location: '',
   date: '',
   badgeStatus: 'all',
@@ -13,7 +13,7 @@ export function AdminFilters({ filterForm, filtersOpen, resultCount, setFiltersO
     filterForm.values.search,
     filterForm.values.location,
     filterForm.values.date,
-    filterForm.values.risk !== 'all',
+    filterForm.values.reviewPriority !== 'all',
     filterForm.values.badgeStatus !== 'all',
   ].filter(Boolean).length;
 
@@ -51,16 +51,16 @@ export function AdminFilters({ filterForm, filtersOpen, resultCount, setFiltersO
           />
         </label>
         <label>
-          Review priority
+          Escalation level
           <select
-            value={filterForm.values.risk}
-            onChange={(event) => filterForm.setValues({ ...filterForm.values, risk: event.target.value })}
+            value={filterForm.values.reviewPriority}
+            onChange={(event) => filterForm.setValues({ ...filterForm.values, reviewPriority: event.target.value })}
           >
             <option value="all">All</option>
             <option value="normal">Normal</option>
             <option value="monitor">Monitor</option>
-            <option value="review">Officer review</option>
-            <option value="high">High priority</option>
+            <option value="review">Needs review</option>
+            <option value="high">High-priority</option>
           </select>
         </label>
         <label>

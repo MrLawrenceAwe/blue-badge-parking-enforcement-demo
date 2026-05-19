@@ -29,9 +29,9 @@ export function useAdminCases({
   const [focusedCaseId, setFocusedCaseId] = useState(null);
   const [noteDraftByCaseId, setNoteDraftByCaseId] = useState({});
   const [adminNotice, setAdminNotice] = useState('');
-  const [adminRecordFilters, setAdminRecordFilters] = useState({
+  const [adminDashboardFilters, setAdminDashboardFilters] = useState({
     search: '',
-    risk: 'all',
+    reviewPriority: 'all',
     location: '',
     date: '',
     badgeStatus: 'all',
@@ -56,7 +56,7 @@ export function useAdminCases({
       setAdminNotice(validationError);
       return;
     }
-    const risk = verificationByBadge[selectedBadge.id];
+    const verification = verificationByBadge[selectedBadge.id];
     const { caseId, error } = validateAndReserveOpenCase({
       badgeId: selectedBadge.id,
       cases,
@@ -74,7 +74,7 @@ export function useAdminCases({
       createAdminCase({
         id: caseId,
         badge: selectedBadge,
-        risk,
+        verification,
         caseDraft,
         addedBy: authUser.name,
         addedAt: timestampNow(),
@@ -86,7 +86,7 @@ export function useAdminCases({
       badgeId: selectedBadge.id,
       type: 'Case opened',
       actor: authUser.name,
-      detail: `Admin opened ${caseId} with status ${risk.score >= 81 && caseDraft.status === 'Open' ? 'High priority' : caseDraft.status}.`,
+      detail: `Admin opened ${caseId} with status ${verification.reviewScore >= 81 && caseDraft.status === 'Open' ? 'High-priority' : caseDraft.status}.`,
     });
     resetCaseDraft();
     setAdminNotice(`Case ${caseId} opened for ${selectedBadge.id}.`);
@@ -195,8 +195,8 @@ export function useAdminCases({
     setFocusedCaseId,
     noteDraftByCaseId,
     setNoteDraftByCaseId,
-    adminRecordFilters,
-    setAdminRecordFilters,
+    adminDashboardFilters,
+    setAdminDashboardFilters,
     adminNotice,
     createCaseForSelectedBadge,
     reactivateBadgeAfterReview,

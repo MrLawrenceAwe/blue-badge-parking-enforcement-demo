@@ -2,14 +2,14 @@ export const PERMISSIONS = {
   manageOwnBadge: 'manageOwnBadge',
   verifyBadge: 'verifyBadge',
   manageCases: 'manageCases',
-  tuneRiskRules: 'tuneRiskRules',
+  tuneVerificationRules: 'tuneVerificationRules',
 };
 
 const permissionsByRole = {
   holder: new Set([PERMISSIONS.manageOwnBadge]),
   carer: new Set([PERMISSIONS.manageOwnBadge]),
   officer: new Set([PERMISSIONS.verifyBadge]),
-  admin: new Set([PERMISSIONS.manageCases, PERMISSIONS.tuneRiskRules]),
+  admin: new Set([PERMISSIONS.manageCases, PERMISSIONS.tuneVerificationRules]),
 };
 
 export function hasPermission({ authUser, activeRole, permission, badgeId }) {

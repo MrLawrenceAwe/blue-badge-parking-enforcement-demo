@@ -1,7 +1,7 @@
 import { normaliseVehicle, vehicleSearchKey } from './badges';
 import { scanEvidenceItems } from './evidence';
 import { gpsForKnownLocation } from './locations';
-import { scanOutcomeForVerification } from './risk';
+import { scanOutcomeForVerification } from './verification';
 import { parseScanInput } from './scanInput';
 
 export function describeScanInput(scanInput) {
@@ -52,7 +52,7 @@ export function buildOfficerScanContext({ vehicle, location, scannedAt }) {
   };
 }
 
-export function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, risk, evidence, officerName }) {
+export function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, verification, evidence, officerName }) {
   return {
     id,
     badgeId,
@@ -62,7 +62,7 @@ export function buildOfficerScanRecord({ id, badgeId, scanContext, scannedAt, ri
     officer: officerName,
     time: scannedAt,
     device: scanContext.device,
-    scanOutcome: scanOutcomeForVerification(risk),
+    scanOutcome: scanOutcomeForVerification(verification),
     contravention: evidence.contravention,
     action: evidence.action,
     officerNote: evidence.officerNote,

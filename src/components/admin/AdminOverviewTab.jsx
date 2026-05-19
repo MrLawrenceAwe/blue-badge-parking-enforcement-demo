@@ -1,5 +1,5 @@
 import { Clock3, Gauge, QrCode, ShieldAlert, Siren } from 'lucide-react';
-import { riskBandLabels } from '../../domain/risk';
+import { verificationPriorityLabels } from '../../domain/verification';
 import { formatTime } from '../../utils/date';
 import { SessionCard } from '../sessions/SessionCard';
 import { BadgeStatusPill } from '../ui/BadgeStatusPill';
@@ -68,9 +68,9 @@ export function AdminOverviewTab({
         </div>
       </div>
 
-      <div className="app-panel risk-panel">
+      <div className="app-panel review-score-panel">
         <div className="app-panel-heading">
-          <h2>Badge verification scores</h2>
+          <h2>Badge review scores</h2>
           <Gauge aria-hidden="true" />
         </div>
         <div className="table-wrap">
@@ -80,7 +80,7 @@ export function AdminOverviewTab({
                 <th>Badge</th>
                 <th>Vehicle</th>
                 <th>Status</th>
-                <th>Score</th>
+                <th>Review score</th>
               </tr>
             </thead>
             <tbody>
@@ -89,7 +89,7 @@ export function AdminOverviewTab({
                   <td data-label="Badge">
                     <button
                       type="button"
-                      className="risk-register-button"
+                      className="verification-register-button"
                       onClick={() => selectCase({ badgeId: badge.id })}
                     >
                       <span>{badge.id}</span>
@@ -100,10 +100,10 @@ export function AdminOverviewTab({
                   <td data-label="Status">
                     <BadgeStatusPill status={badge.status} />
                   </td>
-                  <td data-label="Score">
-                    <strong>{verificationByBadge[badge.id].score}</strong>
+                  <td data-label="Review score">
+                    <strong>{verificationByBadge[badge.id].reviewScore}</strong>
                     <br />
-                    <small>{riskBandLabels[verificationByBadge[badge.id].riskBand]}</small>
+                    <small>{verificationPriorityLabels[verificationByBadge[badge.id].reviewPriority]}</small>
                   </td>
                 </tr>
               ))}

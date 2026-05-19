@@ -78,11 +78,11 @@ test('officer gets a specific reason for an untrusted QR token', async ({ page }
   await expect(page.getByText(/QR token could not be trusted/i)).toBeVisible();
 });
 
-test('admin risk rule validation rejects inverted thresholds', async ({ page }) => {
+test('admin verification rule validation rejects inverted thresholds', async ({ page }) => {
   await resetDemo(page);
 
   await page.getByRole('button', { name: /Admin/i }).click();
-  await page.getByRole('tab', { name: /Risk rules/i }).click();
+  await page.getByRole('tab', { name: /Verification rules/i }).click();
   await page.getByLabel(/Review threshold/i).fill('95');
 
   await expect(page.getByText(/Verification rule not updated/i)).toBeVisible();

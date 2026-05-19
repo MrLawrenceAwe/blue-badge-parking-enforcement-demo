@@ -1,6 +1,6 @@
 import { AppHeader } from './components/app/AppHeader';
 import { AuthStrip } from './components/app/AuthStrip';
-import { RoleRouter } from './components/app/RoleRouter';
+import { RoleViewSwitch } from './components/app/RoleViewSwitch';
 import { SummaryStrip } from './components/app/SummaryStrip';
 import { demoUsers } from './data/demoUsers';
 import { useBadgeActions } from './hooks/useBadgeActions';
@@ -8,7 +8,7 @@ import { useAdminCases } from './hooks/useAdminCases';
 import { useAuthSession } from './hooks/useAuthSession';
 import { useEnforcementStore } from './hooks/useEnforcementStore';
 import { useOfficerScan } from './hooks/useOfficerScan';
-import { useRiskRules } from './hooks/useRiskRules';
+import { useVerificationRules } from './hooks/useVerificationRules';
 import { useThemePreference } from './hooks/useThemePreference';
 
 export function App() {
@@ -43,7 +43,7 @@ export function App() {
     cases: enforcementStore.cases,
     setCases: enforcementStore.setCases,
     setSelectedBadgeId: auth.setSelectedBadgeId,
-    riskRules: enforcementStore.riskRules,
+    verificationRules: enforcementStore.verificationRules,
     appendAuditEvent: enforcementStore.appendAuditEvent,
   });
 
@@ -58,8 +58,8 @@ export function App() {
     appendAuditEvent: enforcementStore.appendAuditEvent,
     queueNotification: enforcementStore.queueNotification,
   });
-  const riskRuleActions = useRiskRules({
-    setRiskRules: enforcementStore.setRiskRules,
+  const verificationRuleActions = useVerificationRules({
+    setVerificationRules: enforcementStore.setVerificationRules,
   });
 
   return (
@@ -85,18 +85,18 @@ export function App() {
           ).length
         }
         highPriorityReviewCount={
-          Object.values(enforcementStore.verificationByBadge).filter((verification) => verification.score >= 81).length
+          Object.values(enforcementStore.verificationByBadge).filter((verification) => verification.reviewScore >= 81).length
         }
         openCaseCount={enforcementStore.openCases.length}
       />
 
-      <RoleRouter
+      <RoleViewSwitch
         auth={auth}
         enforcementStore={enforcementStore}
         badgeActions={badgeActions}
         officerScan={officerScan}
         adminCases={adminCases}
-        riskRuleActions={riskRuleActions}
+        verificationRuleActions={verificationRuleActions}
       />
     </main>
   );

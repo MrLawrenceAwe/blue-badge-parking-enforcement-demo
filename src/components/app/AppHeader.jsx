@@ -11,7 +11,7 @@ const roleHeroNotes = {
   holder: 'Show your badge, manage parking sessions, and report problems quickly.',
   carer: 'Manage badges and parking sessions for the people you support.',
   officer: 'Verify badges, check vehicle matches, and record enforcement evidence.',
-  admin: 'Review priority, manage cases, and monitor badge activity across the service.',
+  admin: 'Review escalations, manage cases, and monitor badge activity across the service.',
 };
 
 export function AppHeader({ role, availableRoles, roleUsers, setRole, selectRoleUser }) {

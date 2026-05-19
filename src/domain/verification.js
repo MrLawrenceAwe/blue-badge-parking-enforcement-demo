@@ -10,11 +10,11 @@ export const VERIFICATION_STATUS = {
   invalid: 'invalid'
 };
 
-export const riskBandLabels = {
+export const verificationPriorityLabels = {
   normal: 'Normal',
   monitor: 'Monitor',
-  review: 'Officer review',
-  high: 'High priority alert'
+  review: 'Needs review',
+  high: 'High-priority alert'
 };
 
 export const verificationStatusLabels = {
@@ -24,21 +24,21 @@ export const verificationStatusLabels = {
   [VERIFICATION_STATUS.invalid]: 'Invalid'
 };
 
-const RISK_BAND = {
+const REVIEW_PRIORITY = {
   normal: 'normal',
   monitor: 'monitor',
   review: 'review',
   high: 'high'
 };
 
-const RISK_SEVERITY_CLASS = {
-  low: 'risk-low',
-  watch: 'risk-watch',
-  high: 'risk-high',
-  critical: 'risk-critical'
+const VERIFICATION_SEVERITY_CLASS = {
+  low: 'verification-low',
+  watch: 'verification-watch',
+  high: 'verification-high',
+  critical: 'verification-critical'
 };
 
-const RISK_TRIGGER_DEFINITIONS = {
+const VERIFICATION_TRIGGER_DEFINITIONS = {
   unknownBadge: {
     label: 'Unknown badge or invalid verification token',
     weight: 'default'
@@ -81,7 +81,7 @@ const RISK_TRIGGER_DEFINITIONS = {
   },
 };
 
-export const defaultRiskRules = {
+export const defaultVerificationScoringRules = {
   highRiskThreshold: 81,
   reviewThreshold: 61,
   monitorThreshold: 31,
@@ -100,7 +100,7 @@ export const defaultRiskRules = {
   }
 };
 
-const RISK_RULE_LIMITS = {
+const VERIFICATION_RULE_LIMITS = {
   highRiskThreshold: { min: 1, max: 100 },
   reviewThreshold: { min: 1, max: 100 },
   monitorThreshold: { min: 1, max: 100 },
@@ -109,23 +109,23 @@ const RISK_RULE_LIMITS = {
   longStayMinutes: { min: 30, max: 480 },
 };
 
-const RISK_WEIGHT_LIMITS = { min: 0, max: 100 };
+const VERIFICATION_WEIGHT_LIMITS = { min: 0, max: 100 };
 
-export function normaliseRiskRules(rules = defaultRiskRules) {
+export function normaliseVerificationRules(rules = defaultVerificationScoringRules) {
   const nextRules = {
-    ...defaultRiskRules,
+    ...defaultVerificationScoringRules,
     ...rules,
     weights: {
-      ...defaultRiskRules.weights,
+      ...defaultVerificationScoringRules.weights,
       ...(rules.weights ?? {}),
     },
   };
 
-  Object.entries(RISK_RULE_LIMITS).forEach(([field, limits]) => {
-    nextRules[field] = clampNumber(nextRules[field], defaultRiskRules[field], limits);
+  Object.entries(VERIFICATION_RULE_LIMITS).forEach(([field, limits]) => {
+    nextRules[field] = clampNumber(nextRules[field], defaultVerificationScoringRules[field], limits);
   });
   Object.keys(nextRules.weights).forEach((field) => {
-    nextRules.weights[field] = clampNumber(nextRules.weights[field], defaultRiskRules.weights[field], RISK_WEIGHT_LIMITS);
+    nextRules.weights[field] = clampNumber(nextRules.weights[field], defaultVerificationScoringRules.weights[field], VERIFICATION_WEIGHT_LIMITS);
   });
 
   nextRules.reviewThreshold = Math.min(nextRules.reviewThreshold, nextRules.highRiskThreshold);
@@ -133,16 +133,16 @@ export function normaliseRiskRules(rules = defaultRiskRules) {
   return nextRules;
 }
 
-export function validateRiskRules(rules = defaultRiskRules) {
+export function validateVerificationRules(rules = defaultVerificationScoringRules) {
   const issues = [];
-  Object.entries(RISK_RULE_LIMITS).forEach(([field, limits]) => {
+  Object.entries(VERIFICATION_RULE_LIMITS).forEach(([field, limits]) => {
     if (!Number.isFinite(Number(rules[field])) || Number(rules[field]) < limits.min || Number(rules[field]) > limits.max) {
       issues.push(`${field} must be between ${limits.min} and ${limits.max}`);
     }
   });
   Object.entries(rules.weights ?? {}).forEach(([field, value]) => {
-    if (!Number.isFinite(Number(value)) || Number(value) < RISK_WEIGHT_LIMITS.min || Number(value) > RISK_WEIGHT_LIMITS.max) {
-      issues.push(`weights.${field} must be between ${RISK_WEIGHT_LIMITS.min} and ${RISK_WEIGHT_LIMITS.max}`);
+    if (!Number.isFinite(Number(value)) || Number(value) < VERIFICATION_WEIGHT_LIMITS.min || Number(value) > VERIFICATION_WEIGHT_LIMITS.max) {
+      issues.push(`weights.${field} must be between ${VERIFICATION_WEIGHT_LIMITS.min} and ${VERIFICATION_WEIGHT_LIMITS.max}`);
     }
   });
   if (Number(rules.highRiskThreshold) < Number(rules.reviewThreshold)) {
@@ -157,15 +157,15 @@ export function validateRiskRules(rules = defaultRiskRules) {
   };
 }
 
-export function assessBadgeVerification(badge, sessions, scans, scanContext = {}, rules = defaultRiskRules) {
-  rules = normaliseRiskRules(rules);
+export function assessBadgeVerificationRisk(badge, sessions, scans, scanContext = {}, rules = defaultVerificationScoringRules) {
+  rules = normaliseVerificationRules(rules);
   const triggeredRules = [];
   if (!badge) {
-    return buildRiskAssessment({
-      score: 100,
-      riskBand: RISK_BAND.high,
-      triggers: [buildRiskTrigger('unknownBadge', rules)],
-      severityClass: RISK_SEVERITY_CLASS.high,
+    return buildVerificationAssessment({
+      reviewScore: 100,
+      reviewPriority: REVIEW_PRIORITY.high,
+      triggers: [buildVerificationTrigger('unknownBadge', rules)],
+      severityClass: VERIFICATION_SEVERITY_CLASS.high,
       verificationStatus: VERIFICATION_STATUS.invalid,
       explanation: ['No matching badge record or trusted QR code was found.']
     });
@@ -176,13 +176,13 @@ export function assessBadgeVerification(badge, sessions, scans, scanContext = {}
   if (vehicleTrigger) triggeredRules.push(vehicleTrigger);
   const badgeScans = scans.filter((scan) => scan.badgeId === badge.id);
   const failedScans = badgeScans.filter((scan) => scan.scanOutcome !== 'valid').length + (scanContext.includeCurrentFailure ? 1 : 0);
-  if (failedScans >= 2) triggeredRules.push(buildRiskTrigger('multipleFailedScans', rules));
+  if (failedScans >= 2) triggeredRules.push(buildVerificationTrigger('multipleFailedScans', rules));
 
-  if (hasRecentDistantScan(badgeScans, scanContext, rules)) triggeredRules.push(buildRiskTrigger('impossibleTravel', rules));
+  if (hasRecentDistantScan(badgeScans, scanContext, rules)) triggeredRules.push(buildVerificationTrigger('impossibleTravel', rules));
 
   const activeSessions = getActiveSessionsForBadge(badge, sessions, scanContext.time);
   if (activeSessions.some((session) => session.durationMins > rules.longStayMinutes)) {
-    triggeredRules.push(buildRiskTrigger('longStay', rules));
+    triggeredRules.push(buildVerificationTrigger('longStay', rules));
   }
 
   if (
@@ -190,51 +190,51 @@ export function assessBadgeVerification(badge, sessions, scans, scanContext = {}
     scanContext.location &&
     !badge.usualLocations.some((place) => scanContext.location.includes(place))
   ) {
-    triggeredRules.push(buildRiskTrigger('newDeviceUnusualLocation', rules));
+    triggeredRules.push(buildVerificationTrigger('newDeviceUnusualLocation', rules));
   }
 
-  let score = Math.min(100, triggeredRules.reduce((total, trigger) => total + trigger.score, 0));
-  const explanation = explainRisk(triggeredRules);
+  let reviewScore = Math.min(100, triggeredRules.reduce((total, trigger) => total + trigger.points, 0));
+  const explanation = explainVerificationTriggers(triggeredRules);
 
   if (badge.status === 'stolen' || badge.status === 'suspended') {
-    score = Math.max(score, 85);
-    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, severityClass: RISK_SEVERITY_CLASS.critical, verificationStatus: VERIFICATION_STATUS.deactivated, explanation });
+    reviewScore = Math.max(reviewScore, 85);
+    return buildVerificationAssessment({ reviewScore, reviewPriority: REVIEW_PRIORITY.high, triggers: triggeredRules, severityClass: VERIFICATION_SEVERITY_CLASS.critical, verificationStatus: VERIFICATION_STATUS.deactivated, explanation });
   }
 
   if (badge.status === 'expired') {
-    score = Math.max(score, 70);
-    return buildRiskAssessment({
-      score,
-      riskBand: score >= rules.highRiskThreshold ? RISK_BAND.high : RISK_BAND.review,
+    reviewScore = Math.max(reviewScore, 70);
+    return buildVerificationAssessment({
+      reviewScore,
+      reviewPriority: reviewScore >= rules.highRiskThreshold ? REVIEW_PRIORITY.high : REVIEW_PRIORITY.review,
       triggers: triggeredRules,
-      severityClass: RISK_SEVERITY_CLASS.high,
+      severityClass: VERIFICATION_SEVERITY_CLASS.high,
       verificationStatus: VERIFICATION_STATUS.invalid,
       explanation
     });
   }
 
-  if (score >= rules.highRiskThreshold) {
-    return buildRiskAssessment({ score, riskBand: RISK_BAND.high, triggers: triggeredRules, severityClass: RISK_SEVERITY_CLASS.high, verificationStatus: VERIFICATION_STATUS.invalid, explanation });
+  if (reviewScore >= rules.highRiskThreshold) {
+    return buildVerificationAssessment({ reviewScore, reviewPriority: REVIEW_PRIORITY.high, triggers: triggeredRules, severityClass: VERIFICATION_SEVERITY_CLASS.high, verificationStatus: VERIFICATION_STATUS.invalid, explanation });
   }
 
-  if (score >= rules.monitorThreshold || badge.status === 'under review') {
-    return buildRiskAssessment({
-      score,
-      riskBand: score >= rules.reviewThreshold ? RISK_BAND.review : RISK_BAND.monitor,
+  if (reviewScore >= rules.monitorThreshold || badge.status === 'under review') {
+    return buildVerificationAssessment({
+      reviewScore,
+      reviewPriority: reviewScore >= rules.reviewThreshold ? REVIEW_PRIORITY.review : REVIEW_PRIORITY.monitor,
       triggers: triggeredRules,
-      severityClass: RISK_SEVERITY_CLASS.watch,
+      severityClass: VERIFICATION_SEVERITY_CLASS.watch,
       verificationStatus: VERIFICATION_STATUS.suspicious,
       explanation
     });
   }
 
-  return buildRiskAssessment({
-    score,
-    riskBand: RISK_BAND.normal,
+  return buildVerificationAssessment({
+    reviewScore,
+    reviewPriority: REVIEW_PRIORITY.normal,
     triggers: triggeredRules,
-    severityClass: RISK_SEVERITY_CLASS.low,
+    severityClass: VERIFICATION_SEVERITY_CLASS.low,
     verificationStatus: VERIFICATION_STATUS.valid,
-    explanation: ['No configured risk rules were triggered.']
+    explanation: ['No configured verification rules were triggered.']
   });
 }
 
@@ -244,44 +244,44 @@ function clampNumber(value, fallback, { min, max }) {
   return Math.min(max, Math.max(min, numericValue));
 }
 
-export function riskFromPermissionError(message) {
-  return buildRiskAssessment({
-    score: 100,
-    riskBand: RISK_BAND.high,
-    triggers: [{ type: 'permissionError', label: message, score: 100 }],
-    severityClass: RISK_SEVERITY_CLASS.high,
+export function verificationAssessmentFromPermissionError(message) {
+  return buildVerificationAssessment({
+    reviewScore: 100,
+    reviewPriority: REVIEW_PRIORITY.high,
+    triggers: [{ type: 'permissionError', label: message, points: 100 }],
+    severityClass: VERIFICATION_SEVERITY_CLASS.high,
     verificationStatus: VERIFICATION_STATUS.invalid
   });
 }
 
-export function scanOutcomeForVerification(risk) {
-  if (risk.verificationStatus === VERIFICATION_STATUS.valid) return 'valid';
-  if (risk.verificationStatus === VERIFICATION_STATUS.suspicious) return 'review';
-  if (risk.verificationStatus === VERIFICATION_STATUS.deactivated) return 'deactivated';
+export function scanOutcomeForVerification(verification) {
+  if (verification.verificationStatus === VERIFICATION_STATUS.valid) return 'valid';
+  if (verification.verificationStatus === VERIFICATION_STATUS.suspicious) return 'review';
+  if (verification.verificationStatus === VERIFICATION_STATUS.deactivated) return 'deactivated';
   return 'invalid';
 }
 
-function buildRiskTrigger(triggerType, rules) {
-  const triggerDefinition = RISK_TRIGGER_DEFINITIONS[triggerType] ?? RISK_TRIGGER_DEFINITIONS.unknownBadge;
+function buildVerificationTrigger(triggerType, rules) {
+  const triggerDefinition = VERIFICATION_TRIGGER_DEFINITIONS[triggerType] ?? VERIFICATION_TRIGGER_DEFINITIONS.unknownBadge;
   return {
     type: triggerType,
     label: triggerDefinition.label,
-    score: rules.weights[triggerDefinition.weight] ?? rules.weights.default
+    points: rules.weights[triggerDefinition.weight] ?? rules.weights.default
   };
 }
 
 function getBadgeStatusTriggers(badge, rules) {
   return [
-    badge.status === 'stolen' && buildRiskTrigger('stolenBadge', rules),
-    badge.status === 'expired' && buildRiskTrigger('expiredBadge', rules),
-    badge.status === 'suspended' && buildRiskTrigger('suspendedBadge', rules),
-    badge.status === 'under review' && buildRiskTrigger('underReview', rules)
+    badge.status === 'stolen' && buildVerificationTrigger('stolenBadge', rules),
+    badge.status === 'expired' && buildVerificationTrigger('expiredBadge', rules),
+    badge.status === 'suspended' && buildVerificationTrigger('suspendedBadge', rules),
+    badge.status === 'under review' && buildVerificationTrigger('underReview', rules)
   ].filter(Boolean);
 }
 
 function getVehicleMismatchTrigger(badge, scanContext, rules) {
   if (!scanContext.vehicle || vehicleSearchKey(scanContext.vehicle) === vehicleSearchKey(badge.vehicle)) return null;
-  return buildRiskTrigger('unregisteredVehicle', rules);
+  return buildVerificationTrigger('unregisteredVehicle', rules);
 }
 
 function hasRecentDistantScan(badgeScans, scanContext, rules) {
@@ -297,10 +297,10 @@ function getActiveSessionsForBadge(badge, sessions, activeAt) {
   return sessions.filter((session) => session.badgeId === badge.id && isSessionActive(session, activeSessionTime));
 }
 
-function buildRiskAssessment({ score, riskBand, triggers, severityClass, verificationStatus, explanation = [] }) {
+function buildVerificationAssessment({ reviewScore, reviewPriority, triggers, severityClass, verificationStatus, explanation = [] }) {
   return {
-    score,
-    riskBand,
+    reviewScore,
+    reviewPriority,
     triggers,
     severityClass,
     verificationStatus,
@@ -309,7 +309,7 @@ function buildRiskAssessment({ score, riskBand, triggers, severityClass, verific
   };
 }
 
-function explainRisk(triggers) {
-  if (!triggers.length) return ['No configured risk rules were triggered.'];
-  return triggers.map((trigger) => `${trigger.label}: +${trigger.score} points`);
+function explainVerificationTriggers(triggers) {
+  if (!triggers.length) return ['No configured verification rules were triggered.'];
+  return triggers.map((trigger) => `${trigger.label}: +${trigger.points} points`);
 }
