@@ -36,9 +36,9 @@ For manual publishing, run `npm run build` and deploy the generated `dist/` fold
 - Locked digital parking session clock with tamper-evident demo attestation
 - Badge holder, carer, officer, and council admin views
 - Officer scan/lookup flow for badge ID, QR value, or vehicle registration
-- Rules-based fraud scoring and traffic-light verification outcomes
+- Rules-based verification scoring and traffic-light verification outcomes
 - Stolen badge reporting with immediate deactivation
-- Admin dashboard with sessions, scans, cases, fraud scores, filters, and reactivation
+- Admin dashboard with sessions, scans, cases, review scores, filters, and reactivation
 - Accessible, high-contrast, mobile-first UI with large controls
 
 This is a demo prototype with realistic mock data and in-memory state. It shows the intended enforcement flows, role boundaries, and tamper-evident behaviour, but it is not production authentication, storage, or backend security.
@@ -56,7 +56,7 @@ Use these paths when walking someone through the prototype.
 2. Vehicle mismatch escalation
    - Switch to Officer
    - Verify `BB-WCC-104928` with observed vehicle `WR64 BAD`
-   - Review the unregistered vehicle risk explanation
+   - Review the unregistered vehicle escalation explanation
    - Open an enforcement case from the scan
    - Switch to Admin, open Cases, and inspect the new case
 
@@ -67,9 +67,9 @@ Use these paths when walking someone through the prototype.
    - Confirm the officer result shows a deactivated high-priority alert
    - Switch to Admin and reactivate after review when appropriate
 
-4. Risk-rule tuning
-   - Switch to Admin and open Risk rules
-   - Adjust monitor, review, or high-risk thresholds
+4. Verification-rule tuning
+   - Switch to Admin and open Verification rules
+   - Adjust monitor, review, or high-priority thresholds
    - The app rejects inverted threshold ordering and out-of-range values
    - Re-run an officer scan to see scores update immediately
 

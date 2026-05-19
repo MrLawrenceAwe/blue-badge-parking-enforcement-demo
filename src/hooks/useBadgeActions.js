@@ -145,7 +145,7 @@ export function useBadgeActions({
       return false;
     }
     setBadgeNotice(
-      'Badge reported stolen. New sessions are blocked and officer scans will show a high-risk deactivated status.',
+      'Badge reported stolen. New sessions are blocked and officer scans will show a deactivated high-priority status.',
     );
     setBadges((current) =>
       current.map((badge) => (badge.id === selectedBadge.id ? { ...badge, status: 'stolen' } : badge)),
@@ -171,7 +171,7 @@ export function useBadgeActions({
     queueNotification({
       badgeId: selectedBadge.id,
       recipient: selectedBadge.email,
-      message: 'Your badge has been deactivated after a stolen badge report. A risk review case has been opened.',
+      message: 'Your badge has been deactivated after a stolen badge report. A review case has been opened.',
     });
     return true;
   }

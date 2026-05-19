@@ -12,7 +12,7 @@ describe('migratePersistedEnforcementState', () => {
           id: 'CASE-1',
           badgeId: 'UNKNOWN',
           title: 'Legacy case',
-          status: 'Officer review',
+          status: 'Needs review',
           assignedTo: 'Legacy Team',
           notes: [],
           evidenceItems: [],
@@ -21,7 +21,7 @@ describe('migratePersistedEnforcementState', () => {
       auditEvents: [],
       notifications: [],
       replacementRequests: [],
-      riskRules: {},
+      verificationRules: {},
     });
 
     expect(migratedState.cases[0].assignedTeam).toBe('Legacy Team');

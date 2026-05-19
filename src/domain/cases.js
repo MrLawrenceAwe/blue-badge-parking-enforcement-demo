@@ -1,6 +1,6 @@
-import { riskBandLabels } from './risk';
+import { verificationPriorityLabels } from './verification';
 
-export const caseStatuses = ['Open', 'Officer review', 'High priority', 'Evidence requested', 'Resolved'];
+export const caseStatuses = ['Open', 'Needs review', 'High-priority', 'Evidence requested', 'Resolved'];
 
 export function isCaseOpen(caseRecord) {
   return caseRecord.status !== 'Resolved';
@@ -11,8 +11,8 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
     id,
     badgeId: badge.id,
     title: 'Badge reported stolen by holder',
-    status: 'High priority',
-    assignedTeam: 'Risk Review Team A',
+    status: 'High-priority',
+    assignedTeam: 'Priority Review Team A',
     dueDate,
     closureReason: '',
     notes: [`Immediate digital deactivation triggered from holder portal. Details: ${details}. Contact: ${contact}.`],
@@ -23,12 +23,12 @@ export function createStolenBadgeCase({ id, badge, details, contact, addedBy, ad
   };
 }
 
-export function createAdminCase({ id, badge, risk, caseDraft, addedBy, addedAt }) {
-  const status = risk.score >= 81 && caseDraft.status === 'Open' ? 'High priority' : caseDraft.status;
+export function createAdminCase({ id, badge, verification, caseDraft, addedBy, addedAt }) {
+  const status = verification.reviewScore >= 81 && caseDraft.status === 'Open' ? 'High-priority' : caseDraft.status;
   return {
     id,
     badgeId: badge.id,
-    title: `${badge.holder} - ${riskBandLabels[risk.riskBand]}`,
+    title: `${badge.holder} - ${verificationPriorityLabels[verification.reviewPriority]}`,
     status,
     assignedTeam: caseDraft.assignedTeam,
     dueDate: caseDraft.dueDate,
@@ -42,17 +42,17 @@ export function createAdminCase({ id, badge, risk, caseDraft, addedBy, addedAt }
 }
 
 export function createOfficerScanCase({ id, badgeId, scanResult, addedAt, addedBy }) {
-  const { risk } = scanResult;
+  const { verification } = scanResult;
   return {
     id,
     badgeId,
-    title: `Officer scan escalation - ${riskBandLabels[risk.riskBand]}`,
-    status: risk.score >= 81 ? 'High priority' : 'Officer review',
-    assignedTeam: risk.score >= 81 ? 'Risk Review Team A' : 'Duty review team',
-    dueDate: new Date(Date.now() + (risk.score >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    title: `Officer scan escalation - ${verificationPriorityLabels[verification.reviewPriority]}`,
+    status: verification.reviewScore >= 81 ? 'High-priority' : 'Needs review',
+    assignedTeam: verification.reviewScore >= 81 ? 'Priority Review Team A' : 'Duty review team',
+    dueDate: new Date(Date.now() + (verification.reviewScore >= 81 ? 1 : 3) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     closureReason: '',
     notes: [
-      `Officer scan at ${scanResult.location} for vehicle ${scanResult.vehicle}. Verification status: ${risk.verificationStatus}. Action: ${scanResult.evidence.action}. Contravention: ${scanResult.evidence.contravention}. Alerts: ${risk.triggers.map((trigger) => trigger.label).join('; ')}.`
+      `Officer scan at ${scanResult.location} for vehicle ${scanResult.vehicle}. Verification status: ${verification.verificationStatus}. Action: ${scanResult.evidence.action}. Contravention: ${scanResult.evidence.contravention}. Alerts: ${verification.triggers.map((trigger) => trigger.label).join('; ')}.`
     ],
     evidence: `Officer scan log ${scanResult.scanId}`,
     evidenceItems: [

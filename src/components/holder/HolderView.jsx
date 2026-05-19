@@ -2,7 +2,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Clock3, ShieldCheck } from 'lucide-react';
 import { isSessionActive } from '../../domain/sessions';
 import { issuedVerificationTokenForBadge } from '../../domain/badgeTokens';
-import { VERIFICATION_STATUS } from '../../domain/risk';
+import { VERIFICATION_STATUS } from '../../domain/verification';
 import { formatDate } from '../../utils/date';
 import { BadgeStatusPill } from '../ui/BadgeStatusPill';
 import { BadgeActions } from '../badges/BadgeActions';
@@ -16,13 +16,13 @@ export function HolderView({
   replacementForm,
   replacementRequests,
   notifications,
-  risk
+  verification
 }) {
   const activeSession = sessions.find((session) => session.badgeId === badge.id && isSessionActive(session));
   const verificationToken = issuedVerificationTokenForBadge(badge.id);
-  const accountMessage = risk.verificationStatus === VERIFICATION_STATUS.valid
+  const accountMessage = verification.verificationStatus === VERIFICATION_STATUS.valid
     ? 'Badge ready for verification'
-    : risk.verificationStatus === VERIFICATION_STATUS.suspicious
+    : verification.verificationStatus === VERIFICATION_STATUS.suspicious
       ? 'Council review in progress'
       : 'Action required before use';
   return (
@@ -55,7 +55,7 @@ export function HolderView({
             aria-label={`Signed verification QR code for ${badge.id}`}
           />
         </div>
-        <div className={`account-status ${risk.severityClass}`}>
+        <div className={`account-status ${verification.severityClass}`}>
           <ShieldCheck aria-hidden="true" />
           <strong>{accountMessage}</strong>
         </div>

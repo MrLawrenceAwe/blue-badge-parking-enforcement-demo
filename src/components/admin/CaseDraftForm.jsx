@@ -37,12 +37,12 @@ export function CaseDraftForm({ allBadges, selectedBadgeId, selectedBadge, caseD
             placeholder="Add officer note, evidence reference, or review decision"
           />
           <label>
-            Evidence reference
+            Evidence file or reference
             <input
               value={caseDraft.evidence}
               onChange={(event) => updateCaseDraft('evidence', event.target.value)}
               placeholder="Photo, scan log, witness note, file reference"
-              aria-label="Evidence reference"
+              aria-label="Evidence file or reference"
             />
           </label>
           <div className="button-row">

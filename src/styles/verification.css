@@ -1,4 +1,4 @@
-.risk-banner,
+.verification-banner,
 .account-status,
 .verification-result {
   border-radius: 8px;
@@ -109,20 +109,20 @@
   color: var(--ink);
 }
 
-.risk-low {
+.verification-low {
   background: var(--green);
 }
 
-.risk-watch {
+.verification-watch {
   background: var(--amber);
   color: var(--black);
 }
 
-.risk-high {
+.verification-high {
   background: var(--red);
 }
 
-.risk-critical {
+.verification-critical {
   background: var(--black);
 }
 

@@ -1,5 +1,5 @@
 import { isCaseOpen } from './cases';
-import { assessBadgeVerification } from './risk';
+import { assessBadgeVerificationRisk } from './verification';
 import { isSessionActive } from './sessions';
 
 export function selectActiveSessions(sessions) {
@@ -10,8 +10,8 @@ export function selectOpenCases(cases) {
   return cases.filter(isCaseOpen);
 }
 
-export function buildVerificationByBadge({ badges, sessions, scans, riskRules }) {
+export function buildVerificationByBadge({ badges, sessions, scans, verificationRules }) {
   return Object.fromEntries(
-    badges.map((badge) => [badge.id, assessBadgeVerification(badge, sessions, scans, {}, riskRules)]),
+    badges.map((badge) => [badge.id, assessBadgeVerificationRisk(badge, sessions, scans, {}, verificationRules)]),
   );
 }
