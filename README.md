@@ -2,6 +2,16 @@
 
 A React/Vite prototype for a digital Blue Badge parking enforcement system for UK councils.
 
+[![CI](https://github.com/MrLawrenceAwe/blue-badge-parking-enforcement-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/MrLawrenceAwe/blue-badge-parking-enforcement-demo/actions/workflows/ci.yml)
+
+[**Open the live prototype**](https://mrlawrenceawe.github.io/blue-badge-parking-enforcement-demo/)
+
+**Stack:** React, Vite, JavaScript, Vitest and Playwright.
+
+## Portfolio overview
+
+Explore holder, carer, enforcement officer and council administrator journeys using synthetic records. The project demonstrates role-based user journeys, domain rules, validation and automated accessibility assertions. It runs entirely in the browser and is a prototype, with no production authentication or backend.
+
 ## Run locally
 
 ```bash
@@ -17,7 +27,7 @@ All demo accounts use password `demo123`.
 
 - `amelia.hart@example.test` - holder journey
 - `officer@example.test` - enforcement officer journey
-- `admin@westminster.gov.uk` - council admin journey
+- `admin@westminster.gov.uk` - synthetic council admin journey (not a real account)
 - `maya.hart@example.test` - carer journey
 
 ## Share it
